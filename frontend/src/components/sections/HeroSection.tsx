@@ -100,7 +100,7 @@ export default function HeroSection({ data }: { data?: HeroData }) {
           </motion.div>
 
           {/* Main heading — word by word */}
-          <motion.h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1.5rem' }}>
+          <motion.h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1rem' }}>
             {words.map((line, li) => (
               <div key={li} style={{ overflow: 'hidden', display: 'block' }}>
                 {line.split(' ').map((word, wi) => (
@@ -120,7 +120,7 @@ export default function HeroSection({ data }: { data?: HeroData }) {
           </motion.h1>
 
           {/* Introduction */}
-          <motion.p variants={fadeUp} className="body-lg" style={{ maxWidth: '620px', margin: '0 auto 3rem', color: 'var(--gray-400)' }}>
+          <motion.p variants={fadeUp} className="body-lg" style={{ maxWidth: '560px', margin: '0 auto 2rem', color: 'var(--gray-400)' }}>
             {d.introduction}
           </motion.p>
 
