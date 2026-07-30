@@ -30,14 +30,13 @@ const projectSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-projectSchema.pre('save', function (next) {
-  if (!this.slug) {
+projectSchema.pre('save', function () {
+  if (!this.slug && this.title) {
     this.slug = this.title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
   }
-  next();
 });
 
 module.exports = mongoose.model('Project', projectSchema);

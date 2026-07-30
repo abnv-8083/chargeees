@@ -1,4 +1,12 @@
 const mongoose = require('mongoose');
+const dns = require('dns');
+
+// Fix for Windows DNS resolution issue with MongoDB Atlas SRV records (querySrv ECONNREFUSED)
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {
+  // Fallback if DNS override fails
+}
 
 const connectDB = async () => {
   try {
