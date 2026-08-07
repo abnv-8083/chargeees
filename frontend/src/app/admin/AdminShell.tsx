@@ -4,10 +4,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import {
-  LayoutDashboard, Sparkles, BookOpen, Compass, Flag,
-  Users, Briefcase, Layers, Image as ImageIcon, Inbox,
-  Settings, LogOut, ExternalLink, Menu, X, ShieldCheck,
-  ChevronDown, ChevronRight, Award
+  LayoutDashboard, Sparkles, Users, Briefcase, Layers,
+  Image as ImageIcon, Inbox, Settings, LogOut, ExternalLink,
+  Menu, X, ShieldCheck, ChevronDown, ChevronRight, Award
 } from 'lucide-react';
 
 const SIDEBAR_NAV = [
@@ -65,7 +64,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       {mobileOpen && (
         <div
           onClick={() => setMobileOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', zIndex: 40 }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(4px)', zIndex: 90 }}
         />
       )}
 
@@ -73,28 +72,28 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       <aside
         style={{
           width: sidebarOpen ? '260px' : '72px',
-          background: '#0f0f0f',
-          borderRight: '1px solid #1f1f1f',
+          background: '#0d0d0d',
+          borderRight: '1px solid #1a1a1a',
           display: 'flex',
           flexDirection: 'column',
-          transition: 'width 0.25s ease',
+          transition: 'width 0.25s ease, left 0.25s ease',
           position: 'sticky',
           top: 0,
           height: '100vh',
-          zIndex: 50,
-          overflowY: 'auto',
+          zIndex: 100,
           flexShrink: 0,
+          overflow: 'hidden',
         }}
         className={`admin-sidebar ${mobileOpen ? 'mobile-open' : ''}`}
       >
         {/* Brand Header */}
-        <div style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #1f1f1f', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           {sidebarOpen ? (
             <Link href="/admin" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--white)' }}>
                 Charg<span style={{ color: '#888' }}>Ease</span>
               </span>
-              <span style={{ background: '#222', color: '#aaa', fontSize: '0.65rem', padding: '0.15rem 0.4rem', borderRadius: 4, fontWeight: 600, letterSpacing: '0.05em' }}>
+              <span style={{ background: '#222', color: '#38bdf8', fontSize: '0.65rem', padding: '0.15rem 0.45rem', borderRadius: 4, fontWeight: 700, letterSpacing: '0.05em' }}>
                 ADMIN
               </span>
             </Link>
@@ -105,8 +104,18 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           )}
         </div>
 
-        {/* Navigation */}
-        <nav style={{ padding: '1rem 0.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+        {/* Scrollable Navigation Items Container */}
+        <nav
+          style={{
+            padding: '1rem 0.5rem',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.35rem',
+            overflowY: 'auto',
+            scrollbarWidth: 'thin',
+          }}
+        >
           {SIDEBAR_NAV.map((item, i) => {
             if (item.children) {
               const isChildActive = item.children.some(c => pathname === c.href);
@@ -121,7 +130,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                       justifyContent: sidebarOpen ? 'space-between' : 'center',
                       padding: '0.65rem 0.75rem',
                       borderRadius: 8,
-                      background: isChildActive ? '#1c1c1c' : 'transparent',
+                      background: isChildActive ? '#1a1a1a' : 'transparent',
                       color: isChildActive ? '#fff' : '#aaa',
                       border: 'none',
                       cursor: 'pointer',
@@ -129,15 +138,16 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      {item.icon}
+                      <span style={{ color: isChildActive ? '#38bdf8' : '#aaa' }}>{item.icon}</span>
                       {sidebarOpen && <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{item.label}</span>}
                     </div>
                     {sidebarOpen && (
-                      <span style={{ transition: 'transform 0.2s ease', transform: sectionsOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                      <span style={{ transition: 'transform 0.2s ease', transform: sectionsOpen ? 'rotate(180deg)' : 'rotate(0deg)', color: '#666' }}>
                         <ChevronDown size={14} />
                       </span>
                     )}
                   </button>
+
                   {sidebarOpen && sectionsOpen && (
                     <div style={{ paddingLeft: '2.25rem', display: 'flex', flexDirection: 'column', gap: '0.25rem', marginTop: '0.25rem' }}>
                       {item.children.map((child, ci) => {
@@ -148,11 +158,12 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                             href={child.href}
                             onClick={() => setMobileOpen(false)}
                             style={{
-                              padding: '0.45rem 0.6rem',
+                              padding: '0.45rem 0.65rem',
                               borderRadius: 6,
                               fontSize: '0.8125rem',
-                              color: active ? '#fff' : '#888',
-                              background: active ? '#242424' : 'transparent',
+                              color: active ? '#38bdf8' : '#888',
+                              background: active ? 'rgba(56, 189, 248, 0.1)' : 'transparent',
+                              borderLeft: active ? '2px solid #38bdf8' : '2px solid transparent',
                               textDecoration: 'none',
                               fontWeight: active ? 600 : 400,
                               transition: 'all 0.2s ease',
@@ -181,21 +192,22 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   gap: '0.75rem',
                   padding: '0.65rem 0.75rem',
                   borderRadius: 8,
-                  background: active ? '#242424' : 'transparent',
+                  background: active ? '#1f2937' : 'transparent',
                   color: active ? '#fff' : '#aaa',
+                  borderLeft: active ? '3px solid #38bdf8' : '3px solid transparent',
                   textDecoration: 'none',
                   fontWeight: active ? 600 : 500,
                   fontSize: '0.875rem',
                   transition: 'all 0.2s ease',
                 }}
               >
-                {item.icon}
+                <span style={{ color: active ? '#38bdf8' : 'inherit' }}>{item.icon}</span>
                 {sidebarOpen && <span>{item.label}</span>}
               </Link>
             );
           })}
 
-          <div style={{ margin: '1rem 0 0.5rem', borderTop: '1px solid #1f1f1f' }} />
+          <div style={{ margin: '1rem 0 0.5rem', borderTop: '1px solid #1a1a1a' }} />
 
           {/* View Live Site */}
           <a
@@ -221,13 +233,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </nav>
 
         {/* User Footer / Logout */}
-        <div style={{ padding: '1rem', borderTop: '1px solid #1f1f1f', background: '#0a0a0a', display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', gap: '0.5rem' }}>
+        <div style={{ padding: '1rem', borderTop: '1px solid #1a1a1a', background: '#080808', display: 'flex', alignItems: 'center', justifyContent: sidebarOpen ? 'space-between' : 'center', gap: '0.5rem', flexShrink: 0 }}>
           {sidebarOpen && (
             <div style={{ overflow: 'hidden' }}>
               <p style={{ fontSize: '0.8125rem', fontWeight: 600, color: '#fff', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden', margin: 0 }}>
                 {user.name}
               </p>
-              <p style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase', margin: 0 }}>
+              <p style={{ fontSize: '0.7rem', color: '#38bdf8', textTransform: 'uppercase', margin: 0, fontWeight: 600 }}>
                 {user.role}
               </p>
             </div>
@@ -236,15 +248,16 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             onClick={logout}
             title="Logout"
             style={{
-              background: 'transparent',
-              border: '1px solid #222',
-              color: '#ff6b6b',
+              background: '#1f1313',
+              border: '1px solid #3b1c1c',
+              color: '#f87171',
               padding: '0.5rem',
-              borderRadius: 6,
+              borderRadius: 8,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
+              transition: 'all 0.2s ease',
             }}
           >
             <LogOut size={16} />
@@ -258,8 +271,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <header
           style={{
             height: '64px',
-            background: '#0f0f0f',
-            borderBottom: '1px solid #1f1f1f',
+            background: '#0d0d0d',
+            borderBottom: '1px solid #1a1a1a',
             padding: '0 1.5rem',
             display: 'flex',
             alignItems: 'center',
@@ -316,6 +329,8 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             position: fixed !important;
             left: ${mobileOpen ? '0' : '-280px'};
             width: 260px !important;
+            top: 0 !important;
+            bottom: 0 !important;
           }
           .desktop-toggle { display: none !important; }
           .mobile-toggle { display: flex !important; }
