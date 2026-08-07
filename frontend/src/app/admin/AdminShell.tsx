@@ -59,7 +59,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
   }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a0a0a', color: 'var(--white)', fontFamily: 'var(--font-inter)' }}>
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#0a0a0a', color: 'var(--white)', fontFamily: 'var(--font-inter)' }}>
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
@@ -68,7 +68,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         />
       )}
 
-      {/* Sidebar */}
+      {/* Fixed Sidebar */}
       <aside
         style={{
           width: sidebarOpen ? '260px' : '72px',
@@ -77,8 +77,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           display: 'flex',
           flexDirection: 'column',
           transition: 'width 0.25s ease, left 0.25s ease',
-          position: 'sticky',
+          position: 'fixed',
           top: 0,
+          bottom: 0,
+          left: 0,
           height: '100vh',
           zIndex: 100,
           flexShrink: 0,
@@ -266,7 +268,19 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
       </aside>
 
       {/* Main Container */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minWidth: 0,
+          marginLeft: sidebarOpen ? '260px' : '72px',
+          height: '100vh',
+          overflowY: 'auto',
+          transition: 'margin-left 0.25s ease'
+        }}
+        className="admin-main-content"
+      >
         {/* Top Header Bar */}
         <header
           style={{
@@ -280,6 +294,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             position: 'sticky',
             top: 0,
             zIndex: 30,
+            flexShrink: 0,
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -316,7 +331,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         </header>
 
         {/* Content Area */}
-        <main style={{ flex: 1, padding: '2rem 1.5rem', overflowY: 'auto', background: '#0a0a0a' }}>
+        <main style={{ flex: 1, padding: '2rem 1.5rem', background: '#0a0a0a' }}>
           <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
             {children}
           </div>
@@ -331,6 +346,9 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             width: 260px !important;
             top: 0 !important;
             bottom: 0 !important;
+          }
+          .admin-main-content {
+            margin-left: 0 !important;
           }
           .desktop-toggle { display: none !important; }
           .mobile-toggle { display: flex !important; }
