@@ -9,6 +9,7 @@ import { FounderSection, CoFounderSection } from '@/components/sections/FounderS
 import ProjectsSection from '@/components/sections/ProjectsSection';
 import ServicesSection from '@/components/sections/ServicesSection';
 import GallerySection from '@/components/sections/GallerySection';
+import CertificateSection from '@/components/sections/CertificateSection';
 import InquirySection from '@/components/sections/InquirySection';
 import ContactSection from '@/components/sections/ContactSection';
 import Footer from '@/components/Footer';
@@ -57,6 +58,8 @@ export default function ClientPage({ hero, about, vision, mission, founders, cof
         <ServicesSection data={services.length > 0 ? services : undefined} />
         <div className="divider" />
         <GallerySection data={gallery.length > 0 ? gallery : undefined} />
+        <div className="divider" />
+        <CertificateSection />
         <div className="divider" />
         <InquirySection />
         <div className="divider" />

@@ -20,11 +20,16 @@ const serviceRoutes = require('./src/routes/services');
 const galleryRoutes = require('./src/routes/gallery');
 const inquiryRoutes = require('./src/routes/inquiries');
 const settingsRoutes = require('./src/routes/settings');
+const certificateRoutes = require('./src/routes/certificates');
+const path = require('path');
 
 // Connect to MongoDB
 connectDB();
 
 const app = express();
+
+// Serve local upload fallback files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Security & Middleware
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
@@ -36,8 +41,13 @@ app.use(cors({
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(cookieParser());
-app.use(mongoSanitize());
+// Express 5 compatible mongoSanitize (in-place property sanitization)
+app.use((req, res, next) => {
+  if (req.body) mongoSanitize.sanitize(req.body);
+  if (req.params) mongoSanitize.sanitize(req.params);
+  if (req.query) mongoSanitize.sanitize(req.query);
+  next();
+});
 if (process.env.NODE_ENV === 'development') app.use(morgan('dev'));
 
 // Rate limiting
@@ -60,6 +70,7 @@ app.use('/api/services', serviceRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/inquiries', inquiryLimiter, inquiryRoutes);
 app.use('/api/settings', settingsRoutes);
+app.use('/api/certificates', certificateRoutes);
 
 // Error handlers
 app.use(notFound);

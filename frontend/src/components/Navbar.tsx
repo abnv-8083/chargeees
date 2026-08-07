@@ -1,8 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
-
 import type { SiteSettings } from '@/lib/types';
 
 const FALLBACK_NAV = [
@@ -14,7 +12,8 @@ const FALLBACK_NAV = [
   { label: 'Projects', href: '#projects', order: 6 },
   { label: 'Services', href: '#services', order: 7 },
   { label: 'Gallery', href: '#gallery', order: 8 },
-  { label: 'Contact', href: '#contact', order: 9 },
+  { label: 'Certificate', href: '#certificate', order: 9 },
+  { label: 'Contact', href: '#contact', order: 10 },
 ];
 
 export default function Navbar({ settings }: { settings?: SiteSettings }) {
@@ -26,6 +25,11 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
   const navItems = (settings?.navigation && settings.navigation.length > 0)
     ? [...settings.navigation].sort((a, b) => (a.order || 0) - (b.order || 0))
     : FALLBACK_NAV;
+
+  // Add Certificate section link if missing from DB navigation settings
+  if (!navItems.some(n => n.href === '#certificate')) {
+    navItems.splice(navItems.length - 1, 0, { label: 'Certificate', href: '#certificate', order: 9 });
+  }
 
   useEffect(() => {
     const onScroll = () => {
@@ -47,6 +51,7 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
 
   const handleNavClick = (href: string) => {
     setMobileOpen(false);
+    if (!href.startsWith('#')) return;
     const id = href.slice(1);
     const el = document.getElementById(id);
     if (el) {
@@ -98,8 +103,8 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
             ))}
           </div>
 
-          {/* CTA + Hamburger */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {/* Action Buttons: ONLY Get in Touch */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button
               onClick={() => handleNavClick('#contact')}
               className="btn-primary"
@@ -107,6 +112,7 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
             >
               Get in Touch
             </button>
+
             <button
               className={`hamburger ${mobileOpen ? 'open' : ''}`}
               onClick={() => setMobileOpen(!mobileOpen)}

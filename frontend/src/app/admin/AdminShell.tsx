@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Sparkles, BookOpen, Compass, Flag,
   Users, Briefcase, Layers, Image as ImageIcon, Inbox,
   Settings, LogOut, ExternalLink, Menu, X, ShieldCheck,
-  ChevronDown, ChevronRight
+  ChevronDown, ChevronRight, Award
 } from 'lucide-react';
 
 const SIDEBAR_NAV = [
@@ -26,6 +26,7 @@ const SIDEBAR_NAV = [
   { label: 'Projects', href: '/admin/projects', icon: <Briefcase size={18} /> },
   { label: 'Services', href: '/admin/services', icon: <Layers size={18} /> },
   { label: 'Gallery', href: '/admin/gallery', icon: <ImageIcon size={18} /> },
+  { label: 'Certificates', href: '/admin/certificates', icon: <Award size={18} /> },
   { label: 'Inquiries', href: '/admin/inquiries', icon: <Inbox size={18} /> },
   { label: 'Site Settings', href: '/admin/settings', icon: <Settings size={18} /> },
 ];

@@ -23,7 +23,31 @@ const sendTokenResponse = (user, statusCode, res) => {
   });
 };
 
-// @desc  Login admin
+// @desc  Register user / client
+exports.register = async (req, res, next) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Please provide name, email, and password.' });
+    }
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'An account with that email already exists.' });
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      password,
+      role: role || 'client',
+    });
+
+    sendTokenResponse(user, 201, res);
+  } catch (err) { next(err); }
+};
+
+// @desc  Login user / admin
 exports.login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -40,6 +64,14 @@ exports.login = async (req, res, next) => {
     user.lastLogin = Date.now();
     await user.save({ validateBeforeSave: false });
     sendTokenResponse(user, 200, res);
+  } catch (err) { next(err); }
+};
+
+// @desc  Get list of users (Admin)
+exports.getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    res.status(200).json({ success: true, count: users.length, data: users });
   } catch (err) { next(err); }
 };
 

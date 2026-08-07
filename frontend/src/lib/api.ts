@@ -161,4 +161,33 @@ export const updateSettingsAdmin = (formDataOrJson: FormData | any) =>
     body: formDataOrJson instanceof FormData ? formDataOrJson : JSON.stringify(formDataOrJson),
   }).then(r => r.data);
 
+// User / Client Auth
+export const clientRegister = (name: string, email: string, password: string) =>
+  apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password, role: 'client' }) });
+
+export const adminGetUsers = () =>
+  apiFetch('/auth/users').then(r => r.data || []);
+
+// Certificate APIs
+export const adminGetCertificates = (params = 'limit=100') =>
+  apiFetch(`/certificates?${params}`).then(r => r.data || []);
+
+export const adminCreateCertificate = (formData: FormData) =>
+  apiFetch('/certificates', { method: 'POST', body: formData }).then(r => r.data);
+
+export const adminUpdateCertificate = (id: string, formData: FormData) =>
+  apiFetch(`/certificates/${id}`, { method: 'PUT', body: formData }).then(r => r.data);
+
+export const adminDeleteCertificate = (id: string) =>
+  apiFetch(`/certificates/${id}`, { method: 'DELETE' });
+
+export const searchCertificateByNumber = (certNumber: string) =>
+  apiFetch(`/certificates/search/${encodeURIComponent(certNumber)}`).then(r => r.data);
+
+export const claimCertificate = (certificateNumber: string) =>
+  apiFetch('/certificates/claim', { method: 'POST', body: JSON.stringify({ certificateNumber }) });
+
+export const getUserCertificates = () =>
+  apiFetch('/certificates/my-certificates').then(r => r.data || []);
+
 export default apiFetch;

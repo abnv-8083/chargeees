@@ -1,5 +1,4 @@
 import React from 'react';
-import { AuthProvider } from '@/context/AuthContext';
 import AdminShell from './AdminShell';
 
 export const metadata = {
@@ -9,10 +8,8 @@ export const metadata = {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <AdminShell>
-        {children}
-      </AdminShell>
-    </AuthProvider>
+    <AdminShell>
+      {children}
+    </AdminShell>
   );
 }

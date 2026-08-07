@@ -131,3 +131,33 @@ export type SiteSettings = {
     quickLinks: { label: string; href: string }[];
   };
 };
+
+export type UserData = {
+  _id: string;
+  name: string;
+  email: string;
+  role: 'superadmin' | 'admin' | 'editor' | 'client';
+  avatar?: string;
+  createdAt?: string;
+};
+
+export type CertificateData = {
+  _id: string;
+  title: string;
+  certificateNumber: string;
+  user?: UserData | null;
+  issueDate: string;
+  expiryDate?: string | null;
+  issuer: string;
+  description?: string;
+  fileUrl: string;
+  fileType: 'pdf' | 'image';
+  s3Key?: string;
+  status: 'active' | 'revoked' | 'expired';
+  issuedBy?: UserData | null;
+  createdAt: string;
+  isClaimed?: boolean;
+  isClaimedByMe?: boolean;
+  isClaimedByOthers?: boolean;
+  claimedUser?: { name: string; email: string } | null;
+};
