@@ -8,8 +8,9 @@ const signToken = (id) =>
 
 const sendTokenResponse = (user, statusCode, res) => {
   const token = signToken(user._id);
+  const cookieDays = parseInt(process.env.JWT_COOKIE_EXPIRE, 10) || 7;
   const cookieOptions = {
-    expires: new Date(Date.now() + parseInt(process.env.JWT_COOKIE_EXPIRE, 10) * 24 * 60 * 60 * 1000),
+    expires: new Date(Date.now() + cookieDays * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'strict',
