@@ -2,7 +2,11 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAllGalleryAdmin, createGalleryItemAdmin, deleteGalleryItemAdmin } from '@/lib/api';
 import type { GalleryItemData } from '@/lib/types';
-import { Plus, Trash2, Image as ImageIcon, Video, FileText, CheckCircle2, AlertCircle, X, Filter } from 'lucide-react';
+import { showToast } from '@/lib/toast';
+import {
+  Plus, Trash2, Image as ImageIcon, Video, FileText, CheckCircle2,
+  AlertCircle, X, Filter, Upload, Sparkles, Tag, Eye
+} from 'lucide-react';
 
 export default function GalleryManagerPage() {
   const [items, setItems] = useState<GalleryItemData[]>([]);
@@ -10,10 +14,11 @@ export default function GalleryManagerPage() {
   const [selectedFolder, setSelectedFolder] = useState('ALL');
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [previewMedia, setPreviewMedia] = useState<GalleryItemData | null>(null);
 
   // Form State
   const [file, setFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [folder, setFolder] = useState('Corporate');
   const [type, setType] = useState<'image' | 'video' | 'pdf'>('image');
@@ -27,6 +32,7 @@ export default function GalleryManagerPage() {
       setItems(Array.isArray(res) ? res : res?.data || []);
     } catch (e) {
       setItems([]);
+      showToast.error('Failed to load media showcase.');
     } finally {
       setLoading(false);
     }
@@ -36,22 +42,38 @@ export default function GalleryManagerPage() {
     loadGallery();
   }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0];
+    if (selected) {
+      setFile(selected);
+      if (selected.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onloadend = () => setFilePreview(reader.result as string);
+        reader.readAsDataURL(selected);
+      } else {
+        setFilePreview(null);
+      }
+    }
+  };
+
   const handleDelete = async (id: string, itemTitle: string) => {
-    if (!confirm(`Are you sure you want to delete media "${itemTitle}"?`)) return;
+    if (!window.confirm(`Are you sure you want to delete media "${itemTitle}"?`)) return;
     try {
       await deleteGalleryItemAdmin(id);
-      setMessage({ type: 'success', text: 'Media item deleted successfully.' });
+      showToast.success(`Media item "${itemTitle}" deleted successfully.`);
       loadGallery();
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Failed to delete media.' });
+      showToast.error(err.message || 'Failed to delete media.');
     }
   };
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    if (!file) {
+      showToast.error('Please select a file to upload.');
+      return;
+    }
     setSaving(true);
-    setMessage(null);
     try {
       const payload = new FormData();
       payload.append('file', file);
@@ -59,138 +81,158 @@ export default function GalleryManagerPage() {
       payload.append('folder', folder);
       payload.append('type', type);
       if (caption) payload.append('caption', caption);
-
-      const tagsArray = tags.split(',').map(t => t.trim()).filter(Boolean);
-      payload.append('tags', JSON.stringify(tagsArray));
+      if (tags) {
+        const tagsArr = tags.split(',').map(t => t.trim()).filter(Boolean);
+        payload.append('tags', JSON.stringify(tagsArr));
+      }
 
       await createGalleryItemAdmin(payload);
-      setMessage({ type: 'success', text: 'New media item uploaded successfully!' });
+      showToast.success('Media asset uploaded successfully!');
       setModalOpen(false);
       setFile(null);
+      setFilePreview(null);
       setTitle('');
       setCaption('');
       setTags('');
       loadGallery();
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Failed to upload media item.' });
+      showToast.error(err.message || 'Failed to upload media asset.');
     } finally {
       setSaving(false);
     }
   };
 
-  const folders = ['ALL', 'Corporate', 'Architecture', 'Events', 'Team', 'Projects'];
-  const filteredItems = items.filter(it => selectedFolder === 'ALL' || it.folder?.toLowerCase() === selectedFolder.toLowerCase());
+  const FOLDERS = ['ALL', 'Corporate', 'EV Charging', 'Architecture', 'Infrastructure', 'Press'];
+
+  const filteredItems = items.filter(i => selectedFolder === 'ALL' || i.folder === selectedFolder);
 
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '2rem' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
         <div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>
-            Media Gallery & Asset Library
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#34d399', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.3rem' }}>
+            <ImageIcon size={16} /> Asset Repository
+          </div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
+            Media & Gallery Showcase
           </h1>
-          <p style={{ color: '#888', fontSize: '0.875rem' }}>
-            Centralized Cloudinary media repository for corporate images, video reels, and architectural blueprints.
+          <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+            High-resolution photography, video assets, project captures, and media archives.
           </p>
         </div>
         <button
           onClick={() => setModalOpen(true)}
-          style={{ background: '#fff', color: '#000', border: 'none', padding: '0.75rem 1.25rem', borderRadius: 8, fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+          style={{
+            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+            color: '#fff',
+            border: 'none',
+            padding: '0.7rem 1.3rem',
+            borderRadius: 10,
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+            transition: 'all 0.2s ease',
+          }}
         >
-          <Plus size={16} /> Upload New Media
+          <Upload size={18} /> Upload Media Asset
         </button>
       </div>
 
-      {message && (
-        <div style={{
-          background: message.type === 'success' ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 107, 107, 0.1)',
-          border: `1px solid ${message.type === 'success' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 107, 107, 0.3)'}`,
-          color: message.type === 'success' ? '#4ade80' : '#ff6b6b',
-          padding: '1rem 1.25rem',
-          borderRadius: 12,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.6rem',
-          marginBottom: '1.5rem',
-          fontSize: '0.875rem',
-        }}>
-          {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <span>{message.text}</span>
-        </div>
-      )}
-
-      {/* Folder Filter Bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-        <Filter size={16} color="#888" style={{ marginRight: '0.4rem' }} />
-        {folders.map(f => (
+      {/* Filter Bar */}
+      <div style={{ background: '#09090b', border: '1px solid #1c1c21', borderRadius: 16, padding: '1rem 1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1.75rem' }}>
+        <Filter size={15} color="#71717a" style={{ marginRight: '0.25rem' }} />
+        {FOLDERS.map(f => (
           <button
             key={f}
             onClick={() => setSelectedFolder(f)}
             style={{
-              background: selectedFolder === f ? '#fff' : '#171717',
-              color: selectedFolder === f ? '#000' : '#aaa',
-              border: 'none',
+              background: selectedFolder === f ? 'rgba(52, 211, 153, 0.15)' : '#121215',
+              color: selectedFolder === f ? '#34d399' : '#a1a1aa',
+              border: selectedFolder === f ? '1px solid rgba(52, 211, 153, 0.3)' : '1px solid #1c1c21',
               padding: '0.45rem 0.85rem',
-              borderRadius: 6,
-              fontSize: '0.8rem',
-              fontWeight: selectedFolder === f ? 600 : 400,
+              borderRadius: 8,
+              fontSize: '0.775rem',
+              fontWeight: selectedFolder === f ? 600 : 500,
               cursor: 'pointer',
+              transition: 'all 0.15s ease',
             }}
           >
-            {f === 'ALL' ? 'All Folders' : f}
+            {f === 'ALL' ? 'All Collections' : f}
           </button>
         ))}
       </div>
 
+      {/* Gallery Grid */}
       {loading ? (
-        <div style={{ padding: '3rem', textAlign: 'center', color: '#888' }}>Loading asset library...</div>
+        <div style={{ padding: '4rem 0', textAlign: 'center', color: '#71717a' }}>
+          <div className="w-8 h-8 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p style={{ fontSize: '0.875rem' }}>Loading media showcase...</p>
+        </div>
       ) : filteredItems.length === 0 ? (
-        <div style={{ background: '#121212', border: '1px solid #222', borderRadius: 16, padding: '4rem 2rem', textAlign: 'center' }}>
-          <ImageIcon size={44} style={{ margin: '0 auto 1rem', color: '#555' }} />
-          <h3 style={{ color: '#fff', marginBottom: '0.5rem' }}>No media assets in this folder</h3>
-          <p style={{ color: '#888', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Upload your first high-resolution corporate asset.</p>
-          <button onClick={() => setModalOpen(true)} style={{ background: '#fff', color: '#000', border: 'none', padding: '0.65rem 1.25rem', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
-            Upload Media Now
-          </button>
+        <div style={{ background: '#09090b', border: '1px dashed #22222a', borderRadius: 16, padding: '4rem 1.5rem', textAlign: 'center', color: '#71717a' }}>
+          <ImageIcon size={40} style={{ margin: '0 auto 0.75rem', opacity: 0.5 }} />
+          <p style={{ fontSize: '1rem', fontWeight: 600, color: '#e4e4e7', margin: '0 0 0.25rem' }}>No media items found in this collection</p>
+          <p style={{ fontSize: '0.825rem', margin: 0 }}>Click "Upload Media Asset" to add new photos or videos.</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '1.25rem' }}>
-          {filteredItems.map((item, i) => (
-            <div key={item._id || i} style={{ background: '#121212', border: '1px solid #222', borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-              <div>
-                <div style={{ position: 'relative', height: '180px', background: '#181818', overflow: 'hidden' }}>
-                  {item.type === 'video' ? (
-                    <video src={item.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} muted loop playsInline />
-                  ) : item.type === 'pdf' ? (
-                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>
-                      <FileText size={44} />
-                    </div>
-                  ) : (
-                    <img src={item.url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  )}
-                  <div style={{ position: 'absolute', top: '0.6rem', left: '0.6rem', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', padding: '0.2rem 0.5rem', borderRadius: 4, fontSize: '0.65rem', color: '#fff', fontWeight: 600, textTransform: 'uppercase' }}>
-                    {item.folder || 'General'}
+          {filteredItems.map(item => (
+            <div
+              key={item._id}
+              style={{
+                background: '#09090b',
+                border: '1px solid #1c1c21',
+                borderRadius: 16,
+                overflow: 'hidden',
+                position: 'relative',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'transform 0.2s ease, border-color 0.2s ease',
+              }}
+              className="gallery-card"
+            >
+              {/* Media Thumbnail Container */}
+              <div style={{ height: '200px', background: '#121215', position: 'relative', overflow: 'hidden' }}>
+                {item.url ? (
+                  <img src={item.url} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#52525b' }}>
+                    <ImageIcon size={36} />
                   </div>
+                )}
+
+                <div style={{ position: 'absolute', top: '0.65rem', left: '0.65rem', display: 'flex', gap: '0.35rem' }}>
+                  <span style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)', color: '#34d399', border: '1px solid rgba(52,211,153,0.3)', padding: '0.15rem 0.5rem', borderRadius: 6, fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase' }}>
+                    {item.folder || 'General'}
+                  </span>
                 </div>
 
-                <div style={{ padding: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.3rem' }}>
-                    {item.type === 'video' ? <Video size={14} color="#facc15" /> : item.type === 'pdf' ? <FileText size={14} color="#ff6b6b" /> : <ImageIcon size={14} color="#4ade80" />}
-                    <h4 style={{ fontSize: '0.9rem', fontWeight: 600, color: '#fff', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {item.title}
-                    </h4>
-                  </div>
-                  {item.caption && <p style={{ fontSize: '0.75rem', color: '#888', margin: 0, lineHeight: 1.4 }}>{item.caption}</p>}
+                <div style={{ position: 'absolute', top: '0.65rem', right: '0.65rem', display: 'flex', gap: '0.35rem' }}>
+                  <button
+                    onClick={() => handleDelete(item._id, item.title)}
+                    title="Delete Media"
+                    style={{ background: 'rgba(239, 68, 68, 0.85)', backdropFilter: 'blur(4px)', border: 'none', color: '#fff', padding: '0.35rem', borderRadius: 6, cursor: 'pointer', display: 'flex' }}
+                  >
+                    <Trash2 size={13} />
+                  </button>
                 </div>
               </div>
 
-              <div style={{ padding: '0.75rem 1rem', background: '#161616', borderTop: '1px solid #1f1f1f', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.7rem', color: '#666', textTransform: 'uppercase' }}>{item.type}</span>
-                <button
-                  onClick={() => handleDelete(item._id, item.title)}
-                  style={{ background: 'transparent', color: '#ff6b6b', border: '1px solid rgba(255,107,107,0.3)', padding: '0.35rem 0.6rem', borderRadius: 6, fontSize: '0.75rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.2rem' }}
-                >
-                  <Trash2 size={12} /> Delete
-                </button>
+              {/* Title & Caption */}
+              <div style={{ padding: '1rem' }}>
+                <h4 style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', fontWeight: 600, color: '#fff', margin: '0 0 0.25rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {item.title}
+                </h4>
+                {item.caption && (
+                  <p style={{ fontSize: '0.775rem', color: '#9ca3af', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {item.caption}
+                  </p>
+                )}
               </div>
             </div>
           ))}
@@ -199,102 +241,96 @@ export default function GalleryManagerPage() {
 
       {/* Upload Modal */}
       {modalOpen && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div style={{ background: '#121212', border: '1px solid #282828', borderRadius: 16, width: '100%', maxWidth: '540px', padding: '2rem', maxHeight: '90vh', overflowY: 'auto' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '1px solid #1f1f1f', paddingBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#fff', margin: 0 }}>Upload Asset to Gallery</h3>
-              <button onClick={() => setModalOpen(false)} style={{ background: 'transparent', border: 'none', color: '#888', cursor: 'pointer' }}>
-                <X size={20} />
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div style={{ background: '#09090b', border: '1px solid #27272a', borderRadius: 20, width: '100%', maxWidth: '520px', padding: '2rem', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 700, color: '#fff', margin: 0 }}>
+                Upload Media Asset
+              </h2>
+              <button onClick={() => setModalOpen(false)} style={{ background: '#18181b', border: 'none', color: '#a1a1aa', padding: '0.4rem', borderRadius: 8, cursor: 'pointer' }}>
+                <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Select Asset File</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Media File *</label>
                 <input
                   type="file"
                   required
                   accept="image/*,video/*,application/pdf"
-                  onChange={e => {
-                    const f = e.target.files?.[0];
-                    if (f) {
-                      setFile(f);
-                      if (!title) setTitle(f.name.split('.')[0]);
-                      if (f.type.startsWith('video/')) setType('video');
-                      else if (f.type === 'application/pdf') setType('pdf');
-                      else setType('image');
-                    }
-                  }}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
+                  onChange={handleFileChange}
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.6rem', color: '#a1a1aa', fontSize: '0.8rem' }}
+                />
+                {filePreview && (
+                  <div style={{ marginTop: '0.75rem', height: '140px', borderRadius: 10, overflow: 'hidden', border: '1px solid #27272a' }}>
+                    <img src={filePreview} alt="Upload Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Asset Title</label>
+                <input
+                  type="text"
+                  value={title}
+                  onChange={e => setTitle(e.target.value)}
+                  placeholder="e.g. Executive Headquarters Architecture"
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
                 />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1rem' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Asset Title</label>
-                  <input
-                    type="text"
-                    required
-                    value={title}
-                    onChange={e => setTitle(e.target.value)}
-                    style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
-                  />
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Collection / Folder</label>
+                  <select
+                    value={folder}
+                    onChange={e => setFolder(e.target.value)}
+                    style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
+                  >
+                    {FOLDERS.filter(f => f !== 'ALL').map(f => <option key={f} value={f}>{f}</option>)}
+                  </select>
                 </div>
+
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Asset Type</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Media Type</label>
                   <select
                     value={type}
                     onChange={e => setType(e.target.value as any)}
-                    style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
+                    style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
                   >
                     <option value="image">Image</option>
                     <option value="video">Video</option>
-                    <option value="pdf">Document (PDF)</option>
+                    <option value="pdf">PDF Document</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Target Folder</label>
-                <select
-                  value={folder}
-                  onChange={e => setFolder(e.target.value)}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
-                >
-                  {folders.filter(f => f !== 'ALL').map(fo => (
-                    <option key={fo} value={fo}>{fo}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Caption / Description</label>
+                <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Caption / Subtitle</label>
                 <input
                   type="text"
-                  placeholder="e.g. Headquarters architectural blueprint view"
                   value={caption}
                   onChange={e => setCaption(e.target.value)}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
+                  placeholder="Optional brief description for lightbox caption..."
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
                 />
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Tags (comma-separated)</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Headquarters, Corporate, Design"
-                  value={tags}
-                  onChange={e => setTags(e.target.value)}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem', borderTop: '1px solid #1f1f1f', paddingTop: '1.25rem' }}>
-                <button type="button" onClick={() => setModalOpen(false)} style={{ background: 'transparent', border: '1px solid #333', color: '#aaa', padding: '0.65rem 1.25rem', borderRadius: 8, cursor: 'pointer' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem', borderTop: '1px solid #1c1c21', paddingTop: '1.25rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  style={{ background: '#121215', border: '1px solid #22222a', color: '#a1a1aa', padding: '0.65rem 1.25rem', borderRadius: 10, fontSize: '0.85rem', cursor: 'pointer' }}
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={saving || !file} style={{ background: '#fff', color: '#000', border: 'none', padding: '0.65rem 1.5rem', borderRadius: 8, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer' }}>
-                  {saving ? 'Uploading...' : 'Upload Media'}
+                <button
+                  type="submit"
+                  disabled={saving}
+                  style={{ background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', border: 'none', color: '#fff', padding: '0.65rem 1.4rem', borderRadius: 10, fontSize: '0.85rem', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer' }}
+                >
+                  {saving ? 'Uploading...' : 'Upload Media Asset'}
                 </button>
               </div>
             </form>

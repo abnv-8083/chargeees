@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { fetchMission, updateMissionSection } from '@/lib/api';
 import type { MissionData } from '@/lib/types';
-import { Save, CheckCircle2, AlertCircle, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { showToast } from '@/lib/toast';
+import { Save, Sparkles, Plus, Trash2 } from 'lucide-react';
 
 const FALLBACK_MISSION: MissionData = {
   heading: 'Our Operational Mandate',
@@ -24,24 +25,22 @@ export default function MissionSectionEditorPage() {
   const [data, setData] = useState<MissionData>(FALLBACK_MISSION);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     fetchMission()
       .then((res: any) => { if (res) setData(res); })
+      .catch(() => showToast.error('Failed to load Mission section data.'))
       .finally(() => setLoading(false));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setMessage(null);
     try {
       await updateMissionSection(data);
-      setMessage({ type: 'success', text: 'Mission section updated successfully!' });
-      setTimeout(() => setMessage(null), 4000);
+      showToast.success('Mission section updated successfully!');
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Failed to update mission section.' });
+      showToast.error(err.message || 'Failed to update mission section.');
     } finally {
       setSaving(false);
     }
@@ -60,178 +59,138 @@ export default function MissionSectionEditorPage() {
     setData({ ...data, commitments: updated });
   };
 
-  const addObjective = () => {
-    setData({
-      ...data,
-      objectives: [...(data.objectives || []), 'New strategic objective item'],
-    });
-  };
-
-  const removeObjective = (index: number) => {
-    const updated = [...(data.objectives || [])];
-    updated.splice(index, 1);
-    setData({ ...data, objectives: updated });
-  };
-
-  if (loading) return <div style={{ padding: '2rem', color: '#888' }}>Loading Mission Section data...</div>;
+  if (loading) {
+    return (
+      <div style={{ padding: '4rem 0', textAlign: 'center', color: '#71717a' }}>
+        <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p style={{ fontSize: '0.875rem' }}>Loading Mission Section data...</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: '900px' }}>
+    <div style={{ maxWidth: '820px' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#888', fontSize: '0.8125rem', marginBottom: '0.3rem' }}>
-          <Sparkles size={14} /> Sections / Mission
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#38bdf8', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.3rem' }}>
+          <Sparkles size={16} /> Sections / Mission Mandate
         </div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, color: '#fff' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, color: '#fff', margin: 0 }}>
           Mission Section Editor
         </h1>
-        <p style={{ color: '#888', fontSize: '0.875rem' }}>
-          Configure mission statement, commitments array, strategic objectives list, and customer guarantee.
+        <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+          Configure operational commitments, quantitative performance targets, and customer-first principles.
         </p>
       </div>
 
-      {message && (
-        <div style={{
-          background: message.type === 'success' ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 107, 107, 0.1)',
-          border: `1px solid ${message.type === 'success' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 107, 107, 0.3)'}`,
-          color: message.type === 'success' ? '#4ade80' : '#ff6b6b',
-          padding: '1rem 1.25rem',
-          borderRadius: 12,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.6rem',
-          marginBottom: '1.5rem',
-          fontSize: '0.875rem',
-        }}>
-          {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <span>{message.text}</span>
-        </div>
-      )}
-
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        <div style={{ background: '#121212', border: '1px solid #222', borderRadius: 16, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+        <div style={{ background: '#09090b', border: '1px solid #1c1c21', borderRadius: 18, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Mission Heading</label>
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Mission Section Heading</label>
             <input
               type="text"
+              required
               value={data.heading}
               onChange={e => setData({ ...data, heading: e.target.value })}
-              style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+              style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
             />
           </div>
+
           <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Mission Statement</label>
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Official Mission Statement</label>
             <textarea
-              rows={3}
+              rows={4}
+              required
               value={data.statement}
               onChange={e => setData({ ...data, statement: e.target.value })}
-              style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+              style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none', resize: 'vertical' }}
             />
           </div>
+
           <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Customer-First Guarantee Paragraph</label>
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Customer First Statement</label>
             <textarea
               rows={3}
-              value={data.customerFirst}
+              value={data.customerFirst || ''}
               onChange={e => setData({ ...data, customerFirst: e.target.value })}
-              style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+              style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none', resize: 'vertical' }}
             />
           </div>
         </div>
 
         {/* Commitments Card */}
-        <div style={{ background: '#121212', border: '1px solid #222', borderRadius: 16, padding: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1f1f1f', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#fff', margin: 0 }}>Core Commitments</h3>
+        <div style={{ background: '#09090b', border: '1px solid #1c1c21', borderRadius: 18, padding: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 600, color: '#fff', margin: 0 }}>
+              Pillars & Commitments
+            </h3>
             <button
               type="button"
               onClick={addCommitment}
-              style={{ background: '#242424', color: '#fff', border: '1px solid #333', borderRadius: 6, padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}
+              style={{ background: '#121215', border: '1px solid #22222a', color: '#38bdf8', padding: '0.4rem 0.8rem', borderRadius: 8, fontSize: '0.775rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
             >
               <Plus size={14} /> Add Commitment
             </button>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {(data.commitments || []).map((c, i) => (
-              <div key={i} style={{ background: '#181818', border: '1px solid #282828', borderRadius: 10, padding: '1.25rem', display: 'grid', gridTemplateColumns: '1fr 2fr auto', gap: '1rem', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  placeholder="Commitment Title"
-                  value={c.title}
-                  onChange={e => {
-                    const updated = [...(data.commitments || [])];
-                    updated[i].title = e.target.value;
-                    setData({ ...data, commitments: updated });
-                  }}
-                  style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.6rem', color: '#fff', fontSize: '0.85rem' }}
-                />
-                <input
-                  type="text"
-                  placeholder="Commitment Description"
-                  value={c.description}
-                  onChange={e => {
-                    const updated = [...(data.commitments || [])];
-                    updated[i].description = e.target.value;
-                    setData({ ...data, commitments: updated });
-                  }}
-                  style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.6rem', color: '#fff', fontSize: '0.85rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeCommitment(i)}
-                  style={{ background: 'transparent', border: 'none', color: '#ff6b6b', cursor: 'pointer', padding: '0.4rem' }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Objectives Card */}
-        <div style={{ background: '#121212', border: '1px solid #222', borderRadius: 16, padding: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1f1f1f', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#fff', margin: 0 }}>Strategic Objectives Checklist</h3>
-            <button
-              type="button"
-              onClick={addObjective}
-              style={{ background: '#242424', color: '#fff', border: '1px solid #333', borderRadius: 6, padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}
-            >
-              <Plus size={14} /> Add Objective
-            </button>
-          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {(data.objectives || []).map((obj, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ color: '#888', fontWeight: 600, fontSize: '0.85rem', width: '24px' }}>{i + 1}.</span>
+            {data.commitments?.map((com, idx) => (
+              <div key={idx} style={{ background: '#121215', border: '1px solid #1c1c21', borderRadius: 10, padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={com.title}
+                    onChange={e => {
+                      const updated = [...(data.commitments || [])];
+                      updated[idx].title = e.target.value;
+                      setData({ ...data, commitments: updated });
+                    }}
+                    placeholder="Commitment Title"
+                    style={{ flex: 1, background: '#09090b', border: '1px solid #22222a', borderRadius: 8, padding: '0.45rem 0.75rem', color: '#fff', fontSize: '0.85rem', fontWeight: 600, outline: 'none' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeCommitment(idx)}
+                    style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#f87171', padding: '0.45rem', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
                 <input
                   type="text"
-                  value={obj}
+                  value={com.description}
                   onChange={e => {
-                    const updated = [...(data.objectives || [])];
-                    updated[i] = e.target.value;
-                    setData({ ...data, objectives: updated });
+                    const updated = [...(data.commitments || [])];
+                    updated[idx].description = e.target.value;
+                    setData({ ...data, commitments: updated });
                   }}
-                  style={{ flex: 1, background: '#181818', border: '1px solid #282828', borderRadius: 6, padding: '0.6rem 0.8rem', color: '#fff', fontSize: '0.85rem' }}
+                  placeholder="Commitment details..."
+                  style={{ width: '100%', background: '#09090b', border: '1px solid #22222a', borderRadius: 8, padding: '0.45rem 0.75rem', color: '#a1a1aa', fontSize: '0.825rem', outline: 'none' }}
                 />
-                <button
-                  type="button"
-                  onClick={() => removeObjective(i)}
-                  style={{ background: 'transparent', border: 'none', color: '#ff6b6b', cursor: 'pointer', padding: '0.4rem' }}
-                >
-                  <Trash2 size={16} />
-                </button>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button
             type="submit"
             disabled={saving}
-            style={{ background: '#fff', color: '#000', border: 'none', padding: '0.75rem 1.5rem', borderRadius: 8, fontSize: '0.9rem', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: saving ? 0.7 : 1 }}
+            style={{
+              background: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
+              color: '#fff',
+              border: 'none',
+              padding: '0.7rem 1.5rem',
+              borderRadius: 10,
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              cursor: saving ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: '0 4px 14px rgba(56, 189, 248, 0.35)',
+            }}
           >
-            <Save size={16} /> {saving ? 'Saving Changes...' : 'Save Mission Section'}
+            <Save size={16} /> {saving ? 'Saving...' : 'Save Mission Section'}
           </button>
         </div>
       </form>

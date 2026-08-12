@@ -2,7 +2,12 @@
 import React, { useEffect, useState } from 'react';
 import { fetchSettings, updateSettingsAdmin } from '@/lib/api';
 import type { SiteSettings } from '@/lib/types';
-import { Save, CheckCircle2, AlertCircle, Settings, Globe, MapPin, Share2, Search, Menu as MenuIcon, LayoutTemplate, Plus, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { showToast } from '@/lib/toast';
+import {
+  Save, CheckCircle2, AlertCircle, Settings, Globe, MapPin, Share2,
+  Search, Menu as MenuIcon, LayoutTemplate, Plus, Trash2, ArrowUp,
+  ArrowDown, Sparkles
+} from 'lucide-react';
 
 export default function SettingsManagerPage() {
   const [activeTab, setActiveTab] = useState<'general' | 'contact' | 'social' | 'seo' | 'navigation' | 'footer'>('general');
@@ -44,18 +49,17 @@ export default function SettingsManagerPage() {
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     fetchSettings()
       .then((res: any) => { if (res && Object.keys(res).length > 0) setData(res); })
+      .catch(() => showToast.error('Failed to fetch site settings.'))
       .finally(() => setLoading(false));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setMessage(null);
 
     try {
       const payload = new FormData();
@@ -72,10 +76,9 @@ export default function SettingsManagerPage() {
       if (faviconFile) payload.append('favicon', faviconFile);
 
       await updateSettingsAdmin(payload);
-      setMessage({ type: 'success', text: 'Site configuration updated across all modules!' });
-      setTimeout(() => setMessage(null), 4000);
+      showToast.success('Site configuration saved successfully!');
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Failed to update site settings.' });
+      showToast.error(err.message || 'Failed to update site settings.');
     } finally {
       setSaving(false);
     }
@@ -117,287 +120,292 @@ export default function SettingsManagerPage() {
     { key: 'footer', label: 'Footer Links', icon: <LayoutTemplate size={15} /> },
   ];
 
-  if (loading) return <div style={{ padding: '3rem', color: '#888' }}>Loading site configuration settings...</div>;
+  if (loading) {
+    return (
+      <div style={{ padding: '4rem 0', textAlign: 'center', color: '#71717a' }}>
+        <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p style={{ fontSize: '0.875rem' }}>Loading site configuration settings...</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, color: '#fff', marginBottom: '0.4rem' }}>
-          Global Site Configuration & CMS Preferences
-        </h1>
-        <p style={{ color: '#888', fontSize: '0.875rem' }}>
-          Manage corporate identity, navigation structure, contact details, social media links, and SEO tags.
-        </p>
-      </div>
-
-      {message && (
-        <div style={{
-          background: message.type === 'success' ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 107, 107, 0.1)',
-          border: `1px solid ${message.type === 'success' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 107, 107, 0.3)'}`,
-          color: message.type === 'success' ? '#4ade80' : '#ff6b6b',
-          padding: '1rem 1.25rem',
-          borderRadius: 12,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.6rem',
-          marginBottom: '1.5rem',
-          fontSize: '0.875rem',
-        }}>
-          {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <span>{message.text}</span>
+    <form onSubmit={handleSubmit}>
+      {/* Header */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1.25rem', marginBottom: '2rem' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#38bdf8', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.3rem' }}>
+            <Settings size={16} /> Global Configuration
+          </div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, color: '#fff', margin: 0, letterSpacing: '-0.02em' }}>
+            Site & Portal Settings
+          </h1>
+          <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+            Manage brand identity, contact endpoints, social links, SEO tags, and navigation hierarchy.
+          </p>
         </div>
-      )}
 
-      {/* Tabs Header */}
-      <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', borderBottom: '1px solid #1f1f1f', paddingBottom: '0.75rem', marginBottom: '2rem' }}>
-        {TABS.map(t => (
-          <button
-            key={t.key}
-            type="button"
-            onClick={() => setActiveTab(t.key as any)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              padding: '0.65rem 1.1rem',
-              borderRadius: 8,
-              background: activeTab === t.key ? '#fff' : 'transparent',
-              color: activeTab === t.key ? '#000' : '#aaa',
-              border: 'none',
-              fontWeight: activeTab === t.key ? 600 : 500,
-              fontSize: '0.85rem',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            {t.icon}
-            {t.label}
-          </button>
-        ))}
+        <button
+          type="submit"
+          disabled={saving}
+          style={{
+            background: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
+            color: '#fff',
+            border: 'none',
+            padding: '0.7rem 1.4rem',
+            borderRadius: 10,
+            fontSize: '0.875rem',
+            fontWeight: 600,
+            cursor: saving ? 'not-allowed' : 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            boxShadow: '0 4px 14px rgba(56, 189, 248, 0.35)',
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <Save size={16} /> {saving ? 'Saving Changes...' : 'Save Configuration'}
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ background: '#121212', border: '1px solid #222', borderRadius: 16, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        {/* TAB 1: General Brand */}
+      {/* Tabs Navigation */}
+      <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', borderBottom: '1px solid #1c1c21', paddingBottom: '0.75rem', marginBottom: '1.75rem' }}>
+        {TABS.map(t => {
+          const active = activeTab === t.key;
+          return (
+            <button
+              type="button"
+              key={t.key}
+              onClick={() => setActiveTab(t.key as any)}
+              style={{
+                background: active ? 'rgba(56, 189, 248, 0.12)' : '#09090b',
+                color: active ? '#38bdf8' : '#a1a1aa',
+                border: active ? '1px solid rgba(56, 189, 248, 0.3)' : '1px solid #1c1c21',
+                padding: '0.55rem 1rem',
+                borderRadius: 10,
+                fontSize: '0.825rem',
+                fontWeight: active ? 600 : 500,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.45rem',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {t.icon}
+              <span>{t.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Tab Panels */}
+      <div style={{ background: '#09090b', border: '1px solid #1c1c21', borderRadius: 18, padding: '2rem' }}>
+        {/* General Brand Tab */}
         {activeTab === 'general' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '680px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Company Name</label>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Company Name</label>
               <input
                 type="text"
-                value={data.companyName}
+                value={data.companyName || ''}
                 onChange={e => setData({ ...data, companyName: e.target.value })}
-                style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
               />
             </div>
+
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Global Tagline / Motto</label>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Tagline / Slogan</label>
               <input
                 type="text"
-                value={data.companyTagline}
+                value={data.companyTagline || ''}
                 onChange={e => setData({ ...data, companyTagline: e.target.value })}
-                style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
               />
             </div>
+
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Corporate Description Summary</label>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Corporate Summary</label>
               <textarea
                 rows={3}
-                value={data.companyDescription}
+                value={data.companyDescription || ''}
                 onChange={e => setData({ ...data, companyDescription: e.target.value })}
-                style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem', fontFamily: 'inherit' }}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none', resize: 'vertical' }}
               />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Corporate Logo (Upload PNG/SVG)</label>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Brand Logo Image</label>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={e => e.target.files?.[0] && setLogoFile(e.target.files[0])}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
+                  onChange={e => setLogoFile(e.target.files?.[0] || null)}
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.5rem', color: '#a1a1aa', fontSize: '0.8rem' }}
                 />
               </div>
+
               <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Browser Favicon Icon (Upload ICO/PNG)</label>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Favicon Icon (.ico / .png)</label>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={e => e.target.files?.[0] && setFaviconFile(e.target.files[0])}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
+                  onChange={e => setFaviconFile(e.target.files?.[0] || null)}
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.5rem', color: '#a1a1aa', fontSize: '0.8rem' }}
                 />
               </div>
             </div>
           </div>
         )}
 
-        {/* TAB 2: Contact & Map */}
+        {/* Contact Tab */}
         {activeTab === 'contact' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '680px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Primary Corporate Email</label>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Primary Email</label>
                 <input
                   type="email"
-                  value={data.contact?.email}
+                  value={data.contact?.email || ''}
                   onChange={e => setData({ ...data, contact: { ...data.contact!, email: e.target.value } })}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
                 />
               </div>
+
               <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Primary Telephone Number</label>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Phone Number</label>
                 <input
                   type="text"
-                  value={data.contact?.phone}
+                  value={data.contact?.phone || ''}
                   onChange={e => setData({ ...data, contact: { ...data.contact!, phone: e.target.value } })}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
                 />
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Headquarters Street Address</label>
-                <textarea
-                  rows={3}
-                  value={data.contact?.address}
-                  onChange={e => setData({ ...data, contact: { ...data.contact!, address: e.target.value } })}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem', fontFamily: 'inherit' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Standard Office Hours</label>
-                <textarea
-                  rows={3}
-                  value={data.contact?.officeHours}
-                  onChange={e => setData({ ...data, contact: { ...data.contact!, officeHours: e.target.value } })}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem', fontFamily: 'inherit' }}
-                />
-              </div>
-            </div>
+
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Google Maps Embed iframe URL (src only)</label>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Headquarters Address</label>
+              <textarea
+                rows={3}
+                value={data.contact?.address || ''}
+                onChange={e => setData({ ...data, contact: { ...data.contact!, address: e.target.value } })}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none', resize: 'vertical' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Google Maps Embed iframe Source URL</label>
               <input
                 type="text"
-                placeholder="https://www.google.com/maps/embed?pb=..."
                 value={data.contact?.googleMapsEmbed || ''}
                 onChange={e => setData({ ...data, contact: { ...data.contact!, googleMapsEmbed: e.target.value } })}
-                style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                placeholder="https://www.google.com/maps/embed?pb=..."
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.85rem', outline: 'none' }}
               />
             </div>
           </div>
         )}
 
-        {/* TAB 3: Social Links */}
+        {/* Social Channels */}
         {activeTab === 'social' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {['linkedin', 'twitter', 'instagram', 'facebook', 'youtube'].map(network => (
-              <div key={network} style={{ display: 'grid', gridTemplateColumns: '140px 1fr', gap: '1rem', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.85rem', color: '#aaa', textTransform: 'capitalize', fontWeight: 600 }}>{network} URL</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '680px' }}>
+            {['linkedin', 'twitter', 'instagram', 'facebook', 'youtube'].map(key => (
+              <div key={key}>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem', textTransform: 'capitalize' }}>
+                  {key} Page URL
+                </label>
                 <input
                   type="text"
-                  placeholder={`https://${network}.com/chargeease`}
-                  value={(data.social as any)?.[network] || ''}
-                  onChange={e => setData({ ...data, social: { ...data.social!, [network]: e.target.value } })}
-                  style={{ background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.7rem 1rem', color: '#fff', fontSize: '0.85rem' }}
+                  value={(data.social as any)?.[key] || ''}
+                  onChange={e => setData({ ...data, social: { ...data.social, [key]: e.target.value } })}
+                  placeholder={`https://${key}.com/...`}
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
                 />
               </div>
             ))}
           </div>
         )}
 
-        {/* TAB 4: SEO Metadata */}
+        {/* SEO Metadata */}
         {activeTab === 'seo' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '680px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Global Page Title Tag (&lt;title&gt;)</label>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Default Meta Title</label>
               <input
                 type="text"
-                value={data.seo?.metaTitle}
+                value={data.seo?.metaTitle || ''}
                 onChange={e => setData({ ...data, seo: { ...data.seo!, metaTitle: e.target.value } })}
-                style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
               />
             </div>
+
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Meta Description Tag</label>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Default Meta Description</label>
               <textarea
                 rows={3}
-                value={data.seo?.metaDescription}
+                value={data.seo?.metaDescription || ''}
                 onChange={e => setData({ ...data, seo: { ...data.seo!, metaDescription: e.target.value } })}
-                style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem', fontFamily: 'inherit' }}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none', resize: 'vertical' }}
               />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Open Graph Image URL (Preview Banner)</label>
-                <input
-                  type="text"
-                  value={data.seo?.ogImage || ''}
-                  onChange={e => setData({ ...data, seo: { ...data.seo!, ogImage: e.target.value } })}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Official Twitter / X Handle</label>
-                <input
-                  type="text"
-                  value={data.seo?.twitterHandle || ''}
-                  onChange={e => setData({ ...data, seo: { ...data.seo!, twitterHandle: e.target.value } })}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
-                />
-              </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Twitter / X Handle</label>
+              <input
+                type="text"
+                value={data.seo?.twitterHandle || ''}
+                onChange={e => setData({ ...data, seo: { ...data.seo!, twitterHandle: e.target.value } })}
+                placeholder="@ChargEase"
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
+              />
             </div>
           </div>
         )}
 
-        {/* TAB 5: Navigation Menu */}
+        {/* Navigation Menu Editor */}
         {activeTab === 'navigation' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-              <span style={{ fontSize: '0.85rem', color: '#aaa' }}>Reorder and manage public header navigation anchors.</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '780px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.875rem', fontWeight: 600, color: '#fff' }}>Header Navigation Items</span>
               <button
                 type="button"
                 onClick={addNavItem}
-                style={{ background: '#222', color: '#fff', border: '1px solid #333', padding: '0.4rem 0.8rem', borderRadius: 6, fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}
+                style={{ background: '#121215', border: '1px solid #22222a', color: '#38bdf8', padding: '0.4rem 0.8rem', borderRadius: 8, fontSize: '0.775rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
               >
-                <Plus size={14} /> Add Menu Item
+                <Plus size={14} /> Add Link Item
               </button>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {(data.navigation || []).map((nav, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '50px 1fr 1fr auto', gap: '0.75rem', alignItems: 'center', background: '#181818', border: '1px solid #282828', padding: '0.75rem', borderRadius: 8 }}>
-                  <span style={{ fontSize: '0.8rem', color: '#888', fontWeight: 600 }}>#{nav.order}</span>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+              {data.navigation?.map((nav, idx) => (
+                <div key={idx} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', background: '#121215', border: '1px solid #1c1c21', padding: '0.75rem 1rem', borderRadius: 10 }}>
+                  <span style={{ fontSize: '0.75rem', color: '#71717a', fontWeight: 600, width: 24 }}>#{idx + 1}</span>
                   <input
                     type="text"
-                    placeholder="Link Label"
                     value={nav.label}
                     onChange={e => {
                       const updated = [...(data.navigation || [])];
-                      updated[i].label = e.target.value;
+                      updated[idx].label = e.target.value;
                       setData({ ...data, navigation: updated });
                     }}
-                    style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.5rem', color: '#fff', fontSize: '0.85rem' }}
+                    placeholder="Link Label"
+                    style={{ flex: 1, background: '#09090b', border: '1px solid #22222a', borderRadius: 8, padding: '0.45rem 0.75rem', color: '#fff', fontSize: '0.825rem', outline: 'none' }}
                   />
                   <input
                     type="text"
-                    placeholder="#section or /page"
                     value={nav.href}
                     onChange={e => {
                       const updated = [...(data.navigation || [])];
-                      updated[i].href = e.target.value;
+                      updated[idx].href = e.target.value;
                       setData({ ...data, navigation: updated });
                     }}
-                    style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.5rem', color: '#fff', fontSize: '0.85rem' }}
+                    placeholder="Href (#section or /path)"
+                    style={{ flex: 1, background: '#09090b', border: '1px solid #22222a', borderRadius: 8, padding: '0.45rem 0.75rem', color: '#fff', fontSize: '0.825rem', outline: 'none' }}
                   />
-                  <div style={{ display: 'flex', gap: '0.3rem' }}>
-                    <button type="button" onClick={() => moveNavItem(i, 'up')} style={{ background: '#222', border: 'none', color: '#fff', padding: '0.4rem', borderRadius: 4, cursor: 'pointer' }} title="Move Up">
-                      <ArrowUp size={14} />
-                    </button>
-                    <button type="button" onClick={() => moveNavItem(i, 'down')} style={{ background: '#222', border: 'none', color: '#fff', padding: '0.4rem', borderRadius: 4, cursor: 'pointer' }} title="Move Down">
-                      <ArrowDown size={14} />
-                    </button>
-                    <button type="button" onClick={() => removeNavItem(i)} style={{ background: 'transparent', border: 'none', color: '#ff6b6b', padding: '0.4rem', cursor: 'pointer' }} title="Delete">
-                      <Trash2 size={15} />
-                    </button>
+                  <div style={{ display: 'flex', gap: '0.25rem' }}>
+                    <button type="button" onClick={() => moveNavItem(idx, 'up')} style={{ background: '#1c1c21', border: 'none', color: '#a1a1aa', padding: '0.4rem', borderRadius: 6, cursor: 'pointer' }}><ArrowUp size={13} /></button>
+                    <button type="button" onClick={() => moveNavItem(idx, 'down')} style={{ background: '#1c1c21', border: 'none', color: '#a1a1aa', padding: '0.4rem', borderRadius: 6, cursor: 'pointer' }}><ArrowDown size={13} /></button>
+                    <button type="button" onClick={() => removeNavItem(idx)} style={{ background: 'rgba(239, 68, 68, 0.1)', border: 'none', color: '#f87171', padding: '0.4rem', borderRadius: 6, cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
                 </div>
               ))}
@@ -405,51 +413,43 @@ export default function SettingsManagerPage() {
           </div>
         )}
 
-        {/* TAB 6: Footer */}
+        {/* Footer Links */}
         {activeTab === 'footer' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', maxWidth: '680px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Copyright Notice String</label>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Copyright Line</label>
               <input
                 type="text"
-                value={data.footer?.copyright}
+                value={data.footer?.copyright || ''}
                 onChange={e => setData({ ...data, footer: { ...data.footer!, copyright: e.target.value } })}
-                style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
               />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Privacy Policy Target URL</label>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Privacy Policy Link</label>
                 <input
                   type="text"
-                  value={data.footer?.privacyPolicyUrl}
+                  value={data.footer?.privacyPolicyUrl || ''}
                   onChange={e => setData({ ...data, footer: { ...data.footer!, privacyPolicyUrl: e.target.value } })}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
                 />
               </div>
+
               <div>
-                <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Terms of Service Target URL</label>
+                <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Terms & Conditions Link</label>
                 <input
                   type="text"
-                  value={data.footer?.termsUrl}
+                  value={data.footer?.termsUrl || ''}
                   onChange={e => setData({ ...data, footer: { ...data.footer!, termsUrl: e.target.value } })}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+                  style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
                 />
               </div>
             </div>
           </div>
         )}
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem', borderTop: '1px solid #1f1f1f' }}>
-          <button
-            type="submit"
-            disabled={saving}
-            style={{ background: '#fff', color: '#000', border: 'none', padding: '0.75rem 1.5rem', borderRadius: 8, fontSize: '0.9rem', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: saving ? 0.7 : 1 }}
-          >
-            <Save size={16} /> {saving ? 'Saving Configuration...' : 'Save All Settings'}
-          </button>
-        </div>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 }

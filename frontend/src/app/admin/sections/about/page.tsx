@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAbout, updateAboutSection } from '@/lib/api';
 import type { AboutData } from '@/lib/types';
-import { Save, CheckCircle2, AlertCircle, Sparkles, Plus, Trash2 } from 'lucide-react';
+import { showToast } from '@/lib/toast';
+import { Save, Sparkles, Plus, Trash2 } from 'lucide-react';
 
 const FALLBACK_ABOUT: AboutData = {
   heading: 'Architects of Digital Excellence',
@@ -26,24 +27,22 @@ export default function AboutSectionEditorPage() {
   const [data, setData] = useState<AboutData>(FALLBACK_ABOUT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     fetchAbout()
       .then((res: any) => { if (res) setData(res); })
+      .catch(() => showToast.error('Failed to load About section data.'))
       .finally(() => setLoading(false));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setMessage(null);
     try {
       await updateAboutSection(data);
-      setMessage({ type: 'success', text: 'About section updated successfully!' });
-      setTimeout(() => setMessage(null), 4000);
+      showToast.success('About section updated successfully!');
     } catch (err: any) {
-      setMessage({ type: 'error', text: err.message || 'Failed to update about section.' });
+      showToast.error(err.message || 'Failed to update about section.');
     } finally {
       setSaving(false);
     }
@@ -62,211 +61,177 @@ export default function AboutSectionEditorPage() {
     setData({ ...data, coreValues: updated });
   };
 
-  const addTimelineEntry = () => {
+  const addTimelineItem = () => {
     setData({
       ...data,
-      timeline: [...(data.timeline || []), { year: '2024', title: 'Milestone Title', description: 'Milestone description' }],
+      timeline: [...(data.timeline || []), { year: '2025', title: 'Milestone Title', description: 'Milestone detail...' }],
     });
   };
 
-  const removeTimelineEntry = (index: number) => {
+  const removeTimelineItem = (index: number) => {
     const updated = [...(data.timeline || [])];
     updated.splice(index, 1);
     setData({ ...data, timeline: updated });
   };
 
-  if (loading) return <div style={{ padding: '2rem', color: '#888' }}>Loading About Section data...</div>;
+  if (loading) {
+    return (
+      <div style={{ padding: '4rem 0', textAlign: 'center', color: '#71717a' }}>
+        <div className="w-8 h-8 border-2 border-sky-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p style={{ fontSize: '0.875rem' }}>Loading About Section data...</p>
+      </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: '900px' }}>
+    <div style={{ maxWidth: '840px' }}>
       <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#888', fontSize: '0.8125rem', marginBottom: '0.3rem' }}>
-          <Sparkles size={14} /> Sections / About
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#38bdf8', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.3rem' }}>
+          <Sparkles size={16} /> Sections / About Us
         </div>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, color: '#fff' }}>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, color: '#fff', margin: 0 }}>
           About Section & Timeline Editor
         </h1>
-        <p style={{ color: '#888', fontSize: '0.875rem' }}>
-          Manage company overview, core values cards, and historical milestone timeline.
+        <p style={{ color: '#9ca3af', fontSize: '0.9rem', marginTop: '0.2rem' }}>
+          Configure company narrative, core corporate values, timeline milestones, and value propositions.
         </p>
       </div>
 
-      {message && (
-        <div style={{
-          background: message.type === 'success' ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255, 107, 107, 0.1)',
-          border: `1px solid ${message.type === 'success' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 107, 107, 0.3)'}`,
-          color: message.type === 'success' ? '#4ade80' : '#ff6b6b',
-          padding: '1rem 1.25rem',
-          borderRadius: 12,
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.6rem',
-          marginBottom: '1.5rem',
-          fontSize: '0.875rem',
-        }}>
-          {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-          <span>{message.text}</span>
-        </div>
-      )}
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+        {/* Core Narrative Card */}
+        <div style={{ background: '#09090b', border: '1px solid #1c1c21', borderRadius: 18, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: 0 }}>
+            Corporate Narrative
+          </h2>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-        {/* Main Content Card */}
-        <div style={{ background: '#121212', border: '1px solid #222', borderRadius: 16, padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#fff', margin: 0, borderBottom: '1px solid #1f1f1f', paddingBottom: '0.75rem' }}>
-            Main Content
-          </h3>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Subheading Badge</label>
-            <input
-              type="text"
-              value={data.subheading}
-              onChange={e => setData({ ...data, subheading: e.target.value })}
-              style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
-            />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Main Heading</label>
+              <input
+                type="text"
+                required
+                value={data.heading}
+                onChange={e => setData({ ...data, heading: e.target.value })}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Subheading Label</label>
+              <input
+                type="text"
+                required
+                value={data.subheading}
+                onChange={e => setData({ ...data, subheading: e.target.value })}
+                style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none' }}
+              />
+            </div>
           </div>
+
           <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Main Heading</label>
-            <input
-              type="text"
-              value={data.heading}
-              onChange={e => setData({ ...data, heading: e.target.value })}
-              style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
-            />
-          </div>
-          <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Introduction Text</label>
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Introduction Text</label>
             <textarea
               rows={3}
               value={data.introduction}
               onChange={e => setData({ ...data, introduction: e.target.value })}
-              style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+              style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none', resize: 'vertical' }}
             />
           </div>
+
           <div>
-            <label style={{ display: 'block', fontSize: '0.8125rem', color: '#aaa', marginBottom: '0.4rem', fontWeight: 500 }}>Detailed Story Paragraph</label>
+            <label style={{ display: 'block', fontSize: '0.825rem', fontWeight: 600, color: '#d4d4d8', marginBottom: '0.4rem' }}>Detailed Story</label>
             <textarea
               rows={4}
               value={data.story}
               onChange={e => setData({ ...data, story: e.target.value })}
-              style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.75rem 1rem', color: '#fff', fontSize: '0.9rem' }}
+              style={{ width: '100%', background: '#121215', border: '1px solid #22222a', borderRadius: 10, padding: '0.65rem 0.9rem', color: '#fff', fontSize: '0.875rem', outline: 'none', resize: 'vertical' }}
             />
           </div>
         </div>
 
-        {/* Core Values Card */}
-        <div style={{ background: '#121212', border: '1px solid #222', borderRadius: 16, padding: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1f1f1f', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#fff', margin: 0 }}>Core Values</h3>
+        {/* Timeline Milestones Card */}
+        <div style={{ background: '#09090b', border: '1px solid #1c1c21', borderRadius: 18, padding: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: 0 }}>
+              Company History & Timeline
+            </h2>
             <button
               type="button"
-              onClick={addCoreValue}
-              style={{ background: '#242424', color: '#fff', border: '1px solid #333', borderRadius: 6, padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}
-            >
-              <Plus size={14} /> Add Value
-            </button>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {(data.coreValues || []).map((v, i) => (
-              <div key={i} style={{ background: '#181818', border: '1px solid #282828', borderRadius: 10, padding: '1.25rem', display: 'grid', gridTemplateColumns: '1fr 2fr auto', gap: '1rem', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  placeholder="Title"
-                  value={v.title}
-                  onChange={e => {
-                    const updated = [...(data.coreValues || [])];
-                    updated[i].title = e.target.value;
-                    setData({ ...data, coreValues: updated });
-                  }}
-                  style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.6rem', color: '#fff', fontSize: '0.85rem' }}
-                />
-                <input
-                  type="text"
-                  placeholder="Description"
-                  value={v.description}
-                  onChange={e => {
-                    const updated = [...(data.coreValues || [])];
-                    updated[i].description = e.target.value;
-                    setData({ ...data, coreValues: updated });
-                  }}
-                  style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.6rem', color: '#fff', fontSize: '0.85rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeCoreValue(i)}
-                  style={{ background: 'transparent', border: 'none', color: '#ff6b6b', cursor: 'pointer', padding: '0.4rem' }}
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Timeline Card */}
-        <div style={{ background: '#121212', border: '1px solid #222', borderRadius: 16, padding: '2rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #1f1f1f', paddingBottom: '0.75rem', marginBottom: '1.5rem' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#fff', margin: 0 }}>Company Timeline Milestones</h3>
-            <button
-              type="button"
-              onClick={addTimelineEntry}
-              style={{ background: '#242424', color: '#fff', border: '1px solid #333', borderRadius: 6, padding: '0.4rem 0.8rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}
+              onClick={addTimelineItem}
+              style={{ background: '#121215', border: '1px solid #22222a', color: '#38bdf8', padding: '0.4rem 0.8rem', borderRadius: 8, fontSize: '0.775rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
             >
               <Plus size={14} /> Add Milestone
             </button>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            {(data.timeline || []).map((t, i) => (
-              <div key={i} style={{ background: '#181818', border: '1px solid #282828', borderRadius: 10, padding: '1.25rem', display: 'grid', gridTemplateColumns: '100px 1fr 2fr auto', gap: '1rem', alignItems: 'center' }}>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {data.timeline?.map((item, idx) => (
+              <div key={idx} style={{ background: '#121215', border: '1px solid #1c1c21', borderRadius: 12, padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                  <input
+                    type="text"
+                    value={item.year}
+                    onChange={e => {
+                      const updated = [...(data.timeline || [])];
+                      updated[idx].year = e.target.value;
+                      setData({ ...data, timeline: updated });
+                    }}
+                    placeholder="Year (e.g. 2024)"
+                    style={{ width: '110px', background: '#09090b', border: '1px solid #22222a', borderRadius: 8, padding: '0.45rem 0.75rem', color: '#38bdf8', fontWeight: 700, fontSize: '0.85rem', outline: 'none' }}
+                  />
+                  <input
+                    type="text"
+                    value={item.title}
+                    onChange={e => {
+                      const updated = [...(data.timeline || [])];
+                      updated[idx].title = e.target.value;
+                      setData({ ...data, timeline: updated });
+                    }}
+                    placeholder="Milestone Title"
+                    style={{ flex: 1, background: '#09090b', border: '1px solid #22222a', borderRadius: 8, padding: '0.45rem 0.75rem', color: '#fff', fontWeight: 600, fontSize: '0.85rem', outline: 'none' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeTimelineItem(idx)}
+                    style={{ background: 'rgba(239,68,68,0.1)', border: 'none', color: '#f87171', padding: '0.45rem', borderRadius: 8, cursor: 'pointer' }}
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
                 <input
                   type="text"
-                  placeholder="Year"
-                  value={t.year}
+                  value={item.description}
                   onChange={e => {
                     const updated = [...(data.timeline || [])];
-                    updated[i].year = e.target.value;
+                    updated[idx].description = e.target.value;
                     setData({ ...data, timeline: updated });
                   }}
-                  style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.6rem', color: '#fff', fontSize: '0.85rem' }}
+                  placeholder="Milestone description..."
+                  style={{ width: '100%', background: '#09090b', border: '1px solid #22222a', borderRadius: 8, padding: '0.45rem 0.75rem', color: '#a1a1aa', fontSize: '0.825rem', outline: 'none' }}
                 />
-                <input
-                  type="text"
-                  placeholder="Milestone Title"
-                  value={t.title}
-                  onChange={e => {
-                    const updated = [...(data.timeline || [])];
-                    updated[i].title = e.target.value;
-                    setData({ ...data, timeline: updated });
-                  }}
-                  style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.6rem', color: '#fff', fontSize: '0.85rem' }}
-                />
-                <input
-                  type="text"
-                  placeholder="Milestone Description"
-                  value={t.description}
-                  onChange={e => {
-                    const updated = [...(data.timeline || [])];
-                    updated[i].description = e.target.value;
-                    setData({ ...data, timeline: updated });
-                  }}
-                  style={{ background: '#121212', border: '1px solid #2c2c2c', borderRadius: 6, padding: '0.6rem', color: '#fff', fontSize: '0.85rem' }}
-                />
-                <button
-                  type="button"
-                  onClick={() => removeTimelineEntry(i)}
-                  style={{ background: 'transparent', border: 'none', color: '#ff6b6b', cursor: 'pointer', padding: '0.4rem' }}
-                >
-                  <Trash2 size={16} />
-                </button>
               </div>
             ))}
           </div>
         </div>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '1rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <button
             type="submit"
             disabled={saving}
-            style={{ background: '#fff', color: '#000', border: 'none', padding: '0.75rem 1.5rem', borderRadius: 8, fontSize: '0.9rem', fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: saving ? 0.7 : 1 }}
+            style={{
+              background: 'linear-gradient(135deg, #38bdf8 0%, #0284c7 100%)',
+              color: '#fff',
+              border: 'none',
+              padding: '0.7rem 1.5rem',
+              borderRadius: 10,
+              fontSize: '0.875rem',
+              fontWeight: 600,
+              cursor: saving ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              boxShadow: '0 4px 14px rgba(56, 189, 248, 0.35)',
+            }}
           >
             <Save size={16} /> {saving ? 'Saving Changes...' : 'Save About Section'}
           </button>
