@@ -60,6 +60,22 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
   return (
     <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#0a0a0a', color: 'var(--white)', fontFamily: 'var(--font-inter)' }}>
+      {/* Global Toast Provider */}
+      <Toaster
+        position="top-right"
+        theme="dark"
+        richColors
+        expand
+        closeButton
+        offset={80}
+        toastOptions={{
+          style: {
+            borderRadius: '12px',
+            fontFamily: 'inherit',
+          },
+        }}
+      />
+
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
