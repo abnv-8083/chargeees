@@ -83,9 +83,12 @@ export const updateVisionSection = (data: any) =>
 export const updateMissionSection = (data: any) =>
   apiFetch('/sections/mission', { method: 'PUT', body: JSON.stringify(data) }).then(r => r.data);
 
-// Admin Founders CRUD
+// Admin Founders CRUD — fetch both types since backend filters by type param
 export const fetchAllFoundersAdmin = () =>
-  apiFetch('/founders').then(r => r.data);
+  Promise.all([
+    apiFetch('/founders?type=founder').then(r => r.data || []),
+    apiFetch('/founders?type=cofounder').then(r => r.data || []),
+  ]).then(([founders, cofounders]) => [...founders, ...cofounders]);
 
 export const createFounderAdmin = (formData: FormData) =>
   apiFetch('/founders', { method: 'POST', body: formData }).then(r => r.data);
