@@ -49,9 +49,7 @@ export default function ClientPage({ hero, about, vision, mission, founders, cof
         <div className="divider" />
         <MissionSection data={mission || undefined} />
         <div className="divider" />
-        <FounderSection data={founders.length > 0 ? founders : undefined} />
-        <div className="divider" />
-        <CoFounderSection data={cofounders.length > 0 ? cofounders : undefined} />
+        <FounderSection data={[...(founders.length > 0 ? founders : []), ...(cofounders.length > 0 ? cofounders : [])].length > 0 ? [...founders, ...cofounders] : undefined} />
         <div className="divider" />
         <ProjectsSection data={projects.length > 0 ? projects : undefined} />
         <div className="divider" />
