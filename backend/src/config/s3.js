@@ -1,101 +1,162 @@
-const { S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+/**
+ * Unified image upload helper.
+ *
+ * Priority:
+ *  1. AWS S3  — when AWS_S3_BUCKET_NAME + credentials are set
+ *  2. Cloudinary — when CLOUDINARY_CLOUD_NAME is set (existing Render config)
+ *  3. Local disk  — dev-only fallback
+ *
+ * All three paths return the same shape: { fileUrl, s3Key }
+ * Controllers never need to know which backend was used.
+ */
+
 const path = require('path');
 const fs = require('fs');
 
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION || 'us-east-1',
-  credentials: process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  } : undefined,
-});
+/* ── AWS S3 (optional) ───────────────────────────────────────────────────── */
+let s3Client, PutObjectCommand, DeleteObjectCommand;
+try {
+  ({ S3Client, PutObjectCommand, DeleteObjectCommand } = require('@aws-sdk/client-s3'));
+  if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+    s3Client = new (require('@aws-sdk/client-s3').S3Client)({
+      region: process.env.AWS_REGION || 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+    });
+  }
+} catch (_) { /* @aws-sdk not installed — skip */ }
+
+/* ── Cloudinary (optional) ───────────────────────────────────────────────── */
+let cloudinary;
+try {
+  cloudinary = require('cloudinary').v2;
+  if (process.env.CLOUDINARY_CLOUD_NAME) {
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  } else {
+    cloudinary = null;
+  }
+} catch (_) { cloudinary = null; }
+
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
 
 /**
- * Core upload helper — uploads to S3 under the given folder prefix,
- * or falls back to local disk storage when S3 credentials are absent.
- *
- * @param {Buffer} fileBuffer
- * @param {string} originalName
- * @param {string} mimeType
- * @param {string} folder  e.g. 'certificates' | 'founders' | 'projects'
- * @returns {{ fileUrl: string, s3Key: string }}
+ * Upload via Cloudinary using a buffer stream.
+ * Returns { fileUrl, s3Key } to stay API-compatible.
+ */
+const uploadViaCloudinary = (fileBuffer, mimeType, folder) => {
+  return new Promise((resolve, reject) => {
+    const resourceType = mimeType.startsWith('video') ? 'video' : 'image';
+    const uploadStream = cloudinary.uploader.upload_stream(
+      {
+        folder: `chargeease/${folder}`,
+        resource_type: resourceType,
+        transformation: resourceType === 'image' ? [{ quality: 'auto', fetch_format: 'auto' }] : [],
+      },
+      (error, result) => {
+        if (error) return reject(new Error(`Cloudinary upload failed: ${error.message}`));
+        resolve({
+          fileUrl: result.secure_url,
+          s3Key: result.public_id, // reuse s3Key field for the public_id
+        });
+      }
+    );
+    uploadStream.end(fileBuffer);
+  });
+};
+
+/**
+ * Core upload — tries S3 → Cloudinary → local disk in order.
  */
 const uploadToS3WithFolder = async (fileBuffer, originalName, mimeType, folder = 'uploads') => {
-  const bucketName = process.env.AWS_S3_BUCKET_NAME;
-  const ext = path.extname(originalName) || (mimeType === 'application/pdf' ? '.pdf' : '.jpg');
-  const s3Key = `${folder}/${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
+  const ext = path.extname(originalName) || '.jpg';
+  const uniqueName = `${folder}/${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
 
-  // ── S3 upload ────────────────────────────────────────────────────────────
-  if (bucketName && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+  /* 1. AWS S3 */
+  if (s3Client && process.env.AWS_S3_BUCKET_NAME) {
+    const bucketName = process.env.AWS_S3_BUCKET_NAME;
     const region = process.env.AWS_REGION || 'us-east-1';
     await s3Client.send(new PutObjectCommand({
       Bucket: bucketName,
-      Key: s3Key,
+      Key: uniqueName,
       Body: fileBuffer,
       ContentType: mimeType,
     }));
-    const fileUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3Key}`;
-    return { fileUrl, s3Key };
+    return {
+      fileUrl: `https://${bucketName}.s3.${region}.amazonaws.com/${uniqueName}`,
+      s3Key: uniqueName,
+    };
   }
 
-  // ── Local disk fallback (dev only — never on read-only hosts like Render) ─
-  // Only attempt when we have a writable filesystem
+  /* 2. Cloudinary */
+  if (cloudinary) {
+    return uploadViaCloudinary(fileBuffer, mimeType, folder);
+  }
+
+  /* 3. Local disk (dev only) */
   try {
     const uploadsDir = path.join(__dirname, `../../uploads/${folder}`);
     fs.mkdirSync(uploadsDir, { recursive: true });
-    const localPath = path.join(uploadsDir, path.basename(s3Key));
+    const localPath = path.join(uploadsDir, path.basename(uniqueName));
     fs.writeFileSync(localPath, fileBuffer);
-    return { fileUrl: `/uploads/${folder}/${path.basename(s3Key)}`, s3Key };
+    return { fileUrl: `/uploads/${folder}/${path.basename(uniqueName)}`, s3Key: uniqueName };
   } catch (diskErr) {
-    // Filesystem is read-only (Render, Vercel, etc.) — throw a clear error
-    // so the controller surfaces a 500 with a useful message
     throw new Error(
-      'Image upload failed: AWS S3 is not configured and the server filesystem is read-only. ' +
-      'Please set AWS_S3_BUCKET_NAME, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY environment variables on Render.'
+      'Image upload failed: no storage backend is configured. ' +
+      'Set AWS_S3_BUCKET_NAME + AWS credentials, or CLOUDINARY_CLOUD_NAME + API keys, in your environment variables.'
     );
   }
 };
 
-/**
- * Upload to 'certificates' folder (backwards-compatible alias).
- */
-exports.uploadToS3 = (fileBuffer, originalName, mimeType) =>
-  uploadToS3WithFolder(fileBuffer, originalName, mimeType, 'certificates');
-
-/**
- * Upload to 'founders' folder.
- */
-exports.uploadFounderImage = (fileBuffer, originalName, mimeType) =>
-  uploadToS3WithFolder(fileBuffer, originalName, mimeType, 'founders');
-
-/**
- * Upload to 'projects' folder.
- */
-exports.uploadProjectImage = (fileBuffer, originalName, mimeType) =>
-  uploadToS3WithFolder(fileBuffer, originalName, mimeType, 'projects');
-
-/**
- * Delete file from S3 bucket or local fallback.
- * Supports any folder prefix.
- */
+/* ── Delete helper ───────────────────────────────────────────────────────── */
 exports.deleteFromS3 = async (s3Key, fileUrl) => {
-  const bucketName = process.env.AWS_S3_BUCKET_NAME;
-
-  if (bucketName && s3Key && process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
-    try {
-      await s3Client.send(new DeleteObjectCommand({ Bucket: bucketName, Key: s3Key }));
-      return;
-    } catch (err) {
-      console.error('AWS S3 Delete Error:', err.message);
+  /* AWS S3 */
+  if (s3Client && process.env.AWS_S3_BUCKET_NAME && s3Key && !s3Key.includes('/')) {
+    // public_ids from cloudinary contain '/', raw S3 keys also can — distinguish by URL
+    if (fileUrl && !fileUrl.includes('cloudinary')) {
+      try {
+        await s3Client.send(new (require('@aws-sdk/client-s3').DeleteObjectCommand)({
+          Bucket: process.env.AWS_S3_BUCKET_NAME,
+          Key: s3Key,
+        }));
+        return;
+      } catch (err) {
+        console.error('S3 Delete Error:', err.message);
+      }
     }
   }
 
-  // Local fallback — works for any /uploads/<folder>/ path
+  /* Cloudinary */
+  if (cloudinary && s3Key && (fileUrl || '').includes('cloudinary')) {
+    try {
+      await cloudinary.uploader.destroy(s3Key);
+    } catch (err) {
+      console.error('Cloudinary Delete Error:', err.message);
+    }
+    return;
+  }
+
+  /* Local fallback cleanup */
   if (fileUrl && fileUrl.startsWith('/uploads/')) {
     const relative = fileUrl.replace(/^\/uploads\//, '');
     const localPath = path.join(__dirname, '../../uploads', relative);
     if (fs.existsSync(localPath)) {
-      try { fs.unlinkSync(localPath); } catch (e) { /* ignore */ }
+      try { fs.unlinkSync(localPath); } catch (_) {}
     }
   }
 };
+
+/* ── Named exports (backwards-compatible) ───────────────────────────────── */
+exports.uploadToS3 = (buf, name, mime) =>
+  uploadToS3WithFolder(buf, name, mime, 'certificates');
+
+exports.uploadFounderImage = (buf, name, mime) =>
+  uploadToS3WithFolder(buf, name, mime, 'founders');
+
+exports.uploadProjectImage = (buf, name, mime) =>
+  uploadToS3WithFolder(buf, name, mime, 'projects');
