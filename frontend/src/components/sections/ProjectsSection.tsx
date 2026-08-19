@@ -431,19 +431,16 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
                     <div style={{ marginBottom: 'auto', paddingTop: '1.5rem' }}>
                       <span className="tag">{project.category}</span>
                     </div>
-                    <div>
-                      <span className={`status-badge status-${project.status}`} style={{ marginBottom: '0.75rem', display: 'inline-flex' }}>{project.status}</span>
-                      <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--white)', lineHeight: 1.2, marginBottom: '0.5rem' }}>{project.title}</h3>
-                      <p style={{ fontSize: '0.8125rem', color: 'var(--gray-500)', lineHeight: 1.6, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{project.description}</p>
-                    </div>
                   </div>
                 )}
                 <div className="project-card-overlay">
-                  <span className={`status-badge status-${project.status}`} style={{ marginBottom: '0.75rem' }}>{project.status}</span>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--white)', lineHeight: 1.2, marginBottom: '0.5rem' }}>{project.title}</h3>
-                  <p style={{ fontSize: '0.8125rem', color: 'var(--gray-400)', lineHeight: 1.6 }}>{project.category}</p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', color: 'var(--gray-400)', fontSize: '0.8rem' }}>
-                    <ExternalLink size={14} /> View Details
+                  <div className="project-card-overlay-inner">
+                    <span className={`status-badge status-${project.status}`} style={{ marginBottom: '0.6rem' }}>{project.status}</span>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 700, color: 'var(--white)', lineHeight: 1.2, marginBottom: '0.35rem' }}>{project.title}</h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', lineHeight: 1.5, margin: 0 }}>{project.category}</p>
+                    <div className="project-card-overlay-cta" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.85rem', color: 'var(--white)', fontSize: '0.8rem', fontWeight: 600 }}>
+                      <ExternalLink size={13} /> View Details
+                    </div>
                   </div>
                 </div>
               </motion.div>
