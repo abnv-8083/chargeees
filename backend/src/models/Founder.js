@@ -6,6 +6,7 @@ const founderSchema = new mongoose.Schema(
     name: { type: String, required: true },
     title: { type: String, default: 'Founder & CEO' },
     profileImage: { type: String, default: null },
+    profileImageS3Key: { type: String, default: null },
     biography: { type: String, default: '' },
     experience: { type: String, default: '' },
     achievements: [{ type: String }],

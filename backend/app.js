@@ -50,11 +50,21 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
 }));
 app.use(compression());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-// Express 5 compatible mongoSanitize (in-place property sanitization)
+// Only parse JSON / urlencoded for non-multipart requests
+// (multer handles multipart/form-data itself — don't let express touch it first)
 app.use((req, res, next) => {
-  if (req.body) mongoSanitize.sanitize(req.body);
+  const ct = req.headers['content-type'] || '';
+  if (ct.startsWith('multipart/form-data')) return next();
+  express.json({ limit: '25mb' })(req, res, next);
+});
+app.use((req, res, next) => {
+  const ct = req.headers['content-type'] || '';
+  if (ct.startsWith('multipart/form-data')) return next();
+  express.urlencoded({ extended: true, limit: '25mb' })(req, res, next);
+});
+// Sanitize only after body is parsed, skip when body is absent
+app.use((req, res, next) => {
+  if (req.body && typeof req.body === 'object') mongoSanitize.sanitize(req.body);
   if (req.params) mongoSanitize.sanitize(req.params);
   if (req.query) mongoSanitize.sanitize(req.query);
   next();

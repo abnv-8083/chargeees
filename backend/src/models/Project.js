@@ -9,9 +9,11 @@ const projectSchema = new mongoose.Schema(
     status: { type: String, enum: ['ongoing', 'completed', 'upcoming', 'on-hold'], default: 'ongoing' },
     completionDate: { type: Date, default: null },
     coverImage: { type: String, default: null },
+    coverImageS3Key: { type: String, default: null },
     gallery: [
       {
         url: String,
+        s3Key: String,
         type: { type: String, enum: ['image', 'video'], default: 'image' },
         caption: String,
       },

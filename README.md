@@ -25,7 +25,7 @@ npm run dev            # starts on http://localhost:5000
 ```
 
 **Admin Credentials (after seed):**
-- Email: `admin@chargeease.com`
+- Email: ``admin@chargeease.com
 - Password: `Admin@1234`
 
 ### 2. Frontend
