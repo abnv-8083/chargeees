@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { Toaster } from 'sonner';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
