@@ -28,7 +28,9 @@ export default function ProjectsManagerPage() {
     tags: '',
   });
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [galleryFile, setGalleryFile] = useState<File | null>(null);
+  const [galleryPreview, setGalleryPreview] = useState<string | null>(null);
   const [galleryCaption, setGalleryCaption] = useState('');
 
   const loadProjects = async () => {
@@ -61,6 +63,7 @@ export default function ProjectsManagerPage() {
       tags: 'Innovation, Enterprise, Scalable',
     });
     setCoverFile(null);
+    setCoverPreview(null);
     setModalOpen(true);
   };
 
@@ -78,6 +81,7 @@ export default function ProjectsManagerPage() {
       tags: proj.tags?.join(', ') || '',
     });
     setCoverFile(null);
+    setCoverPreview(proj.coverImage || null);
     setModalOpen(true);
   };
 
@@ -143,6 +147,7 @@ export default function ProjectsManagerPage() {
       setMessage({ type: 'success', text: 'Gallery image attached successfully!' });
       setGalleryModalOpen(null);
       setGalleryFile(null);
+      setGalleryPreview(null);
       setGalleryCaption('');
       loadProjects();
     } catch (err: any) {
@@ -438,13 +443,29 @@ export default function ProjectsManagerPage() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Cover Image Photography (Upload)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => e.target.files?.[0] && setCoverFile(e.target.files[0])}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
-                />
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.5rem' }}>Cover Image</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: 80, height: 60, borderRadius: 8, background: '#1a1a1a', border: '1px solid #2c2c2c', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {coverPreview
+                      ? <img src={coverPreview} alt="cover preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <ImageIcon size={22} color="#444" />}
+                  </div>
+                  <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#181818', border: '1px dashed #3a3a3a', borderRadius: 8, padding: '0.65rem 1rem', cursor: 'pointer', fontSize: '0.82rem', color: '#aaa' }}>
+                    <ImageIcon size={14} />
+                    {coverFile ? coverFile.name : 'Click to upload JPG, PNG, WEBP (max 20 MB)'}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={e => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        setCoverFile(f);
+                        setCoverPreview(URL.createObjectURL(f));
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1rem', borderTop: '1px solid #1f1f1f', paddingTop: '1.25rem' }}>
@@ -475,14 +496,30 @@ export default function ProjectsManagerPage() {
 
             <form onSubmit={handleAddGalleryImage} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
-                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Select Image/Video File</label>
-                <input
-                  type="file"
-                  required
-                  accept="image/*,video/*"
-                  onChange={e => e.target.files?.[0] && setGalleryFile(e.target.files[0])}
-                  style={{ width: '100%', background: '#181818', border: '1px solid #2c2c2c', borderRadius: 8, padding: '0.65rem', color: '#fff', fontSize: '0.85rem' }}
-                />
+                <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.5rem' }}>Select Image File</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: 80, height: 60, borderRadius: 8, background: '#1a1a1a', border: '1px solid #2c2c2c', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {galleryPreview
+                      ? <img src={galleryPreview} alt="gallery preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <ImageIcon size={22} color="#444" />}
+                  </div>
+                  <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#181818', border: '1px dashed #3a3a3a', borderRadius: 8, padding: '0.65rem 1rem', cursor: 'pointer', fontSize: '0.82rem', color: '#aaa' }}>
+                    <ImageIcon size={14} />
+                    {galleryFile ? galleryFile.name : 'Click to upload image (JPG, PNG, WEBP)'}
+                    <input
+                      type="file"
+                      required
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={e => {
+                        const f = e.target.files?.[0];
+                        if (!f) return;
+                        setGalleryFile(f);
+                        setGalleryPreview(URL.createObjectURL(f));
+                      }}
+                      style={{ display: 'none' }}
+                    />
+                  </label>
+                </div>
               </div>
               <div>
                 <label style={{ display: 'block', fontSize: '0.8rem', color: '#aaa', marginBottom: '0.3rem' }}>Caption (Optional)</label>
@@ -495,7 +532,7 @@ export default function ProjectsManagerPage() {
                 />
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
-                <button type="button" onClick={() => setGalleryModalOpen(null)} style={{ background: 'transparent', border: '1px solid #333', color: '#aaa', padding: '0.5rem 1rem', borderRadius: 6, cursor: 'pointer', fontSize: '0.85rem' }}>
+                <button type="button" onClick={() => { setGalleryModalOpen(null); setGalleryFile(null); setGalleryPreview(null); setGalleryCaption(''); }} style={{ background: 'transparent', border: '1px solid #333', color: '#aaa', padding: '0.5rem 1rem', borderRadius: 6, cursor: 'pointer', fontSize: '0.85rem' }}>
                   Cancel
                 </button>
                 <button type="submit" disabled={saving || !galleryFile} style={{ background: '#fff', color: '#000', border: 'none', padding: '0.5rem 1.25rem', borderRadius: 6, fontWeight: 600, cursor: saving ? 'not-allowed' : 'pointer', fontSize: '0.85rem' }}>
