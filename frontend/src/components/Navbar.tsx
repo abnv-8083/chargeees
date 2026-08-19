@@ -4,16 +4,12 @@ import { Menu, X } from 'lucide-react';
 import type { SiteSettings } from '@/lib/types';
 
 const FALLBACK_NAV = [
-  { label: 'Home', href: '#hero', order: 1 },
-  { label: 'About', href: '#about', order: 2 },
-  { label: 'Vision', href: '#vision', order: 3 },
-  { label: 'Mission', href: '#mission', order: 4 },
-  { label: 'Founder', href: '#founder', order: 5 },
-  { label: 'Projects', href: '#projects', order: 6 },
-  { label: 'Services', href: '#services', order: 7 },
-  { label: 'Gallery', href: '#gallery', order: 8 },
-  { label: 'Certificate', href: '#certificate', order: 9 },
-  { label: 'Contact', href: '#contact', order: 10 },
+  { label: 'Home',     href: '#hero',     order: 1 },
+  { label: 'About',   href: '#about',    order: 2 },
+  { label: 'Projects',href: '#projects', order: 3 },
+  { label: 'Services',href: '#services', order: 4 },
+  { label: 'Gallery', href: '#gallery',  order: 5 },
+  { label: 'Contact', href: '#contact',  order: 6 },
 ];
 
 export default function Navbar({ settings }: { settings?: SiteSettings }) {
@@ -25,11 +21,6 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
   const navItems = (settings?.navigation && settings.navigation.length > 0)
     ? [...settings.navigation].sort((a, b) => (a.order || 0) - (b.order || 0))
     : FALLBACK_NAV;
-
-  // Add Certificate section link if missing from DB navigation settings
-  if (!navItems.some(n => n.href === '#certificate')) {
-    navItems.splice(navItems.length - 1, 0, { label: 'Certificate', href: '#certificate', order: 9 });
-  }
 
   useEffect(() => {
     const onScroll = () => {
