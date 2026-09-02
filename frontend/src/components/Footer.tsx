@@ -33,7 +33,7 @@ const FALLBACK_NAV = [
   { label: 'Projects',     href: '#projects',    order: 3 },
   { label: 'Services',     href: '#services',    order: 4 },
   { label: 'Gallery',      href: '#gallery',     order: 5 },
-  { label: 'Certificates', href: '#certificate', order: 6 },
+  { label: 'Credentials', href: '#certificate', order: 6 },
   { label: 'Contact',      href: '#contact',     order: 7 },
 ];
 
