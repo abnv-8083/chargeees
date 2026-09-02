@@ -12,12 +12,13 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
 };
 
 const FALLBACK_NAV = [
-  { label: 'Home',     href: '#hero',     order: 1 },
-  { label: 'About',   href: '#about',    order: 2 },
-  { label: 'Projects',href: '#projects', order: 3 },
-  { label: 'Services',href: '#services', order: 4 },
-  { label: 'Gallery', href: '#gallery',  order: 5 },
-  { label: 'Contact', href: '#contact',  order: 6 },
+  { label: 'Home',          href: '#hero',        order: 1 },
+  { label: 'About',         href: '#about',       order: 2 },
+  { label: 'Projects',      href: '#projects',    order: 3 },
+  { label: 'Services',      href: '#services',    order: 4 },
+  { label: 'Gallery',       href: '#gallery',     order: 5 },
+  { label: 'Certificates',  href: '#certificate', order: 6 },
+  { label: 'Contact',       href: '#contact',     order: 7 },
 ];
 
 export default function Footer({ settings }: { settings?: SiteSettings }) {
