@@ -276,7 +276,6 @@ export default function HeroSectionEditorPage() {
           >
             <textarea
               rows={4}
-              required
               value={data.introduction}
               onChange={e => update({ introduction: e.target.value })}
               placeholder="Describe what your company does and who it serves…"
