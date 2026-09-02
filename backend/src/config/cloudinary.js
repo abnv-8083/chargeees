@@ -16,11 +16,14 @@ const storage = new CloudinaryStorage({
     else if (req.body && req.body.folder) folder = `chargeease/${req.body.folder}`;
 
     const isVideo = file.mimetype.startsWith('video/');
+    const isPdf = file.mimetype === 'application/pdf';
+    const resourceType = isVideo ? 'video' : isPdf ? 'raw' : 'image';
+
     return {
       folder,
-      resource_type: isVideo ? 'video' : 'image',
-      allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'mp4', 'webm', 'pdf'],
-      transformation: isVideo ? [] : [{ quality: 'auto', fetch_format: 'auto' }],
+      resource_type: resourceType,
+      allowed_formats: isPdf ? ['pdf'] : ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'mp4', 'webm'],
+      transformation: isVideo || isPdf ? [] : [{ quality: 'auto', fetch_format: 'auto' }],
     };
   },
 });

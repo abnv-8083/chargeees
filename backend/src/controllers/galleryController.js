@@ -55,7 +55,7 @@ exports.deleteGalleryItem = async (req, res, next) => {
     if (!item) return res.status(404).json({ success: false, message: 'Item not found.' });
     if (item.publicId) {
       await cloudinary.uploader.destroy(item.publicId, {
-        resource_type: item.type === 'video' ? 'video' : 'image',
+        resource_type: item.type === 'video' ? 'video' : item.type === 'pdf' ? 'raw' : 'image',
       });
     }
     await item.deleteOne();
