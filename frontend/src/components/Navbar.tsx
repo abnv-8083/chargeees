@@ -94,16 +94,8 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
             ))}
           </div>
 
-          {/* Action Buttons: ONLY Get in Touch */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <button
-              onClick={() => handleNavClick('#contact')}
-              className="btn-primary"
-              style={{ padding: '0.6rem 1.5rem', fontSize: '0.8rem' }}
-            >
-              Get in Touch
-            </button>
-
+          {/* Hamburger only — no CTA button */}
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <button
               className={`hamburger ${mobileOpen ? 'open' : ''}`}
               onClick={() => setMobileOpen(!mobileOpen)}
