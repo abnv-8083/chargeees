@@ -377,7 +377,7 @@ body:not(.custom-cursor-active) textarea {
    ============================================================ */
 #navbar {
   position: fixed;
-  top: 0;
+  top: 32px;
   left: 0;
   right: 0;
   z-index: 1000;
