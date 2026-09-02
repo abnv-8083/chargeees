@@ -246,23 +246,24 @@ export default function Footer({ settings }: { settings?: SiteSettings }) {
                   <a key={item.key} href={item.href} target="_blank"
                     rel="noopener noreferrer" aria-label={item.label}
                     style={{
-                      width: 34, height: 34, borderRadius: '50%',
-                      border: '1px solid var(--gray-700)',
+                      width: 38, height: 38, borderRadius: '50%',
+                      border: '1px solid var(--gray-500)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--gray-500)', textDecoration: 'none',
-                      transition: 'border-color 0.2s, color 0.2s, background 0.2s',
+                      color: 'var(--white)', textDecoration: 'none',
+                      transition: 'border-color 0.2s, color 0.2s, background 0.2s, transform 0.2s',
+                      background: 'rgba(255,255,255,0.08)',
                     }}
                     onMouseEnter={e => {
                       const el = e.currentTarget as HTMLAnchorElement;
                       el.style.borderColor = 'var(--white)';
-                      el.style.color = 'var(--white)';
-                      el.style.background = 'rgba(255,255,255,0.06)';
+                      el.style.background = 'rgba(255,255,255,0.18)';
+                      el.style.transform = 'translateY(-2px)';
                     }}
                     onMouseLeave={e => {
                       const el = e.currentTarget as HTMLAnchorElement;
-                      el.style.borderColor = 'var(--gray-700)';
-                      el.style.color = 'var(--gray-500)';
-                      el.style.background = 'transparent';
+                      el.style.borderColor = 'var(--gray-500)';
+                      el.style.background = 'rgba(255,255,255,0.08)';
+                      el.style.transform = 'translateY(0)';
                     }}>
                     {item.icon}
                   </a>
