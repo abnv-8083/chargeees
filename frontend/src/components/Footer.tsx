@@ -45,9 +45,8 @@ function splitColumns<T>(arr: T[], cols: number): T[][] {
 
 export default function Footer({ settings }: { settings?: SiteSettings }) {
   const year   = new Date().getFullYear();
-  const nav    = (settings?.navigation && settings.navigation.length > 0)
-    ? [...settings.navigation].sort((a, b) => (a.order || 0) - (b.order || 0))
-    : FALLBACK_NAV;
+  // Always use hardcoded nav — same reason as Navbar
+  const nav = FALLBACK_NAV;
   const social  = settings?.social  || {};
   const contact = settings?.contact;
   const footer  = settings?.footer;

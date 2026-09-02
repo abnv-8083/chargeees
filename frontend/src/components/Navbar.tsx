@@ -19,9 +19,9 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
-  const navItems = (settings?.navigation && settings.navigation.length > 0)
-    ? [...settings.navigation].sort((a, b) => (a.order || 0) - (b.order || 0))
-    : FALLBACK_NAV;
+  // Always use the hardcoded nav — ignores DB settings.navigation so code
+  // is the single source of truth and DB changes can't override the navbar.
+  const navItems = FALLBACK_NAV;
 
   useEffect(() => {
     const onScroll = () => {
