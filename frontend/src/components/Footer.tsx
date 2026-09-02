@@ -1,306 +1,273 @@
 'use client';
 import { motion } from 'framer-motion';
 import type { SiteSettings } from '@/lib/types';
-import { Linkedin, Twitter, Instagram, Facebook, Youtube, ArrowUp, Globe, Mail, Phone, Clock } from 'lucide-react';
+import { Linkedin, Twitter, Instagram, Facebook, Youtube, Globe } from 'lucide-react';
 
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
-  linkedin:  <Linkedin  size={16} />,
-  twitter:   <Twitter   size={16} />,
-  instagram: <Instagram size={16} />,
-  facebook:  <Facebook  size={16} />,
-  youtube:   <Youtube   size={16} />,
+  linkedin:  <Linkedin  size={15} />,
+  twitter:   <Twitter   size={15} />,
+  instagram: <Instagram size={15} />,
+  facebook:  <Facebook  size={15} />,
+  youtube:   <Youtube   size={15} />,
 };
 
 const FALLBACK_NAV = [
-  { label: 'Home',          href: '#hero',        order: 1 },
-  { label: 'About',         href: '#about',       order: 2 },
-  { label: 'Projects',      href: '#projects',    order: 3 },
-  { label: 'Services',      href: '#services',    order: 4 },
-  { label: 'Gallery',       href: '#gallery',     order: 5 },
-  { label: 'Certificates',  href: '#certificate', order: 6 },
-  { label: 'Contact',       href: '#contact',     order: 7 },
+  { label: 'Home',         href: '#hero',        order: 1 },
+  { label: 'About',        href: '#about',       order: 2 },
+  { label: 'Projects',     href: '#projects',    order: 3 },
+  { label: 'Services',     href: '#services',    order: 4 },
+  { label: 'Gallery',      href: '#gallery',     order: 5 },
+  { label: 'Certificates', href: '#certificate', order: 6 },
+  { label: 'Contact',      href: '#contact',     order: 7 },
 ];
 
+/* Split nav links into 2 columns of roughly equal size */
+function splitColumns<T>(arr: T[], cols: number): T[][] {
+  const size = Math.ceil(arr.length / cols);
+  return Array.from({ length: cols }, (_, i) => arr.slice(i * size, i * size + size));
+}
+
 export default function Footer({ settings }: { settings?: SiteSettings }) {
-  const year = new Date().getFullYear();
-  const nav = (settings?.navigation && settings.navigation.length > 0)
+  const year   = new Date().getFullYear();
+  const nav    = (settings?.navigation && settings.navigation.length > 0)
     ? [...settings.navigation].sort((a, b) => (a.order || 0) - (b.order || 0))
     : FALLBACK_NAV;
   const social  = settings?.social  || {};
   const contact = settings?.contact;
   const footer  = settings?.footer;
+  const hasSocial = Object.values(social).some(Boolean);
 
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-  const scrollTo  = (href: string) => {
+  const scrollTo = (href: string) => {
     const el = document.getElementById(href.replace('#', ''));
-    if (el) {
-      const y = el.getBoundingClientRect().top + window.scrollY - 80;
-      window.scrollTo({ top: y, behavior: 'smooth' });
-    }
+    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+  };
+
+  /* nav split: col1 = pages, col2 = services/legal, col3 = contact info, col4 = quick */
+  const [col1, col2] = splitColumns(nav, 2);
+
+  const legalLinks = [
+    { label: 'Privacy Policy',    href: footer?.privacyPolicyUrl || '/privacy-policy' },
+    { label: 'Terms & Conditions', href: footer?.termsUrl         || '/terms'          },
+  ];
+
+  const contactItems = [
+    contact?.email    && { label: contact.email,       href: `mailto:${contact.email}` },
+    contact?.phone    && { label: contact.phone,       href: `tel:${contact.phone}` },
+    contact?.address  && { label: contact.address,     href: '#contact' },
+  ].filter(Boolean) as { label: string; href: string }[];
+
+  /* link style */
+  const lnk: React.CSSProperties = {
+    display: 'block',
+    background: 'none',
+    border: 'none',
+    padding: '0.22rem 0',
+    textAlign: 'left',
+    fontSize: '0.78rem',
+    fontFamily: 'var(--font-grotesk)',
+    fontWeight: 500,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: 'var(--gray-500)',
+    cursor: 'pointer',
+    textDecoration: 'none',
+    transition: 'color 0.2s',
+    width: 'fit-content',
+  };
+
+  const colHead: React.CSSProperties = {
+    fontSize: '0.7rem',
+    fontFamily: 'var(--font-grotesk)',
+    fontWeight: 700,
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    color: 'var(--white)',
+    marginBottom: '0.9rem',
   };
 
   return (
-    <footer
-      style={{
-        background: 'var(--black)',
-        borderTop: '1px solid var(--gray-800)',
-        paddingTop: 'clamp(3rem, 6vw, 5rem)',
-        paddingBottom: '2rem',
-      }}
-    >
+    <footer style={{ background: 'var(--black)', borderTop: '1px solid var(--gray-900)' }}>
       <div className="section-container">
 
-        {/* ── Top grid: Brand | Nav | Contact ── */}
+        {/* ── Top row: Logo + nav columns ── */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: '2fr 1fr 1fr',
-          gap: 'clamp(2rem, 4vw, 5rem)',
-          marginBottom: 'clamp(2.5rem, 5vw, 4rem)',
+          gridTemplateColumns: '220px repeat(4, 1fr)',
+          gap: 'clamp(1.5rem, 3vw, 3rem)',
+          padding: 'clamp(2.5rem, 5vw, 4rem) 0 clamp(2rem, 4vw, 3rem)',
           alignItems: 'start',
-        }}
-          className="footer-grid"
-        >
+        }} className="footer-top-grid">
 
-          {/* Brand */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-          >
+          {/* Logo + tagline */}
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <div style={{
               fontFamily: 'var(--font-display)',
               fontSize: '1.6rem',
               fontWeight: 700,
               letterSpacing: '-0.02em',
               color: 'var(--white)',
-              marginBottom: '1rem',
+              marginBottom: '0.4rem',
+              lineHeight: 1,
             }}>
               {settings?.companyName
                 ? settings.companyName
                 : <>Charg<span style={{ color: 'var(--gray-600)' }}>Ease</span></>}
             </div>
-
             <p style={{
-              fontSize: '0.875rem',
-              color: 'var(--gray-500)',
-              lineHeight: 1.7,
-              maxWidth: 320,
-              marginBottom: '1.75rem',
-            }}>
-              {settings?.companyDescription
-                || 'Powering the future of business through innovation, precision, and unwavering excellence.'}
-            </p>
-
-            {/* Social icons */}
-            {Object.entries(social).some(([, v]) => v) && (
-              <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
-                {Object.entries(social).map(([key, val]) =>
-                  val ? (
-                    <a
-                      key={key}
-                      href={val}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={key}
-                      style={{
-                        width: 36,
-                        height: 36,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        border: '1px solid var(--gray-800)',
-                        borderRadius: 8,
-                        color: 'var(--gray-500)',
-                        transition: 'border-color 0.2s, color 0.2s',
-                        textDecoration: 'none',
-                      }}
-                      onMouseEnter={e => {
-                        (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--gray-500)';
-                        (e.currentTarget as HTMLAnchorElement).style.color = 'var(--white)';
-                      }}
-                      onMouseLeave={e => {
-                        (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--gray-800)';
-                        (e.currentTarget as HTMLAnchorElement).style.color = 'var(--gray-500)';
-                      }}
-                    >
-                      {SOCIAL_ICONS[key] || <Globe size={16} />}
-                    </a>
-                  ) : null
-                )}
-              </div>
-            )}
-          </motion.div>
-
-          {/* Navigation */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <p style={{
+              margin: 0,
               fontSize: '0.7rem',
               fontFamily: 'var(--font-grotesk)',
-              fontWeight: 700,
-              letterSpacing: '0.1em',
+              fontWeight: 500,
+              letterSpacing: '0.08em',
               textTransform: 'uppercase',
               color: 'var(--gray-600)',
-              marginBottom: '1.25rem',
             }}>
-              Navigation
+              {settings?.companyTagline || 'Powering Business Excellence'}
             </p>
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }} aria-label="Footer navigation">
-              {nav.map(link => (
-                <button
-                  key={link.href}
-                  onClick={() => scrollTo(link.href)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    padding: 0,
-                    textAlign: 'left',
-                    fontSize: '0.875rem',
-                    color: 'var(--gray-500)',
-                    cursor: 'pointer',
-                    fontFamily: 'var(--font-sans)',
-                    transition: 'color 0.2s ease',
-                    width: 'fit-content',
-                  }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}
-                >
-                  {link.label}
-                </button>
-              ))}
-            </nav>
           </motion.div>
 
-          {/* Contact */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <p style={{
-              fontSize: '0.7rem',
-              fontFamily: 'var(--font-grotesk)',
-              fontWeight: 700,
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              color: 'var(--gray-600)',
-              marginBottom: '1.25rem',
-            }}>
-              Contact
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              {(contact?.email || !contact) && (
-                <a
-                  href={`mailto:${contact?.email || 'info@chargeease.com'}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', fontSize: '0.85rem', color: 'var(--gray-500)', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}
-                >
-                  <Mail size={14} style={{ flexShrink: 0 }} />
-                  {contact?.email || 'info@chargeease.com'}
-                </a>
-              )}
-              {contact?.phone && (
-                <a
-                  href={`tel:${contact.phone}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: '0.55rem', fontSize: '0.85rem', color: 'var(--gray-500)', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}
-                >
-                  <Phone size={14} style={{ flexShrink: 0 }} />
-                  {contact.phone}
-                </a>
-              )}
-              {contact?.officeHours && (
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.55rem', fontSize: '0.8rem', color: 'var(--gray-600)', lineHeight: 1.5 }}>
-                  <Clock size={14} style={{ flexShrink: 0, marginTop: '0.15rem' }} />
-                  <span style={{ whiteSpace: 'pre-line' }}>{contact.officeHours}</span>
-                </div>
-              )}
-              {/* Legal links */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.5rem', paddingTop: '0.75rem', borderTop: '1px solid var(--gray-900)' }}>
-                <a
-                  href={footer?.privacyPolicyUrl || '/privacy-policy'}
-                  style={{ fontSize: '0.8rem', color: 'var(--gray-600)', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--gray-400)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-600)')}
-                >
-                  Privacy Policy
-                </a>
-                <a
-                  href={footer?.termsUrl || '/terms'}
-                  style={{ fontSize: '0.8rem', color: 'var(--gray-600)', textDecoration: 'none', transition: 'color 0.2s' }}
-                  onMouseEnter={e => (e.currentTarget.style.color = 'var(--gray-400)')}
-                  onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-600)')}
-                >
-                  Terms & Conditions
-                </a>
-              </div>
-            </div>
+          {/* Col 1 — first half of nav */}
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.06 }}>
+            <p style={colHead}>Navigation</p>
+            {col1.map(item => (
+              <button key={item.href} onClick={() => scrollTo(item.href)}
+                style={lnk}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}>
+                {item.label}
+              </button>
+            ))}
           </motion.div>
+
+          {/* Col 2 — second half of nav */}
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }}>
+            <p style={colHead}>&nbsp;</p>
+            {col2.map(item => (
+              <button key={item.href} onClick={() => scrollTo(item.href)}
+                style={lnk}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}>
+                {item.label}
+              </button>
+            ))}
+          </motion.div>
+
+          {/* Col 3 — Contact */}
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.14 }}>
+            <p style={colHead}>Contact</p>
+            {contactItems.length > 0
+              ? contactItems.map((c, i) => (
+                  <a key={i} href={c.href} style={{ ...lnk, display: 'block' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}>
+                    {c.label}
+                  </a>
+                ))
+              : (
+                <>
+                  <a href="mailto:info@chargeease.com" style={{ ...lnk, display: 'block' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}>
+                    info@chargeease.com
+                  </a>
+                  <button onClick={() => scrollTo('#contact')} style={lnk}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}>
+                    Get in Touch
+                  </button>
+                </>
+              )}
+          </motion.div>
+
+          {/* Col 4 — Legal */}
+          <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.18 }}>
+            <p style={colHead}>Legal</p>
+            {legalLinks.map((l, i) => (
+              <a key={i} href={l.href} style={{ ...lnk, display: 'block' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}>
+                {l.label}
+              </a>
+            ))}
+            <button onClick={() => scrollTo('#inquiry')} style={lnk}
+              onMouseEnter={e => (e.currentTarget.style.color = 'var(--white)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--gray-500)')}>
+              Send Inquiry
+            </button>
+          </motion.div>
+
         </div>
 
-        {/* ── Bottom bar ── */}
-        <div style={{
-          borderTop: '1px solid var(--gray-900)',
-          paddingTop: '1.5rem',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '1rem',
-        }}>
-          <p style={{ fontSize: '0.8rem', color: 'var(--gray-700)', fontFamily: 'var(--font-grotesk)', margin: 0 }}>
-            {footer?.copyright || `© ${year} ChargEase. All rights reserved.`}
-          </p>
+        {/* ── Full-width divider ── */}
+        <div style={{ height: 1, background: 'var(--gray-800)', width: '100%' }} />
 
-          <button
-            onClick={scrollTop}
-            aria-label="Scroll to top"
-            style={{
-              width: 38,
-              height: 38,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              border: '1px solid var(--gray-800)',
-              borderRadius: '50%',
-              background: 'transparent',
-              color: 'var(--gray-600)',
-              cursor: 'pointer',
-              transition: 'border-color 0.2s, color 0.2s',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--gray-500)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--white)';
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--gray-800)';
-              (e.currentTarget as HTMLButtonElement).style.color = 'var(--gray-600)';
-            }}
-          >
-            <ArrowUp size={15} />
-          </button>
+        {/* ── Bottom: social icons centred + copyright centred ── */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1rem',
+          padding: 'clamp(1.5rem, 3vw, 2.5rem) 0',
+        }}>
+          {/* Social icon circles */}
+          {hasSocial && (
+            <div style={{ display: 'flex', gap: '0.6rem' }}>
+              {Object.entries(social).map(([key, val]) =>
+                val ? (
+                  <a key={key} href={val} target="_blank" rel="noopener noreferrer" aria-label={key}
+                    style={{
+                      width: 34, height: 34,
+                      borderRadius: '50%',
+                      border: '1px solid var(--gray-700)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'var(--gray-500)',
+                      textDecoration: 'none',
+                      transition: 'border-color 0.2s, color 0.2s',
+                    }}
+                    onMouseEnter={e => {
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--gray-400)';
+                      (e.currentTarget as HTMLAnchorElement).style.color = 'var(--white)';
+                    }}
+                    onMouseLeave={e => {
+                      (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--gray-700)';
+                      (e.currentTarget as HTMLAnchorElement).style.color = 'var(--gray-500)';
+                    }}>
+                    {SOCIAL_ICONS[key] || <Globe size={15} />}
+                  </a>
+                ) : null
+              )}
+            </div>
+          )}
+
+          {/* Copyright */}
+          <p style={{
+            margin: 0,
+            fontSize: '0.775rem',
+            color: 'var(--gray-600)',
+            fontFamily: 'var(--font-grotesk)',
+            textAlign: 'center',
+          }}>
+            {footer?.copyright || `©Copyright ${year}. All rights reserved.`}
+          </p>
         </div>
 
       </div>
 
-      {/* Responsive grid collapse */}
+      {/* Responsive collapse */}
       <style>{`
-        @media (max-width: 768px) {
-          .footer-grid {
-            grid-template-columns: 1fr !important;
+        @media (max-width: 900px) {
+          .footer-top-grid {
+            grid-template-columns: 1fr 1fr !important;
           }
         }
-        @media (min-width: 769px) and (max-width: 1024px) {
-          .footer-grid {
-            grid-template-columns: 1fr 1fr !important;
+        @media (max-width: 540px) {
+          .footer-top-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
