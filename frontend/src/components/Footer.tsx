@@ -3,13 +3,29 @@ import { motion } from 'framer-motion';
 import type { SiteSettings } from '@/lib/types';
 import { Linkedin, Twitter, Instagram, Facebook, Youtube, Globe } from 'lucide-react';
 
+/* X (formerly Twitter) SVG icon — lucide's Twitter icon is the bird, so we use the X mark */
+function XIcon({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+    </svg>
+  );
+}
+
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   linkedin:  <Linkedin  size={15} />,
-  twitter:   <Twitter   size={15} />,
+  twitter:   <XIcon size={14} />,
   instagram: <Instagram size={15} />,
   facebook:  <Facebook  size={15} />,
   youtube:   <Youtube   size={15} />,
 };
+
+/* Fallback social links shown when CMS has no social settings configured */
+const FALLBACK_SOCIAL = [
+  { key: 'instagram', href: 'https://www.instagram.com/',  icon: <Instagram size={15} />, label: 'Instagram' },
+  { key: 'linkedin',  href: 'https://www.linkedin.com/',   icon: <Linkedin  size={15} />, label: 'LinkedIn'  },
+  { key: 'twitter',   href: 'https://x.com/',              icon: <XIcon size={14} />,     label: 'X'         },
+];
 
 const FALLBACK_NAV = [
   { label: 'Home',         href: '#hero',        order: 1 },
@@ -35,7 +51,6 @@ export default function Footer({ settings }: { settings?: SiteSettings }) {
   const social  = settings?.social  || {};
   const contact = settings?.contact;
   const footer  = settings?.footer;
-  const hasSocial = Object.values(social).some(Boolean);
 
   const scrollTo = (href: string) => {
     const el = document.getElementById(href.replace('#', ''));
@@ -214,35 +229,47 @@ export default function Footer({ settings }: { settings?: SiteSettings }) {
           gap: '1rem',
           padding: 'clamp(1.5rem, 3vw, 2.5rem) 0',
         }}>
-          {/* Social icon circles */}
-          {hasSocial && (
-            <div style={{ display: 'flex', gap: '0.6rem' }}>
-              {Object.entries(social).map(([key, val]) =>
-                val ? (
-                  <a key={key} href={val} target="_blank" rel="noopener noreferrer" aria-label={key}
+          {/* Social icon circles — CMS values when set, otherwise Instagram / LinkedIn / X */}
+          {(() => {
+            const cmsLinks = Object.entries(social).filter(([, v]) => v);
+            const items = cmsLinks.length > 0
+              ? cmsLinks.map(([key, val]) => ({
+                  key, href: val as string,
+                  icon: SOCIAL_ICONS[key] || <Globe size={15} />,
+                  label: key,
+                }))
+              : FALLBACK_SOCIAL;
+
+            return (
+              <div style={{ display: 'flex', gap: '0.6rem' }}>
+                {items.map(item => (
+                  <a key={item.key} href={item.href} target="_blank"
+                    rel="noopener noreferrer" aria-label={item.label}
                     style={{
-                      width: 34, height: 34,
-                      borderRadius: '50%',
+                      width: 34, height: 34, borderRadius: '50%',
                       border: '1px solid var(--gray-700)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      color: 'var(--gray-500)',
-                      textDecoration: 'none',
-                      transition: 'border-color 0.2s, color 0.2s',
+                      color: 'var(--gray-500)', textDecoration: 'none',
+                      transition: 'border-color 0.2s, color 0.2s, background 0.2s',
                     }}
                     onMouseEnter={e => {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--gray-400)';
-                      (e.currentTarget as HTMLAnchorElement).style.color = 'var(--white)';
+                      const el = e.currentTarget as HTMLAnchorElement;
+                      el.style.borderColor = 'var(--white)';
+                      el.style.color = 'var(--white)';
+                      el.style.background = 'rgba(255,255,255,0.06)';
                     }}
                     onMouseLeave={e => {
-                      (e.currentTarget as HTMLAnchorElement).style.borderColor = 'var(--gray-700)';
-                      (e.currentTarget as HTMLAnchorElement).style.color = 'var(--gray-500)';
+                      const el = e.currentTarget as HTMLAnchorElement;
+                      el.style.borderColor = 'var(--gray-700)';
+                      el.style.color = 'var(--gray-500)';
+                      el.style.background = 'transparent';
                     }}>
-                    {SOCIAL_ICONS[key] || <Globe size={15} />}
+                    {item.icon}
                   </a>
-                ) : null
-              )}
-            </div>
-          )}
+                ))}
+              </div>
+            );
+          })()}
 
           {/* Copyright */}
           <p style={{
