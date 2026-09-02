@@ -346,7 +346,7 @@ export default function FoundersManagerPage() {
                       <span style={{ color: '#555', flexShrink: 0 }}>
                         {key === 'linkedin' ? <Linkedin size={14} /> : key === 'twitter' ? <Twitter size={14} /> : key === 'instagram' ? <Instagram size={14} /> : <Globe size={14} />}
                       </span>
-                      <input type="url" placeholder={key.charAt(0).toUpperCase() + key.slice(1)} value={(formData.socialLinks as any)[key]}
+                      <input type="text" placeholder={key.charAt(0).toUpperCase() + key.slice(1)} value={(formData.socialLinks as any)[key]}
                         onChange={e => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, [key]: e.target.value } })}
                         style={{ ...inp, border: 'none', padding: '0.65rem 0', background: 'transparent' }} />
                     </div>
