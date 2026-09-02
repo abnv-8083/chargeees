@@ -158,7 +158,7 @@ export default function GalleryManagerPage() {
         footer={
           <>
             <button onClick={() => setModalOpen(false)} style={adminBtn.secondary()}>Cancel</button>
-            <button onClick={handleUpload} disabled={saving || !file} style={adminBtn.primary(saving)}>
+            <button type="button" onClick={handleUpload} disabled={saving || !file} style={adminBtn.primary(saving)}>
               {saving && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />}
               {saving ? 'Uploading...' : 'Upload Media'}
             </button>

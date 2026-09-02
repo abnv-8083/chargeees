@@ -35,7 +35,7 @@ exports.uploadGalleryItem = async (req, res, next) => {
       title: req.body.title || req.file.originalname,
       caption: req.body.caption || '',
       folder: req.body.folder || 'general',
-      tags: req.body.tags ? req.body.tags.split(',').map((t) => t.trim()) : [],
+      tags: req.body.tags ? (() => { try { const parsed = JSON.parse(req.body.tags); return Array.isArray(parsed) ? parsed : [req.body.tags]; } catch { return req.body.tags.split(',').map((t) => t.trim()); } })() : [],
     });
     res.status(201).json({ success: true, data: item });
   } catch (err) { next(err); }
