@@ -7,7 +7,7 @@ import { ArrowDown, ArrowRight } from 'lucide-react';
 
 const FALLBACK: HeroData = {
   companyName: 'ChargEase',
-  tagline: 'Powering the\nFuture of Business',
+  tagline: 'Charge-Up Your\nLife With Us',
   introduction: 'We deliver cutting-edge solutions that transform industries and accelerate growth through innovation, precision, and excellence.',
   primaryCTA: { label: 'Explore Our Work', link: '#projects' },
   secondaryCTA: { label: 'Get in Touch', link: '#contact' },
@@ -129,9 +129,6 @@ export default function HeroSection({ data }: { data?: HeroData }) {
             <button className="btn-primary" onClick={() => scrollTo(d.primaryCTA.link)}>
               {d.primaryCTA.label}
               <ArrowRight size={16} />
-            </button>
-            <button className="btn-outline" onClick={() => scrollTo(d.secondaryCTA.link)}>
-              {d.secondaryCTA.label}
             </button>
           </motion.div>
         </motion.div>
