@@ -8,9 +8,8 @@ const FALLBACK_NAV = [
   { label: 'About',         href: '#about',       order: 2 },
   { label: 'Projects',      href: '#projects',    order: 3 },
   { label: 'Services',      href: '#services',    order: 4 },
-  { label: 'Gallery',       href: '#gallery',     order: 5 },
-  { label: 'Credentials',  href: '/certificates', order: 6 },
-  { label: 'Contact',       href: '#contact',     order: 7 },
+  { label: 'Credentials',  href: '/certificates', order: 5 },
+  { label: 'Contact',       href: '#contact',     order: 6 },
 ];
 
 export default function Navbar({ settings }: { settings?: SiteSettings }) {
