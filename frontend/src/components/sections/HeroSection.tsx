@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import type { HeroData } from '@/lib/types';
@@ -8,7 +8,7 @@ import { ArrowDown, ArrowRight } from 'lucide-react';
 const FALLBACK: HeroData = {
   companyName: 'ChargEase',
   tagline: 'Charge-Up Your\nLife With Us',
-  introduction: 'We deliver cutting-edge solutions that transform industries and accelerate growth through innovation, precision, and excellence.',
+  introduction: 'We deliver cutting-edge solutions that transform industries and accelerate growth.',
   primaryCTA: { label: 'Explore Our Work', link: '#projects' },
   secondaryCTA: { label: 'Get in Touch', link: '#contact' },
   backgroundType: 'particles',
@@ -25,7 +25,7 @@ function ParticleCanvas() {
     let H = canvas.height = canvas.offsetHeight;
     let raf: number;
 
-    const particles = Array.from({ length: 80 }, () => ({
+    const particles = Array.from({ length: 60 }, () => ({
       x: Math.random() * W,
       y: Math.random() * H,
       vx: (Math.random() - 0.5) * 0.3,
@@ -45,7 +45,6 @@ function ParticleCanvas() {
         ctx.fillStyle = `rgba(255,255,255,${p.o})`;
         ctx.fill();
       });
-      // Draw connections
       for (let i = 0; i < particles.length; i++) {
         for (let j = i + 1; j < particles.length; j++) {
           const dx = particles[i].x - particles[j].x;
@@ -71,17 +70,48 @@ function ParticleCanvas() {
   return <canvas ref={canvasRef} id="hero-canvas" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden="true" />;
 }
 
+/* ─── Typing animation hook ─────────────────────────────────────────────── */
+function useTypingAnimation(text: string, speed = 60, delay = 800) {
+  const [displayed, setDisplayed] = useState('');
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    let i = 0;
+    const start = () => {
+      timeout = setTimeout(function type() {
+        if (i < text.length) {
+          setDisplayed(text.slice(0, i + 1));
+          i++;
+          timeout = setTimeout(type, text[i - 1] === '\n' ? 300 : speed);
+        } else {
+          setDone(true);
+        }
+      }, delay);
+    };
+    start();
+    return () => clearTimeout(timeout);
+  }, [text, speed, delay]);
+
+  return { displayed, done };
+}
+
 const scrollTo = (href: string) => {
   const el = document.getElementById(href.replace('#', ''));
   if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 80; window.scrollTo({ top: y, behavior: 'smooth' }); }
 };
 
-const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.15, delayChildren: 0.8 } } };
+const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.4 } } };
 const fadeUp: Variants = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: 'easeOut' as const } } };
 
 export default function HeroSection({ data }: { data?: HeroData }) {
   const d = data || FALLBACK;
-  const words = d.tagline.split('\n');
+  const lines = d.tagline.split('\n');
+  const fullText = lines.join(' ');
+  const { displayed, done } = useTypingAnimation(fullText, 55, 1000);
+
+  // Split displayed text back into lines for rendering
+  const displayedLines = displayed.split('\n');
 
   return (
     <section id="hero">
@@ -99,33 +129,48 @@ export default function HeroSection({ data }: { data?: HeroData }) {
             <span className="label-sm" style={{ fontSize: '1rem', letterSpacing: '0.12em', color: 'var(--gray-300)', fontWeight: 600 }}>{d.companyName}</span>
           </motion.div>
 
-          {/* Main heading — word by word */}
-          <motion.h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1rem' }}>
-            {words.map((line, li) => (
-              <div key={li} style={{ overflow: 'hidden', display: 'block' }}>
+          {/* Main heading — typing animation */}
+          <h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1rem', minHeight: '1.1em' }}>
+            {displayedLines.map((line, li) => (
+              <span key={li} style={{ display: 'block' }}>
                 {line.split(' ').map((word, wi) => (
-                  <motion.span
-                    key={wi}
-                    variants={{
-                      hidden: { opacity: 0, y: '100%' },
-                      show: { opacity: 1, y: 0, transition: { duration: 1, delay: (li * 3 + wi) * 0.08, ease: [0.16, 1, 0.3, 1] } }
-                    }}
-                    style={{ display: 'inline-block', marginRight: '0.25em' }}
-                  >
+                  <span key={wi} style={{ display: 'inline-block', marginRight: '0.25em' }}>
                     {word}
-                  </motion.span>
+                  </span>
                 ))}
-              </div>
+              </span>
             ))}
-          </motion.h1>
+            {!done && (
+              <span className="hero-cursor" style={{
+                display: 'inline-block',
+                width: '3px',
+                height: '0.9em',
+                background: 'var(--white)',
+                marginLeft: '2px',
+                verticalAlign: 'text-bottom',
+                animation: 'blink 1s step-end infinite',
+              }} />
+            )}
+          </h1>
 
-          {/* Introduction */}
-          <motion.p variants={fadeUp} className="body-lg" style={{ maxWidth: '560px', margin: '0 auto 2rem', color: 'var(--gray-400)' }}>
+          {/* Introduction — fades in after typing */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={done ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="body-lg"
+            style={{ maxWidth: '480px', margin: '0 auto 2rem', color: 'var(--gray-400)' }}
+          >
             {d.introduction}
           </motion.p>
 
-          {/* CTAs */}
-          <motion.div variants={fadeUp} style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          {/* CTAs — slide up after intro */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={done ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}
+          >
             <button className="btn-primary" onClick={() => scrollTo(d.primaryCTA.link)}>
               {d.primaryCTA.label}
               <ArrowRight size={16} />
@@ -135,10 +180,20 @@ export default function HeroSection({ data }: { data?: HeroData }) {
       </div>
 
       {/* Scroll indicator */}
-      <div className="scroll-indicator" aria-hidden="true">
+      <motion.div
+        className="scroll-indicator"
+        initial={{ opacity: 0 }}
+        animate={done ? { opacity: 1 } : {}}
+        transition={{ delay: 0.5, duration: 0.8 }}
+        aria-hidden="true"
+      >
         <span className="label-sm" style={{ color: 'var(--gray-600)' }}>Scroll</span>
         <div className="scroll-line" />
-      </div>
+      </motion.div>
+
+      <style>{`
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      `}</style>
     </section>
   );
 }

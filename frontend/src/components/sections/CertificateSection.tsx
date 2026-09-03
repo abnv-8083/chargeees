@@ -16,10 +16,9 @@ const fmt = (d: string) =>
 
 /* ─── Step guide data ────────────────────────────────────────────────────── */
 const STEPS = [
-  { icon: <Hash size={20} />,        num: '01', title: 'Enter Certificate No.',  desc: 'Type your certificate number in the search box above.' },
+  { icon: <Hash size={20} />,        num: '01', title: 'Enter Certificate No.',  desc: 'Type your certificate number in the search box.' },
   { icon: <FileSearch size={20} />,  num: '02', title: 'Verify Instantly',        desc: 'Our system fetches the official record in seconds.' },
-  { icon: <Eye size={20} />,         num: '03', title: 'Preview & Download',      desc: 'View the certificate online or download the original file.' },
-  { icon: <UserCheck size={20} />,   num: '04', title: 'Link to Your Profile',    desc: 'Optionally add it to your personal profile for future access.' },
+  { icon: <Eye size={20} />,         num: '03', title: 'Preview & Download',      desc: 'View online or download the original file.' },
 ];
 
 /* ─── Status badge ───────────────────────────────────────────────────────── */

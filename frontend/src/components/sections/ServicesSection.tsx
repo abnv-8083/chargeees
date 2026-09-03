@@ -11,16 +11,14 @@ const ICON_MAP: Record<string, React.ReactNode> = {
 };
 
 const FALLBACK_SERVICES: ServiceData[] = [
-  { _id: '1', name: 'Strategic Consulting', description: 'Comprehensive business strategy development tailored to your organization\'s unique goals and market position.', icon: 'Target', features: [], learnMoreLink: '#' },
-  { _id: '2', name: 'Digital Transformation', description: 'End-to-end digital transformation services that modernize operations, enhance efficiency, and unlock new revenue streams.', icon: 'Zap', features: [], learnMoreLink: '#' },
-  { _id: '3', name: 'Technology Solutions', description: 'Custom software and technology solutions designed to solve complex business challenges at enterprise scale.', icon: 'Code', features: [], learnMoreLink: '#' },
-  { _id: '4', name: 'Data & Analytics', description: 'Advanced data analytics and business intelligence solutions that turn raw data into actionable strategic insights.', icon: 'BarChart', features: [], learnMoreLink: '#' },
-  { _id: '5', name: 'Innovation Labs', description: 'Dedicated innovation and R&D services to help your organization stay ahead of disruption and lead in your industry.', icon: 'Lightbulb', features: [], learnMoreLink: '#' },
-  { _id: '6', name: 'Global Partnerships', description: 'Building strategic alliances and partnership frameworks that accelerate global expansion and market penetration.', icon: 'Globe', features: [], learnMoreLink: '#' },
+  { _id: '1', name: 'Strategic Consulting', description: 'Business strategy tailored to your unique goals and market position.', icon: 'Target', features: [], learnMoreLink: '#' },
+  { _id: '2', name: 'Digital Transformation', description: 'Modernize operations and unlock new revenue streams end-to-end.', icon: 'Zap', features: [], learnMoreLink: '#' },
+  { _id: '3', name: 'Technology Solutions', description: 'Custom software built to solve complex challenges at enterprise scale.', icon: 'Code', features: [], learnMoreLink: '#' },
+  { _id: '4', name: 'Data & Analytics', description: 'Turn raw data into actionable strategic insights with advanced BI.', icon: 'BarChart', features: [], learnMoreLink: '#' },
 ];
 
 export default function ServicesSection({ data }: { data?: ServiceData[] }) {
-  const services = data || FALLBACK_SERVICES;
+  const services = (data && data.length > 0 ? data : FALLBACK_SERVICES).slice(0, 4);
 
   return (
     <section id="services" className="section-py" style={{ background: 'var(--black)', position: 'relative' }} data-cursor-color="#f59e0b">
@@ -33,11 +31,11 @@ export default function ServicesSection({ data }: { data?: ServiceData[] }) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          style={{ marginBottom: 'clamp(3rem, 6vw, 6rem)', maxWidth: 640 }}
+          style={{ marginBottom: 'clamp(3rem, 6vw, 5rem)', maxWidth: 640 }}
         >
           <p className="label-sm" style={{ marginBottom: '1rem' }}>What We Do</p>
-          <h2 className="heading-xl" style={{ marginBottom: '1.5rem' }}>Our Services</h2>
-          <p className="body-lg">Comprehensive solutions across every dimension of business growth and transformation.</p>
+          <h2 className="heading-xl" style={{ marginBottom: '1rem' }}>Our Services</h2>
+          <p className="body-lg">Comprehensive solutions across every dimension of business growth.</p>
         </motion.div>
 
         {/* Services Grid */}
@@ -55,18 +53,8 @@ export default function ServicesSection({ data }: { data?: ServiceData[] }) {
               <div className="service-icon">
                 {ICON_MAP[service.icon] || <Zap size={22} />}
               </div>
-              <h3 className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.875rem' }}>{service.name}</h3>
-              <p className="body-md" style={{ marginBottom: '2rem' }}>{service.description}</p>
-              {service.features.length > 0 && (
-                <ul style={{ listStyle: 'none', padding: 0, marginBottom: '1.5rem' }}>
-                  {service.features.slice(0, 3).map((f, fi) => (
-                    <li key={fi} style={{ fontSize: '0.8125rem', color: 'var(--gray-500)', padding: '0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span style={{ width: 4, height: 4, borderRadius: '50%', background: 'var(--gray-600)', flexShrink: 0 }} />
-                      {f}
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <h3 className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.75rem' }}>{service.name}</h3>
+              <p className="body-md" style={{ marginBottom: '1.5rem' }}>{service.description}</p>
               <a
                 href={service.learnMoreLink}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', fontFamily: 'var(--font-grotesk)', fontWeight: 600, color: 'var(--white)', textDecoration: 'none', marginTop: 'auto', transition: 'gap 0.2s ease' }}

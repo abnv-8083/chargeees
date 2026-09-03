@@ -41,132 +41,100 @@ export default function InquirySection() {
     <section id="inquiry" className="section-py" style={{ background: 'var(--black)', position: 'relative' }}>
       <div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', top: '50%', right: '-10%', transform: 'translateY(-50%)' }} />
 
-      <div className="section-container">
-        <div className="inquiry-form-wrapper">
-          {/* Left — Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <p className="label-sm" style={{ marginBottom: '1rem' }}>Let's Talk</p>
-            <h2 className="heading-xl" style={{ marginBottom: '1.5rem' }}>Send an Inquiry</h2>
-            <p className="body-lg" style={{ marginBottom: '3rem' }}>Have a project in mind, or want to explore how ChargEase can help your business? Fill in the form and our team will get back to you promptly.</p>
+      <div className="section-container" style={{ maxWidth: 680, margin: '0 auto' }}>
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          style={{ textAlign: 'center', marginBottom: 'clamp(2rem, 4vw, 3rem)' }}
+        >
+          <p className="label-sm" style={{ marginBottom: '0.75rem' }}>Let's Talk</p>
+          <h2 className="heading-xl" style={{ marginBottom: '0.75rem' }}>Send an Inquiry</h2>
+          <p className="body-lg" style={{ maxWidth: 480, margin: '0 auto' }}>
+            Have a project in mind? Fill in the form and we'll get back to you within 24 hours.
+          </p>
+        </motion.div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {[
-                { label: 'Response Time', value: 'Within 24 hours' },
-                { label: 'Consultation', value: 'First session is complimentary' },
-                { label: 'Confidentiality', value: 'All inquiries are kept strictly confidential' },
-              ].map((item, i) => (
-                <div key={i} style={{ paddingBottom: '1.5rem', borderBottom: '1px solid var(--gray-800)' }}>
-                  <p className="label-sm" style={{ marginBottom: '0.25rem' }}>{item.label}</p>
-                  <p style={{ fontSize: '0.9375rem', color: 'var(--white)', fontFamily: 'var(--font-grotesk)' }}>{item.value}</p>
+        {/* Form */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <AnimatePresence mode="wait">
+            {success ? (
+              <motion.div
+                key="success"
+                className="success-animation"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div className="success-check">
+                  <CheckCircle size={36} color="white" />
                 </div>
-              ))}
-            </div>
-          </motion.div>
+                <h3 className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.5rem' }}>Inquiry Sent!</h3>
+                <p className="body-md" style={{ marginBottom: '1.5rem', maxWidth: 360, textAlign: 'center' }}>
+                  Thank you for reaching out. We'll get back to you within 24 hours.
+                </p>
+                <button className="btn-outline" onClick={() => setSuccess(false)}>Send Another</button>
+              </motion.div>
+            ) : (
+              <motion.form key="form" onSubmit={onSubmit} noValidate>
+                <div className="form-grid">
+                  <div className="form-group">
+                    <input id="inq-name" name="name" type="text" className="form-input" placeholder="Name" value={form.name} onChange={onChange} required aria-required="true" autoComplete="name" />
+                    <label htmlFor="inq-name" className="form-label">Full Name *</label>
+                    <div className="form-line" />
+                  </div>
+                  <div className="form-group">
+                    <input id="inq-email" name="email" type="email" className="form-input" placeholder="Email" value={form.email} onChange={onChange} required aria-required="true" autoComplete="email" />
+                    <label htmlFor="inq-email" className="form-label">Email Address *</label>
+                    <div className="form-line" />
+                  </div>
+                </div>
 
-          {/* Right — Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <AnimatePresence mode="wait">
-              {success ? (
-                <motion.div
-                  key="success"
-                  className="success-animation"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
+                <div className="form-group">
+                  <input id="inq-subject" name="subject" type="text" className="form-input" placeholder="Subject" value={form.subject} onChange={onChange} required aria-required="true" />
+                  <label htmlFor="inq-subject" className="form-label">Subject *</label>
+                  <div className="form-line" />
+                </div>
+
+                <div className="form-group">
+                  <select id="inq-type" name="inquiryType" className="form-input" value={form.inquiryType} onChange={onChange} aria-label="Inquiry Type">
+                    {INQUIRY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <label htmlFor="inq-type" className="form-label" style={{ top: '-0.5rem', fontSize: '0.72rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--gray-400)' }}>Inquiry Type</label>
+                  <div className="form-line" />
+                </div>
+
+                <div className="form-group">
+                  <textarea id="inq-message" name="message" className="form-input" placeholder="Message" value={form.message} onChange={onChange} required aria-required="true" rows={4} />
+                  <label htmlFor="inq-message" className="form-label">Message *</label>
+                  <div className="form-line" />
+                </div>
+
+                {error && (
+                  <p style={{ color: '#ff6b6b', fontSize: '0.85rem', marginBottom: '1rem', fontFamily: 'var(--font-grotesk)' }}>{error}</p>
+                )}
+
+                <button
+                  type="submit"
+                  className="btn-primary"
+                  disabled={loading}
+                  style={{ width: '100%', justifyContent: 'center', padding: '0.9rem', fontSize: '0.875rem', opacity: loading ? 0.7 : 1 }}
                 >
-                  <div className="success-check">
-                    <CheckCircle size={36} color="white" />
-                  </div>
-                  <h3 className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.75rem' }}>Inquiry Sent!</h3>
-                  <p className="body-md" style={{ marginBottom: '2rem', maxWidth: 360, textAlign: 'center' }}>
-                    Thank you for reaching out. We've received your inquiry and will get back to you within 24 hours. A confirmation has been sent to your email.
-                  </p>
-                  <button className="btn-outline" onClick={() => setSuccess(false)}>Send Another</button>
-                </motion.div>
-              ) : (
-                <motion.form key="form" onSubmit={onSubmit} noValidate>
-                  <div className="form-grid">
-                    {/* Name */}
-                    <div className="form-group">
-                      <input id="inquiry-name" name="name" type="text" className="form-input" placeholder="Name" value={form.name} onChange={onChange} required aria-required="true" autoComplete="name" />
-                      <label htmlFor="inquiry-name" className="form-label">Full Name *</label>
-                      <div className="form-line" />
-                    </div>
-                    {/* Company */}
-                    <div className="form-group">
-                      <input id="inquiry-company" name="companyName" type="text" className="form-input" placeholder="Company" value={form.companyName} onChange={onChange} autoComplete="organization" />
-                      <label htmlFor="inquiry-company" className="form-label">Company Name</label>
-                      <div className="form-line" />
-                    </div>
-                    {/* Email */}
-                    <div className="form-group">
-                      <input id="inquiry-email" name="email" type="email" className="form-input" placeholder="Email" value={form.email} onChange={onChange} required aria-required="true" autoComplete="email" />
-                      <label htmlFor="inquiry-email" className="form-label">Email Address *</label>
-                      <div className="form-line" />
-                    </div>
-                    {/* Phone */}
-                    <div className="form-group">
-                      <input id="inquiry-phone" name="phone" type="tel" className="form-input" placeholder="Phone" value={form.phone} onChange={onChange} autoComplete="tel" />
-                      <label htmlFor="inquiry-phone" className="form-label">Phone Number</label>
-                      <div className="form-line" />
-                    </div>
-                  </div>
-
-                  {/* Subject */}
-                  <div className="form-group">
-                    <input id="inquiry-subject" name="subject" type="text" className="form-input" placeholder="Subject" value={form.subject} onChange={onChange} required aria-required="true" />
-                    <label htmlFor="inquiry-subject" className="form-label">Subject *</label>
-                    <div className="form-line" />
-                  </div>
-
-                  {/* Inquiry Type */}
-                  <div className="form-group">
-                    <select id="inquiry-type" name="inquiryType" className="form-input" value={form.inquiryType} onChange={onChange} aria-label="Inquiry Type">
-                      {INQUIRY_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
-                    <label htmlFor="inquiry-type" className="form-label" style={{ top: '-0.5rem', fontSize: '0.72rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--gray-400)' }}>Inquiry Type</label>
-                    <div className="form-line" />
-                  </div>
-
-                  {/* Message */}
-                  <div className="form-group">
-                    <textarea id="inquiry-message" name="message" className="form-input" placeholder="Message" value={form.message} onChange={onChange} required aria-required="true" rows={5} />
-                    <label htmlFor="inquiry-message" className="form-label">Message *</label>
-                    <div className="form-line" />
-                  </div>
-
-                  {/* Error */}
-                  {error && (
-                    <p style={{ color: '#ff6b6b', fontSize: '0.875rem', marginBottom: '1rem', fontFamily: 'var(--font-grotesk)' }}>{error}</p>
+                  {loading ? 'Sending...' : (
+                    <><Send size={15} /> Send Inquiry</>
                   )}
-
-                  {/* Submit */}
-                  <button
-                    type="submit"
-                    className="btn-primary"
-                    disabled={loading}
-                    style={{ width: '100%', justifyContent: 'center', padding: '1rem', fontSize: '0.9rem', opacity: loading ? 0.7 : 1 }}
-                    id="inquiry-submit"
-                  >
-                    {loading ? 'Sending...' : (
-                      <><Send size={16} /> Send Inquiry</>
-                    )}
-                  </button>
-                </motion.form>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        </div>
+                </button>
+              </motion.form>
+            )}
+          </AnimatePresence>
+        </motion.div>
       </div>
     </section>
   );
