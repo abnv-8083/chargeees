@@ -44,7 +44,7 @@ export default function GallerySection({ data }: { data?: GalleryItemData[] }) {
   }, []);
 
   return (
-    <section id="gallery" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }}>
+    <section id="gallery" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }} data-cursor-color="#a78bfa">
       <div className="section-container">
         {/* Header */}
         <motion.div

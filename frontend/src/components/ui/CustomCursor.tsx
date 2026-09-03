@@ -24,6 +24,12 @@ export default function CustomCursor() {
       ix = e.clientX; iy = e.clientY;
       inner.style.left = `${ix}px`;
       inner.style.top  = `${iy}px`;
+
+      // Color-reactive: find nearest ancestor with data-cursor-color
+      const target = (e.target as HTMLElement)?.closest?.('[data-cursor-color]');
+      const color = target?.getAttribute('data-cursor-color');
+      document.documentElement.style.setProperty('--cursor-color', color || 'rgba(255,255,255,0.5)');
+      document.documentElement.style.setProperty('--cursor-color-hover', color || 'rgba(255,255,255,0.8)');
     };
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;

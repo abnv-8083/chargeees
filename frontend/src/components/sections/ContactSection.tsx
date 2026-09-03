@@ -37,7 +37,7 @@ export default function ContactSection({ settings }: { settings?: SiteSettings }
   const s = settings || DEFAULT_SETTINGS as SiteSettings;
 
   return (
-    <section id="contact" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }}>
+    <section id="contact" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }} data-cursor-color="#38bdf8">
       <div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', bottom: '-15%', left: '-5%' }} />
 
       <div className="section-container">

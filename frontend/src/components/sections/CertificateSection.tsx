@@ -149,7 +149,8 @@ export default function CertificateSection() {
   /* ── render ── */
   return (
     <section id="certificate" className="section-py"
-      style={{ background: 'var(--black)', position: 'relative', borderTop: '1px solid var(--gray-900)' }}>
+      style={{ background: 'var(--black)', position: 'relative', borderTop: '1px solid var(--gray-900)' }}
+      data-cursor-color="#22c55e">
 
       {/* subtle grid bg */}
       <div aria-hidden style={{ position: 'absolute', inset: 0, opacity: 0.018,

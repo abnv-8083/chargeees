@@ -360,7 +360,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   }, [activeFilter, search, projects]);
 
   return (
-    <section id="projects" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }}>
+    <section id="projects" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }} data-cursor-color="#818cf8">
       <div className="section-container">
         {/* Header */}
         <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} style={{ marginBottom: '3rem' }}>

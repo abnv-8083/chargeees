@@ -23,7 +23,7 @@ export default function ServicesSection({ data }: { data?: ServiceData[] }) {
   const services = data || FALLBACK_SERVICES;
 
   return (
-    <section id="services" className="section-py" style={{ background: 'var(--black)', position: 'relative' }}>
+    <section id="services" className="section-py" style={{ background: 'var(--black)', position: 'relative' }} data-cursor-color="#f59e0b">
       <div className="floating-orb" style={{ width: 600, height: 600, background: '#fff', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
 
       <div className="section-container">
