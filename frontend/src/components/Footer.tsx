@@ -33,7 +33,7 @@ const FALLBACK_NAV = [
   { label: 'Projects',     href: '#projects',    order: 3 },
   { label: 'Services',     href: '#services',    order: 4 },
   { label: 'Gallery',      href: '#gallery',     order: 5 },
-  { label: 'Credentials', href: '#certificate', order: 6 },
+  { label: 'Credentials', href: '/certificates', order: 6 },
   { label: 'Contact',      href: '#contact',     order: 7 },
 ];
 
@@ -52,6 +52,10 @@ export default function Footer({ settings }: { settings?: SiteSettings }) {
   const footer  = settings?.footer;
 
   const scrollTo = (href: string) => {
+    if (href.startsWith('/')) {
+      window.location.href = href;
+      return;
+    }
     const el = document.getElementById(href.replace('#', ''));
     if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
   };

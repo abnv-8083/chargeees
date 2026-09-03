@@ -9,7 +9,7 @@ const FALLBACK_NAV = [
   { label: 'Projects',      href: '#projects',    order: 3 },
   { label: 'Services',      href: '#services',    order: 4 },
   { label: 'Gallery',       href: '#gallery',     order: 5 },
-  { label: 'Credentials',  href: '#certificate', order: 6 },
+  { label: 'Credentials',  href: '/certificates', order: 6 },
   { label: 'Contact',       href: '#contact',     order: 7 },
 ];
 
@@ -43,6 +43,10 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
 
   const handleNavClick = (href: string) => {
     setMobileOpen(false);
+    if (href.startsWith('/')) {
+      window.location.href = href;
+      return;
+    }
     if (!href.startsWith('#')) return;
     const id = href.slice(1);
     const el = document.getElementById(id);
