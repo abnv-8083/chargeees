@@ -147,43 +147,50 @@ body:not(.custom-cursor-active) textarea {
 /* ============================================================
    CUSTOM CURSOR
    ============================================================ */
-#cursor-outer {
+#cursor-arrow {
   position: fixed;
-  width: 40px;
-  height: 40px;
-  border: 1px solid var(--cursor-color, rgba(255,255,255,0.5));
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999999;
-  transition: transform 0.15s var(--ease-out-expo),
-              border-color 0.35s ease,
-              background 0.35s ease,
-              width 0.25s var(--ease-out-expo),
-              height 0.25s var(--ease-out-expo);
-  transform: translate(-50%, -50%);
-  mix-blend-mode: difference;
-}
-#cursor-inner {
-  position: fixed;
-  width: 6px;
-  height: 6px;
-  background: white;
-  border-radius: 50%;
+  width: 20px;
+  height: 20px;
   pointer-events: none;
   z-index: 99999999;
+  transform: translate(-3px, -3px);
+  color: var(--cursor-color, #ffffff);
+  transition: color 0.35s ease, transform 0.2s var(--ease-out-expo);
+  filter: drop-shadow(0 0 4px rgba(0,0,0,0.5));
+  will-change: left, top;
+}
+#cursor-arrow.hovering {
+  transform: translate(-3px, -3px) scale(1.4);
+}
+#cursor-arrow.clicking {
+  transform: translate(-3px, -3px) scale(0.85);
+}
+#cursor-trail {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--cursor-color, rgba(255,255,255,0.15));
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999998;
   transform: translate(-50%, -50%);
-  transition: transform 0.05s linear;
-  mix-blend-mode: difference;
+  opacity: 0.3;
+  transition: width 0.3s var(--ease-out-expo),
+              height 0.3s var(--ease-out-expo),
+              border-color 0.35s ease,
+              opacity 0.3s ease;
+  will-change: left, top;
 }
-#cursor-outer.hovering {
-  width: 70px;
-  height: 70px;
-  background: rgba(255,255,255,0.05);
-  border-color: var(--cursor-color-hover, rgba(255,255,255,0.8));
+#cursor-trail.hovering {
+  width: 56px;
+  height: 56px;
+  opacity: 0.15;
+  border-color: var(--cursor-color, rgba(255,255,255,0.25));
 }
-#cursor-outer.clicking {
-  transform: translate(-50%, -50%) scale(0.8);
-  background: rgba(255,255,255,0.1);
+#cursor-trail.clicking {
+  width: 24px;
+  height: 24px;
+  opacity: 0.4;
 }
 
 /* ============================================================

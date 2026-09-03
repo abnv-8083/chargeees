@@ -2,68 +2,103 @@
 import { useEffect, useRef } from 'react';
 
 export default function CustomCursor() {
-  const outerRef = useRef<HTMLDivElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
+  const arrowRef = useRef<HTMLDivElement>(null);
+  const trailRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
       return;
     }
 
-    const outer = outerRef.current;
-    const inner = innerRef.current;
-    if (!outer || !inner) return;
+    const arrow = arrowRef.current;
+    const trail = trailRef.current;
+    if (!arrow || !trail) return;
 
     document.body.classList.add('custom-cursor-active');
 
-    let ox = 0, oy = 0;
-    let ix = 0, iy = 0;
+    let mx = 0, my = 0;   // mouse position
+    let ax = 0, ay = 0;   // arrow position (lerped)
+    let tx = 0, ty = 0;   // trail position (lerped, slower)
     let raf: number;
 
+    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
     const onMove = (e: MouseEvent) => {
-      ix = e.clientX; iy = e.clientY;
-      inner.style.left = `${ix}px`;
-      inner.style.top  = `${iy}px`;
+      mx = e.clientX;
+      my = e.clientY;
 
       // Color-reactive: find nearest ancestor with data-cursor-color
       const target = (e.target as HTMLElement)?.closest?.('[data-cursor-color]');
       const color = target?.getAttribute('data-cursor-color');
-      document.documentElement.style.setProperty('--cursor-color', color || 'rgba(255,255,255,0.5)');
-      document.documentElement.style.setProperty('--cursor-color-hover', color || 'rgba(255,255,255,0.8)');
+      document.documentElement.style.setProperty('--cursor-color', color || '#ffffff');
     };
 
-    const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
     const animate = () => {
-      ox = lerp(ox, ix, 0.12);
-      oy = lerp(oy, iy, 0.12);
-      outer.style.left = `${ox}px`;
-      outer.style.top  = `${oy}px`;
+      // Arrow follows tightly
+      ax = lerp(ax, mx, 0.18);
+      ay = lerp(ay, my, 0.18);
+      arrow.style.left = `${ax}px`;
+      arrow.style.top = `${ay}px`;
+
+      // Trail follows slower for a ghostly lag
+      tx = lerp(tx, mx, 0.08);
+      ty = lerp(ty, my, 0.08);
+      trail.style.left = `${tx}px`;
+      trail.style.top = `${ty}px`;
+
       raf = requestAnimationFrame(animate);
     };
     animate();
 
-    const onEnter = () => outer.classList.add('hovering');
-    const onLeave = () => outer.classList.remove('hovering');
-    const onDown  = () => outer.classList.add('clicking');
-    const onUp    = () => outer.classList.remove('clicking');
+    const onEnter = () => {
+      arrow.classList.add('hovering');
+      trail.classList.add('hovering');
+    };
+    const onLeave = () => {
+      arrow.classList.remove('hovering');
+      trail.classList.remove('hovering');
+    };
+    const onDown = () => {
+      arrow.classList.add('clicking');
+      trail.classList.add('clicking');
+    };
+    const onUp = () => {
+      arrow.classList.remove('clicking');
+      trail.classList.remove('clicking');
+    };
 
-    const hoverTargets = document.querySelectorAll('a, button, [data-cursor-hover]');
-    hoverTargets.forEach(el => {
-      el.addEventListener('mouseenter', onEnter);
-      el.addEventListener('mouseleave', onLeave);
+    // Use mutation observer to catch dynamically added elements
+    const observeHoverTargets = () => {
+      const targets = document.querySelectorAll('a, button, [data-cursor-hover]');
+      targets.forEach(el => {
+        el.addEventListener('mouseenter', onEnter);
+        el.addEventListener('mouseleave', onLeave);
+      });
+      return targets;
+    };
+
+    let hoverTargets = observeHoverTargets();
+    const observer = new MutationObserver(() => {
+      // cleanup old
+      hoverTargets.forEach(el => {
+        el.removeEventListener('mouseenter', onEnter);
+        el.removeEventListener('mouseleave', onLeave);
+      });
+      hoverTargets = observeHoverTargets();
     });
+    observer.observe(document.body, { childList: true, subtree: true });
 
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mousedown', onDown);
-    window.addEventListener('mouseup',   onUp);
+    window.addEventListener('mouseup', onUp);
 
     return () => {
       document.body.classList.remove('custom-cursor-active');
       cancelAnimationFrame(raf);
+      observer.disconnect();
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mousedown', onDown);
-      window.removeEventListener('mouseup',   onUp);
+      window.removeEventListener('mouseup', onUp);
       hoverTargets.forEach(el => {
         el.removeEventListener('mouseenter', onEnter);
         el.removeEventListener('mouseleave', onLeave);
@@ -73,8 +108,15 @@ export default function CustomCursor() {
 
   return (
     <>
-      <div ref={outerRef} id="cursor-outer" aria-hidden="true" />
-      <div ref={innerRef} id="cursor-inner" aria-hidden="true" />
+      <div ref={trailRef} id="cursor-trail" aria-hidden="true" />
+      <div ref={arrowRef} id="cursor-arrow" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M4 2L16 10L9 11.5L6.5 18L4 2Z"
+            fill="currentColor"
+          />
+        </svg>
+      </div>
     </>
   );
 }
