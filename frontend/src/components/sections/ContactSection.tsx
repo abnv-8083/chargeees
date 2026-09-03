@@ -3,6 +3,8 @@ import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import type { SiteSettings } from '@/lib/types';
 import { Mail, Phone, MapPin, Clock, Linkedin, Twitter, Instagram, Facebook, Youtube, Globe } from 'lucide-react';
+import Parallax from '@/components/ui/Parallax';
+import RevealText from '@/components/ui/RevealText';
 
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -38,7 +40,7 @@ export default function ContactSection({ settings }: { settings?: SiteSettings }
 
   return (
     <section id="contact" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }} data-cursor-color="#38bdf8">
-      <div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', bottom: '-15%', left: '-5%' }} />
+      <Parallax speed={0.1}><div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', bottom: '-15%', left: '-5%' }} /></Parallax>
 
       <div className="section-container">
         {/* Stats Row */}
@@ -73,7 +75,7 @@ export default function ContactSection({ settings }: { settings?: SiteSettings }
           style={{ marginBottom: 'clamp(3rem, 6vw, 5rem)' }}
         >
           <p className="label-sm" style={{ marginBottom: '1rem' }}>Get In Touch</p>
-          <h2 className="heading-xl">Contact Us</h2>
+          <RevealText as="h2" className="heading-xl" delay={0.1}>Contact Us</RevealText>
         </motion.div>
 
         <div className="contact-grid">

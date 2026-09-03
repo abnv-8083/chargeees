@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { submitInquiry } from '@/lib/api';
 import { Send, CheckCircle } from 'lucide-react';
+import Parallax from '@/components/ui/Parallax';
+import RevealText from '@/components/ui/RevealText';
 
 const INQUIRY_TYPES = ['General', 'Partnership', 'Project', 'Career', 'Media', 'Support', 'Other'];
 
@@ -39,7 +41,7 @@ export default function InquirySection() {
 
   return (
     <section id="inquiry" className="section-py" style={{ background: 'var(--black)', position: 'relative' }}>
-      <div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', top: '50%', right: '-10%', transform: 'translateY(-50%)' }} />
+      <Parallax speed={0.12}><div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', top: '50%', right: '-10%', transform: 'translateY(-50%)' }} /></Parallax>
 
       <div className="section-container" style={{ maxWidth: 680, margin: '0 auto' }}>
         {/* Header */}
@@ -51,7 +53,7 @@ export default function InquirySection() {
           style={{ textAlign: 'center', marginBottom: 'clamp(2rem, 4vw, 3rem)' }}
         >
           <p className="label-sm" style={{ marginBottom: '0.75rem' }}>Let's Talk</p>
-          <h2 className="heading-xl" style={{ marginBottom: '0.75rem' }}>Send an Inquiry</h2>
+          <RevealText as="h2" className="heading-xl" style={{ marginBottom: '0.75rem' }} delay={0.1}>Send an Inquiry</RevealText>
           <p className="body-lg" style={{ maxWidth: 480, margin: '0 auto' }}>
             Have a project in mind? Fill in the form and we'll get back to you within 24 hours.
           </p>

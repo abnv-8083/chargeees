@@ -3,6 +3,8 @@ import { useRef, useState } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import type { AboutData, VisionData, MissionData } from '@/lib/types';
 import { Shield, Lightbulb, Star, Heart, Zap, Globe, Users, Eye, Target } from 'lucide-react';
+import Parallax from '@/components/ui/Parallax';
+import RevealText from '@/components/ui/RevealText';
 
 const ICONS: Record<string, React.ReactNode> = {
   Shield: <Shield size={20} />, Lightbulb: <Lightbulb size={20} />,
@@ -140,7 +142,7 @@ export default function AboutSection({
 
   return (
     <section id="about" className="section-py" style={{ background: 'var(--black)', position: 'relative' }}>
-      <div className="floating-orb" style={{ width: 600, height: 600, background: '#fff', top: '-20%', right: '-10%' }} />
+      <Parallax speed={0.08}><div className="floating-orb" style={{ width: 600, height: 600, background: '#fff', top: '-20%', right: '-10%' }} /></Parallax>
 
       <div className="section-container">
 
@@ -148,7 +150,7 @@ export default function AboutSection({
         <AnimatedBlock>
           <div style={{ marginBottom: 'clamp(3rem, 6vw, 5rem)', maxWidth: 680 }}>
             <p className="label-sm" style={{ marginBottom: '1rem' }}>{d.subheading}</p>
-            <h2 className="heading-xl">{d.heading}</h2>
+            <RevealText as="h2" className="heading-xl" delay={0.15}>{d.heading}</RevealText>
           </div>
         </AnimatedBlock>
 

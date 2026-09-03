@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import type { FounderData } from '@/lib/types';
 import { Linkedin, Twitter, Instagram, Globe, Award, BookOpen, Briefcase, X, ChevronDown } from 'lucide-react';
+import Parallax from '@/components/ui/Parallax';
+import RevealText from '@/components/ui/RevealText';
 
 /* ─── fallback data ──────────────────────────────────────────────────────── */
 const FALLBACK: FounderData[] = [
@@ -200,7 +202,7 @@ export function FounderSection({ data }: { data?: FounderData[] }) {
   return (
     <section id="founder" className="section-py" style={{ background: 'var(--black)', position: 'relative', borderTop: '1px solid var(--gray-900)' }}>
       {/* background orb */}
-      <div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', top: '20%', right: '-8%', opacity: 0.018 }} />
+      <Parallax speed={0.06}><div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', top: '20%', right: '-8%', opacity: 0.018 }} /></Parallax>
 
       <div className="section-container">
         {/* section heading */}
@@ -212,7 +214,7 @@ export function FounderSection({ data }: { data?: FounderData[] }) {
           style={{ marginBottom: 'clamp(2.5rem, 5vw, 4rem)' }}
         >
           <p className="label-sm" style={{ marginBottom: '0.75rem' }}>The People Behind ChargEase</p>
-          <h2 className="heading-xl">Leadership <em>Team</em></h2>
+          <RevealText as="h2" className="heading-xl" delay={0.1}>Leadership Team</RevealText>
         </motion.div>
 
         {/* ── founders group ── */}

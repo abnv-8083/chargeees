@@ -2,6 +2,8 @@
 import { motion } from 'framer-motion';
 import type { ServiceData } from '@/lib/types';
 import { Target, Zap, Code, BarChart2, Lightbulb, Globe, Shield, Users, ArrowRight, Layers, Database, TrendingUp } from 'lucide-react';
+import Parallax from '@/components/ui/Parallax';
+import RevealText from '@/components/ui/RevealText';
 
 const ICON_MAP: Record<string, React.ReactNode> = {
   Target: <Target size={22} />, Zap: <Zap size={22} />, Code: <Code size={22} />,
@@ -22,7 +24,7 @@ export default function ServicesSection({ data }: { data?: ServiceData[] }) {
 
   return (
     <section id="services" className="section-py" style={{ background: 'var(--black)', position: 'relative' }} data-cursor-color="#f59e0b">
-      <div className="floating-orb" style={{ width: 600, height: 600, background: '#fff', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} />
+      <Parallax speed={0.1}><div className="floating-orb" style={{ width: 600, height: 600, background: '#fff', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} /></Parallax>
 
       <div className="section-container">
         {/* Header */}
@@ -34,7 +36,7 @@ export default function ServicesSection({ data }: { data?: ServiceData[] }) {
           style={{ marginBottom: 'clamp(3rem, 6vw, 5rem)', maxWidth: 640 }}
         >
           <p className="label-sm" style={{ marginBottom: '1rem' }}>What We Do</p>
-          <h2 className="heading-xl" style={{ marginBottom: '1rem' }}>Our Services</h2>
+          <RevealText as="h2" className="heading-xl" style={{ marginBottom: '1rem' }} delay={0.15}>Our Services</RevealText>
           <p className="body-lg">Comprehensive solutions across every dimension of business growth.</p>
         </motion.div>
 
