@@ -129,7 +129,7 @@ export const deleteServiceAdmin = (id: string) =>
   apiFetch(`/services/${id}`, { method: 'DELETE' });
 
 // Admin Gallery CRUD
-export const fetchAllGalleryAdmin = (params = 'limit=100') =>
+export const fetchAllGalleryAdmin = (params = 'admin=true&limit=100') =>
   apiFetch(`/gallery?${params}`).then(r => r.data || []);
 
 export const createGalleryItemAdmin = (formData: FormData) =>

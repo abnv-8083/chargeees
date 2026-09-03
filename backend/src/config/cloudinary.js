@@ -12,19 +12,26 @@ const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => {
     let folder = 'chargeease/general';
-    if (req.params.folder) folder = `chargeease/${req.params.folder}`;
-    else if (req.body && req.body.folder) folder = `chargeease/${req.body.folder}`;
+    try {
+      if (req.params && req.params.folder) folder = `chargeease/${req.params.folder}`;
+      else if (req.body && req.body.folder) folder = `chargeease/${req.body.folder}`;
+    } catch (_) { /* ignore */ }
 
     const isVideo = file.mimetype.startsWith('video/');
     const isPdf = file.mimetype === 'application/pdf';
     const resourceType = isVideo ? 'video' : isPdf ? 'raw' : 'image';
 
-    return {
+    const params = {
       folder,
       resource_type: resourceType,
-      allowed_formats: isPdf ? ['pdf'] : ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'mp4', 'webm'],
-      transformation: isVideo || isPdf ? [] : [{ quality: 'auto', fetch_format: 'auto' }],
     };
+
+    // Only apply image optimizations for image uploads
+    if (!isVideo && !isPdf) {
+      params.transformation = [{ quality: 'auto', fetch_format: 'auto' }];
+    }
+
+    return params;
   },
 });
 

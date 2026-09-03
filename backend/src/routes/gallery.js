@@ -6,11 +6,16 @@ const { protect, authorize } = require('../middleware/auth');
 const { upload } = require('../config/cloudinary');
 
 const handleUploadError = (err, req, res, next) => {
+  console.error('[Gallery Upload Error]', err.message || err);
   if (err instanceof multer.MulterError) {
     return res.status(400).json({ success: false, message: `Upload error: ${err.message}` });
   }
   if (err.message === 'Unsupported file type') {
     return res.status(400).json({ success: false, message: 'Unsupported file type. Allowed: JPG, PNG, GIF, WEBP, SVG, MP4, WEBM, PDF.' });
+  }
+  // Catch Cloudinary errors or other upload-related errors
+  if (err.http_code || err.name === 'Error' || (err.message && err.message.includes('cloudinary'))) {
+    return res.status(400).json({ success: false, message: `File upload failed: ${err.message || 'Cloudinary error'}` });
   }
   next(err);
 };
