@@ -160,25 +160,8 @@ body:not(.custom-cursor-active) textarea { cursor: text !important; }
    ============================================================ */
 #cursor-arrow {
   position: fixed;
-<<<<<<< HEAD
   width: 20px;
   height: 20px;
-=======
-  width: 40px; height: 40px;
-  border: 1px solid rgba(139,92,246,0.6);
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999999;
-  transition: transform 0.15s var(--ease-out-expo), border-color 0.2s ease,
-              background 0.2s ease, width 0.25s var(--ease-out-expo), height 0.25s var(--ease-out-expo);
-  transform: translate(-50%, -50%);
-}
-#cursor-inner {
-  position: fixed;
-  width: 6px; height: 6px;
-  background: var(--purple-400);
-  border-radius: 50%;
->>>>>>> 0949963 (changes text sizes)
   pointer-events: none;
   z-index: 99999999;
   transform: translate(-3px, -3px);
