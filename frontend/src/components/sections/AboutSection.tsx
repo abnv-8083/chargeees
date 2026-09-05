@@ -2,7 +2,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import type { AboutData, VisionData, MissionData } from '@/lib/types';
-import { Shield, Lightbulb, Star, Heart, Zap, Globe, Users, Eye, Target } from 'lucide-react';
+import { Eye, Target } from 'lucide-react';
 import Parallax from '@/components/ui/Parallax';
 import RevealText from '@/components/ui/RevealText';
 
@@ -27,11 +27,7 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
   return <span ref={ref}>0{suffix}</span>;
 }
 
-const ICONS: Record<string, React.ReactNode> = {
-  Shield: <Shield size={20} />, Lightbulb: <Lightbulb size={20} />,
-  Star: <Star size={20} />, Heart: <Heart size={20} />,
-  Zap: <Zap size={20} />, Globe: <Globe size={20} />, Users: <Users size={20} />,
-};
+
 
 const FALLBACK_ABOUT: AboutData = {
   heading: 'About ChargEase',
@@ -215,26 +211,7 @@ export default function AboutSection({
           </AnimatedBlock>
         </div>
 
-        {/* ── Core Values ── */}
-        <AnimatedBlock delay={0.1}>
-          <p className="label-sm" style={{ marginBottom: '1.5rem' }}>Core Values</p>
-          <div className="values-grid" style={{ marginBottom: 'clamp(4rem, 8vw, 6rem)' }}>
-            {d.coreValues.map((v, i) => (
-              <motion.div key={i} className="value-card"
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.6rem' }}>
-                  <div style={{ color: 'var(--gray-400)' }}>{ICONS[v.icon] || <Zap size={20} />}</div>
-                  <h4 style={{ fontFamily: 'var(--font-grotesk)', fontSize: '0.9rem', fontWeight: 600, color: 'var(--white)' }}>{v.title}</h4>
-                </div>
-                <p className="body-md" style={{ fontSize: '0.825rem', margin: 0 }}>{v.description}</p>
-              </motion.div>
-            ))}
-          </div>
-        </AnimatedBlock>
+
 
         {/* ── Vision & Mission tabs ── */}
         <AnimatedBlock delay={0.15}>
