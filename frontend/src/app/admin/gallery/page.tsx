@@ -1,11 +1,11 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { fetchAllGalleryAdmin, createGalleryItemAdmin, deleteGalleryItemAdmin } from '@/lib/api';
+import { fetchAllGalleryAdmin, createGalleryItemAdmin, updateGalleryItemAdmin, deleteGalleryItemAdmin } from '@/lib/api';
 import { showToast } from '@/lib/toast';
 import type { GalleryItemData } from '@/lib/types';
 import { AdminModal, ConfirmDialog, AdminLoading } from '@/app/admin/components';
 import { adminInput, adminSelect, adminLabel, adminBtn } from '@/app/admin/components/adminStyles';
-import { Plus, Trash2, Image as ImageIcon, Video, FileText, Filter, Upload, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Pencil, Image as ImageIcon, Video, FileText, Filter, Upload, Loader2 } from 'lucide-react';
 
 const folders = ['ALL', 'Corporate', 'Architecture', 'Events', 'Team', 'Projects'];
 
@@ -15,6 +15,7 @@ export default function GalleryManagerPage() {
   const [selectedFolder, setSelectedFolder] = useState('ALL');
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editingItem, setEditingItem] = useState<GalleryItemData | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<GalleryItemData | null>(null);
   const [deleting, setDeleting] = useState(false);
 
@@ -37,6 +38,24 @@ export default function GalleryManagerPage() {
 
   useEffect(() => { loadGallery(); }, []);
 
+  const openCreateModal = () => {
+    resetForm();
+    setEditingItem(null);
+    setModalOpen(true);
+  };
+
+  const openEditModal = (item: GalleryItemData) => {
+    setEditingItem(item);
+    setFile(null);
+    setFilePreview(item.url || null);
+    setTitle(item.title || '');
+    setFolder(item.folder || 'Corporate');
+    setType((item.type as any) || 'image');
+    setCaption(item.caption || '');
+    setTags(Array.isArray(item.tags) ? item.tags.join(', ') : item.tags || '');
+    setModalOpen(true);
+  };
+
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
@@ -50,30 +69,46 @@ export default function GalleryManagerPage() {
     } finally { setDeleting(false); }
   };
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    if (!editingItem && !file) {
+      showToast.error('File required', 'Please select a file to upload.');
+      return;
+    }
     setSaving(true);
     try {
       const payload = new FormData();
-      payload.append('file', file);
-      payload.append('title', title || file.name);
+      if (file) payload.append('file', file);
+      payload.append('title', title || (file ? file.name : 'Untitled'));
       payload.append('folder', folder);
       payload.append('type', type);
-      if (caption) payload.append('caption', caption);
+      payload.append('caption', caption);
       payload.append('tags', JSON.stringify(tags.split(',').map(t => t.trim()).filter(Boolean)));
-      await createGalleryItemAdmin(payload);
-      showToast.success('Media uploaded', 'New asset added to gallery.');
+
+      if (editingItem) {
+        await updateGalleryItemAdmin(editingItem._id, payload);
+        showToast.success('Media updated', `"${title}" asset updated successfully.`);
+      } else {
+        await createGalleryItemAdmin(payload);
+        showToast.success('Media uploaded', 'New asset added to gallery.');
+      }
       setModalOpen(false);
       resetForm();
       loadGallery();
     } catch (err: any) {
-      showToast.error('Upload failed', err.message || 'Could not upload media.');
+      showToast.error(editingItem ? 'Update failed' : 'Upload failed', err.message || 'Action failed.');
     } finally { setSaving(false); }
   };
 
   const resetForm = () => {
-    setFile(null); setFilePreview(null); setTitle(''); setCaption(''); setTags('');
+    setFile(null);
+    setFilePreview(null);
+    setTitle('');
+    setCaption('');
+    setTags('');
+    setFolder('Corporate');
+    setType('image');
+    setEditingItem(null);
   };
 
   const filteredItems = items.filter(it => selectedFolder === 'ALL' || it.folder?.toLowerCase() === selectedFolder.toLowerCase());
@@ -85,7 +120,7 @@ export default function GalleryManagerPage() {
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, color: '#fafafa', marginBottom: '0.4rem' }}>Media Gallery</h1>
           <p style={{ color: '#71717a', fontSize: '0.875rem' }}>Centralized media repository for images, videos, and documents.</p>
         </div>
-        <button onClick={() => { resetForm(); setModalOpen(true); }} style={adminBtn.primary()}><Plus size={16} /> Upload Media</button>
+        <button onClick={openCreateModal} style={adminBtn.primary()}><Plus size={16} /> Upload Media</button>
       </div>
 
       {/* Folder Filters */}
@@ -109,7 +144,7 @@ export default function GalleryManagerPage() {
           <ImageIcon size={40} style={{ margin: '0 auto 1rem', color: '#3f3f46' }} />
           <h3 style={{ color: '#fafafa', marginBottom: '0.5rem' }}>No media in this folder</h3>
           <p style={{ color: '#71717a', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Upload your first asset to get started.</p>
-          <button onClick={() => { resetForm(); setModalOpen(true); }} style={adminBtn.primary()}>Upload Now</button>
+          <button onClick={openCreateModal} style={adminBtn.primary()}>Upload Now</button>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '1rem' }}>
@@ -140,45 +175,48 @@ export default function GalleryManagerPage() {
               </div>
               <div style={{ padding: '0.65rem 0.85rem', background: '#0d0d0f', borderTop: '1px solid #18181b', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '0.65rem', color: '#3f3f46', textTransform: 'uppercase' }}>{item.type}</span>
-                <button onClick={() => setDeleteTarget(item)} style={adminBtn.danger}><Trash2 size={11} /> Delete</button>
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <button onClick={() => openEditModal(item)} style={adminBtn.secondary()}><Pencil size={11} /> Edit</button>
+                  <button onClick={() => setDeleteTarget(item)} style={adminBtn.danger}><Trash2 size={11} /> Delete</button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Upload Modal */}
+      {/* Create / Edit Modal */}
       <AdminModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
-        title="Upload Media"
-        subtitle="Add a new asset to the gallery"
+        title={editingItem ? 'Edit Media Asset' : 'Upload Media'}
+        subtitle={editingItem ? 'Update metadata or replace media file' : 'Add a new asset to the gallery'}
         icon={<ImageIcon size={18} />}
         maxWidth="520px"
         footer={
           <>
             <button onClick={() => setModalOpen(false)} style={adminBtn.secondary()}>Cancel</button>
-            <button type="button" onClick={handleUpload} disabled={saving || !file} style={adminBtn.primary(saving)}>
+            <button type="button" onClick={handleSave} disabled={saving || (!editingItem && !file)} style={adminBtn.primary(saving)}>
               {saving && <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />}
-              {saving ? 'Uploading...' : 'Upload Media'}
+              {saving ? (editingItem ? 'Saving...' : 'Uploading...') : (editingItem ? 'Save Changes' : 'Upload Media')}
             </button>
           </>
         }
       >
-        <form onSubmit={handleUpload} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {/* File upload */}
+        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {/* File upload / replacement */}
           <div>
-            <label style={adminLabel}>Select File</label>
+            <label style={adminLabel}>{editingItem ? 'Replace File (Optional)' : 'Select File'}</label>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               {filePreview && (
                 <div style={{ width: 56, height: 42, borderRadius: 6, background: '#18181b', border: '1px solid #27272a', overflow: 'hidden', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  {type === 'video' ? <Video size={16} color="#facc15" /> : <img src={filePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
+                  {type === 'video' ? <Video size={16} color="#facc15" /> : type === 'pdf' ? <FileText size={16} color="#f87171" /> : <img src={filePreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
                 </div>
               )}
               <label style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#0d0d0f', border: '1px dashed #3f3f46', borderRadius: 8, padding: '0.6rem 0.85rem', cursor: 'pointer', fontSize: '0.8rem', color: '#71717a' }}>
                 <Upload size={14} />
-                {file ? file.name : 'Click to upload image, video, or PDF'}
-                <input type="file" required accept="image/*,video/*,application/pdf" onChange={e => {
+                {file ? file.name : editingItem ? 'Click to replace image, video, or PDF' : 'Click to upload image, video, or PDF'}
+                <input type="file" required={!editingItem} accept="image/*,video/*,application/pdf" onChange={e => {
                   const f = e.target.files?.[0];
                   if (f) {
                     setFile(f);

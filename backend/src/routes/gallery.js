@@ -26,7 +26,7 @@ router.route('/')
   .post(protect, authorize('superadmin', 'admin', 'editor'), upload.single('file'), handleUploadError, uploadGalleryItem);
 
 router.route('/:id')
-  .put(protect, authorize('superadmin', 'admin', 'editor'), updateGalleryItem)
+  .put(protect, authorize('superadmin', 'admin', 'editor'), upload.single('file'), handleUploadError, updateGalleryItem)
   .delete(protect, authorize('superadmin', 'admin'), deleteGalleryItem);
 
 module.exports = router;

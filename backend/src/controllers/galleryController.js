@@ -43,10 +43,47 @@ exports.uploadGalleryItem = async (req, res, next) => {
 
 exports.updateGalleryItem = async (req, res, next) => {
   try {
-    const item = await GalleryItem.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const item = await GalleryItem.findById(req.params.id);
     if (!item) return res.status(404).json({ success: false, message: 'Item not found.' });
-    res.status(200).json({ success: true, data: item });
-  } catch (err) { next(err); }
+
+    if (req.file) {
+      if (item.publicId) {
+        await cloudinary.uploader.destroy(item.publicId, {
+          resource_type: item.type === 'video' ? 'video' : item.type === 'pdf' ? 'raw' : 'image',
+        }).catch((e) => console.warn('Cloudinary delete old asset warning:', e?.message));
+      }
+      item.url = req.file.path;
+      item.publicId = req.file.filename;
+      item.mimeType = req.file.mimetype;
+      item.type = req.file.mimetype.startsWith('video') ? 'video'
+        : req.file.mimetype === 'application/pdf' ? 'pdf' : 'image';
+    }
+
+    if (req.body.title !== undefined) item.title = req.body.title;
+    if (req.body.caption !== undefined) item.caption = req.body.caption;
+    if (req.body.folder !== undefined) item.folder = req.body.folder;
+    if (req.body.type !== undefined && !req.file) item.type = req.body.type;
+    if (req.body.isPublished !== undefined) item.isPublished = req.body.isPublished === true || req.body.isPublished === 'true';
+
+    if (req.body.tags !== undefined) {
+      if (Array.isArray(req.body.tags)) {
+        item.tags = req.body.tags;
+      } else if (typeof req.body.tags === 'string') {
+        try {
+          const parsed = JSON.parse(req.body.tags);
+          item.tags = Array.isArray(parsed) ? parsed : [req.body.tags];
+        } catch {
+          item.tags = req.body.tags.split(',').map((t) => t.trim()).filter(Boolean);
+        }
+      }
+    }
+
+    const updatedItem = await item.save();
+    res.status(200).json({ success: true, data: updatedItem });
+  } catch (err) {
+    console.error('[Update Gallery Error]', err);
+    next(err);
+  }
 };
 
 exports.deleteGalleryItem = async (req, res, next) => {

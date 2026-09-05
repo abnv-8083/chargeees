@@ -136,7 +136,10 @@ export const createGalleryItemAdmin = (formData: FormData) =>
   apiFetch('/gallery', { method: 'POST', body: formData }).then(r => r.data);
 
 export const updateGalleryItemAdmin = (id: string, data: any) =>
-  apiFetch(`/gallery/${id}`, { method: 'PUT', body: JSON.stringify(data) }).then(r => r.data);
+  apiFetch(`/gallery/${id}`, {
+    method: 'PUT',
+    body: data instanceof FormData ? data : JSON.stringify(data),
+  }).then(r => r.data);
 
 export const deleteGalleryItemAdmin = (id: string) =>
   apiFetch(`/gallery/${id}`, { method: 'DELETE' });
