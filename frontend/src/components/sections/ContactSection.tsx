@@ -6,25 +6,6 @@ import { Mail, Phone, MapPin, Clock, Linkedin, Twitter, Instagram, Facebook, You
 import Parallax from '@/components/ui/Parallax';
 import RevealText from '@/components/ui/RevealText';
 
-function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    let start = 0;
-    const duration = 2000;
-    const step = 1000 / 60;
-    const increment = target / (duration / step);
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= target) { start = target; clearInterval(timer); }
-      el.textContent = Math.floor(start) + suffix;
-    }, step);
-    return () => clearInterval(timer);
-  }, [target, suffix]);
-  return <span ref={ref}>0{suffix}</span>;
-}
-
 const DEFAULT_SETTINGS: Partial<SiteSettings> = {
   contact: { email: 'info@chargeease.com', phone: '+1 (555) 000-0000', address: '100 Innovation Drive, Suite 500\nNew York, NY 10001', officeHours: 'Monday – Friday\n9:00 AM – 6:00 PM EST' },
   social: { linkedin: '#', twitter: '#', instagram: '#', facebook: '#', youtube: '#' },
@@ -43,29 +24,6 @@ export default function ContactSection({ settings }: { settings?: SiteSettings }
       <Parallax speed={0.1}><div className="floating-orb" style={{ width: 500, height: 500, background: '#fff', bottom: '-15%', left: '-5%' }} /></Parallax>
 
       <div className="section-container">
-        {/* Stats Row */}
-        <motion.div
-          className="stats-row"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-        >
-          {[
-            { target: 200, suffix: '+', label: 'Global Clients' },
-            { target: 15, suffix: '+', label: 'Countries' },
-            { target: 6, suffix: '+', label: 'Years of Excellence' },
-            { target: 98, suffix: '%', label: 'Client Satisfaction' },
-          ].map((stat, i) => (
-            <div key={i} className="stat-item">
-              <div className="stat-number">
-                <AnimatedCounter target={stat.target} suffix={stat.suffix} />
-              </div>
-              <div className="stat-label">{stat.label}</div>
-            </div>
-          ))}
-        </motion.div>
-
         {/* Header + Grid */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}

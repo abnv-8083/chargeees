@@ -1,10 +1,31 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useInView, AnimatePresence } from 'framer-motion';
 import type { AboutData, VisionData, MissionData } from '@/lib/types';
 import { Shield, Lightbulb, Star, Heart, Zap, Globe, Users, Eye, Target } from 'lucide-react';
 import Parallax from '@/components/ui/Parallax';
 import RevealText from '@/components/ui/RevealText';
+
+function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: '-40px' });
+  useEffect(() => {
+    if (!inView) return;
+    const el = ref.current;
+    if (!el) return;
+    let start = 0;
+    const duration = 2000;
+    const step = 1000 / 60;
+    const increment = target / (duration / step);
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= target) { start = target; clearInterval(timer); }
+      el.textContent = Math.floor(start) + suffix;
+    }, step);
+    return () => clearInterval(timer);
+  }, [inView, target, suffix]);
+  return <span ref={ref}>0{suffix}</span>;
+}
 
 const ICONS: Record<string, React.ReactNode> = {
   Shield: <Shield size={20} />, Lightbulb: <Lightbulb size={20} />,
@@ -148,9 +169,28 @@ export default function AboutSection({
 
         {/* ── Header ── */}
         <AnimatedBlock>
-          <div style={{ marginBottom: 'clamp(3rem, 6vw, 5rem)', maxWidth: 680 }}>
+          <div style={{ marginBottom: 'clamp(2rem, 4vw, 3rem)', maxWidth: 680 }}>
             <p className="label-sm" style={{ marginBottom: '1rem' }}>{d.subheading}</p>
             <RevealText as="h2" className="heading-xl" delay={0.15}>{d.heading}</RevealText>
+          </div>
+        </AnimatedBlock>
+
+        {/* ── Client Stats & Metrics Bar (Moved from Contact Section) ── */}
+        <AnimatedBlock delay={0.1}>
+          <div className="stats-row" style={{ marginBottom: 'clamp(3rem, 6vw, 5rem)' }}>
+            {[
+              { target: 200, suffix: '+', label: 'Global Clients' },
+              { target: 15, suffix: '+', label: 'Countries' },
+              { target: 6, suffix: '+', label: 'Years of Excellence' },
+              { target: 98, suffix: '%', label: 'Client Satisfaction' },
+            ].map((stat, i) => (
+              <div key={i} className="stat-item">
+                <div className="stat-number">
+                  <AnimatedCounter target={stat.target} suffix={stat.suffix} />
+                </div>
+                <div className="stat-label">{stat.label}</div>
+              </div>
+            ))}
           </div>
         </AnimatedBlock>
 
