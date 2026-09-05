@@ -126,7 +126,7 @@ export default function HeroSection({ data }: { data?: HeroData }) {
           {/* Label */}
           <motion.div variants={fadeUp} className="hero-label" style={{ justifyContent: 'center' }}>
             <span className="hero-label-dot" />
-            <span className="label-sm" style={{ fontSize: '1rem', letterSpacing: '0.12em', color: 'var(--gray-300)', fontWeight: 600 }}>{d.companyName}</span>
+            <span className="label-sm" style={{ fontSize: '1rem', letterSpacing: 'normal', color: 'var(--gray-300)', fontWeight: 600 }}>{d.companyName}</span>
           </motion.div>
 
           {/* Main heading — typing animation */}
