@@ -1,11 +1,11 @@
 const Founder = require('../models/Founder');
 const { uploadFounderImage, deleteFromS3 } = require('../config/s3');
 
-// GET all founders by type
+// GET all founders (filtered by type if query param present, or all)
 exports.getFounders = async (req, res, next) => {
   try {
-    const type = req.query.type || 'founder';
-    const docs = await Founder.find({ type }).sort('order');
+    const query = req.query.type ? { type: req.query.type } : {};
+    const docs = await Founder.find(query).sort('order createdAt');
     res.status(200).json({ success: true, data: docs });
   } catch (err) { next(err); }
 };
@@ -64,7 +64,7 @@ exports.updateFounder = async (req, res, next) => {
     }
 
     if (req.file) {
-      // Delete old image from S3 if present
+      // Delete old image from S3/Cloudinary if present
       const existing = await Founder.findById(req.params.id);
       if (existing && existing.profileImageS3Key) {
         await deleteFromS3(existing.profileImageS3Key, existing.profileImage).catch(() => {});
@@ -92,7 +92,7 @@ exports.deleteFounder = async (req, res, next) => {
     const doc = await Founder.findByIdAndDelete(req.params.id);
     if (!doc) return res.status(404).json({ success: false, message: 'Not found.' });
 
-    // Clean up S3 image
+    // Clean up S3 / Cloudinary image
     if (doc.profileImageS3Key || doc.profileImage) {
       await deleteFromS3(doc.profileImageS3Key, doc.profileImage).catch(() => {});
     }
