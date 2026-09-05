@@ -1,5 +1,4 @@
 const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
 
 cloudinary.config({
@@ -8,35 +7,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const storage = new CloudinaryStorage({
-  cloudinary,
-  params: async (req, file) => {
-    let folder = 'chargeease/general';
-    try {
-      if (req.params && req.params.folder) folder = `chargeease/${req.params.folder}`;
-      else if (req.body && req.body.folder) folder = `chargeease/${req.body.folder}`;
-    } catch (_) { /* ignore */ }
-
-    const isVideo = file.mimetype.startsWith('video/');
-    const isPdf = file.mimetype === 'application/pdf';
-    const resourceType = isVideo ? 'video' : isPdf ? 'raw' : 'image';
-
-    const params = {
-      folder,
-      resource_type: resourceType,
-    };
-
-    // Only apply image optimizations for image uploads
-    if (!isVideo && !isPdf) {
-      params.transformation = [{ quality: 'auto', fetch_format: 'auto' }];
-    }
-
-    return params;
-  },
-});
-
+// Use memoryStorage — files go into memory buffer, then we upload to Cloudinary manually
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
   fileFilter: (req, file, cb) => {
     const allowed = [
@@ -48,4 +21,31 @@ const upload = multer({
   },
 });
 
-module.exports = { cloudinary, upload };
+/**
+ * Upload a buffer to Cloudinary and return { url, publicId }
+ */
+const uploadToCloudinary = (buffer, mimetype, folder = 'chargeease/general') => {
+  return new Promise((resolve, reject) => {
+    const isVideo = mimetype.startsWith('video/');
+    const isPdf = mimetype === 'application/pdf';
+    const resourceType = isVideo ? 'video' : isPdf ? 'raw' : 'image';
+
+    const options = {
+      folder,
+      resource_type: resourceType,
+    };
+
+    if (!isVideo && !isPdf) {
+      options.transformation = [{ quality: 'auto', fetch_format: 'auto' }];
+    }
+
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) return reject(error);
+      resolve({ url: result.secure_url, publicId: result.public_id });
+    });
+
+    stream.end(buffer);
+  });
+};
+
+module.exports = { cloudinary, upload, uploadToCloudinary };

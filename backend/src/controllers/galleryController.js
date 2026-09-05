@@ -1,5 +1,5 @@
 const GalleryItem = require('../models/GalleryItem');
-const { cloudinary } = require('../config/cloudinary');
+const { cloudinary, uploadToCloudinary } = require('../config/cloudinary');
 
 exports.getGallery = async (req, res, next) => {
   try {
@@ -26,19 +26,37 @@ exports.getGallery = async (req, res, next) => {
 exports.uploadGalleryItem = async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded.' });
+
+    const folderName = req.body.folder || 'general';
+    const cloudinaryFolder = `chargeease/${folderName}`;
+    const { url, publicId } = await uploadToCloudinary(req.file.buffer, req.file.mimetype, cloudinaryFolder);
+
     const item = await GalleryItem.create({
-      url: req.file.path,
-      publicId: req.file.filename,
+      url,
+      publicId,
       type: req.file.mimetype.startsWith('video') ? 'video'
         : req.file.mimetype === 'application/pdf' ? 'pdf' : 'image',
       mimeType: req.file.mimetype,
       title: req.body.title || req.file.originalname,
       caption: req.body.caption || '',
-      folder: req.body.folder || 'general',
-      tags: req.body.tags ? (() => { try { const parsed = JSON.parse(req.body.tags); return Array.isArray(parsed) ? parsed : [req.body.tags]; } catch { return req.body.tags.split(',').map((t) => t.trim()); } })() : [],
+      folder: folderName,
+      tags: req.body.tags
+        ? (() => {
+          try {
+            const parsed = JSON.parse(req.body.tags);
+            return Array.isArray(parsed) ? parsed : [req.body.tags];
+          } catch {
+            return req.body.tags.split(',').map((t) => t.trim()).filter(Boolean);
+          }
+        })()
+        : [],
     });
+
     res.status(201).json({ success: true, data: item });
-  } catch (err) { next(err); }
+  } catch (err) {
+    console.error('[Upload Gallery Error]', err);
+    next(err);
+  }
 };
 
 exports.updateGalleryItem = async (req, res, next) => {
@@ -47,13 +65,19 @@ exports.updateGalleryItem = async (req, res, next) => {
     if (!item) return res.status(404).json({ success: false, message: 'Item not found.' });
 
     if (req.file) {
+      // Delete old asset from Cloudinary
       if (item.publicId) {
         await cloudinary.uploader.destroy(item.publicId, {
           resource_type: item.type === 'video' ? 'video' : item.type === 'pdf' ? 'raw' : 'image',
         }).catch((e) => console.warn('Cloudinary delete old asset warning:', e?.message));
       }
-      item.url = req.file.path;
-      item.publicId = req.file.filename;
+
+      const folderName = req.body.folder || item.folder || 'general';
+      const cloudinaryFolder = `chargeease/${folderName}`;
+      const { url, publicId } = await uploadToCloudinary(req.file.buffer, req.file.mimetype, cloudinaryFolder);
+
+      item.url = url;
+      item.publicId = publicId;
       item.mimeType = req.file.mimetype;
       item.type = req.file.mimetype.startsWith('video') ? 'video'
         : req.file.mimetype === 'application/pdf' ? 'pdf' : 'image';
@@ -63,7 +87,9 @@ exports.updateGalleryItem = async (req, res, next) => {
     if (req.body.caption !== undefined) item.caption = req.body.caption;
     if (req.body.folder !== undefined) item.folder = req.body.folder;
     if (req.body.type !== undefined && !req.file) item.type = req.body.type;
-    if (req.body.isPublished !== undefined) item.isPublished = req.body.isPublished === true || req.body.isPublished === 'true';
+    if (req.body.isPublished !== undefined) {
+      item.isPublished = req.body.isPublished === true || req.body.isPublished === 'true';
+    }
 
     if (req.body.tags !== undefined) {
       if (Array.isArray(req.body.tags)) {
@@ -93,7 +119,7 @@ exports.deleteGalleryItem = async (req, res, next) => {
     if (item.publicId) {
       await cloudinary.uploader.destroy(item.publicId, {
         resource_type: item.type === 'video' ? 'video' : item.type === 'pdf' ? 'raw' : 'image',
-      });
+      }).catch((e) => console.warn('Cloudinary delete warning:', e?.message));
     }
     await item.deleteOne();
     res.status(200).json({ success: true, message: 'Item deleted.' });
