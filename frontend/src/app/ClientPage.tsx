@@ -1,4 +1,5 @@
 'use client';
+import { useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/sections/HeroSection';
@@ -36,6 +37,22 @@ export default function ClientPage({
 }: Props) {
   const allFounders = [...founders, ...cofounders];
 
+  // Auto-scroll to anchor hash when arriving from other pages (e.g. /#projects, /#inquiry, /#contact)
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const id = window.location.hash.slice(1);
+      const timer = setTimeout(() => {
+        const el = document.getElementById(id);
+        if (el) {
+          const offset = 80;
+          const y = el.getBoundingClientRect().top + window.scrollY - offset;
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
     <>
       <LoadingScreen />
@@ -54,7 +71,7 @@ export default function ClientPage({
         />
         <div className="divider" />
 
-        {/* Founders — no nav link, still on page */}
+        {/* Founders */}
         <FounderSection data={allFounders.length > 0 ? allFounders : undefined} />
         <div className="divider" />
 

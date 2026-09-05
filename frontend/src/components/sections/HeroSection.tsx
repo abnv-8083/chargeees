@@ -3,14 +3,14 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import type { HeroData } from '@/lib/types';
-import { ArrowDown, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const FALLBACK: HeroData = {
   companyName: 'ChargEase',
   tagline: 'Charge-Up Your\nLife With Us',
   introduction: 'We deliver cutting-edge solutions that transform industries and accelerate growth.',
   primaryCTA: { label: 'Explore Our Work', link: '#projects' },
-  secondaryCTA: { label: 'Get in Touch', link: '#contact' },
+  secondaryCTA: { label: 'Get in Touch', link: '#inquiry' },
   backgroundType: 'particles',
 };
 
@@ -96,9 +96,21 @@ function useTypingAnimation(text: string, speed = 60, delay = 800) {
   return { displayed, done };
 }
 
-const scrollTo = (href: string) => {
-  const el = document.getElementById(href.replace('#', ''));
-  if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 80; window.scrollTo({ top: y, behavior: 'smooth' }); }
+const handleExploreClick = (link?: string) => {
+  if (typeof window === 'undefined') return;
+  const cleanId = (link || 'projects').replace(/^(\/|#)+/, '').replace(/\/$/, '');
+  const targetId = cleanId || 'projects';
+  const isHomePage = window.location.pathname === '/' || window.location.pathname === '';
+
+  if (isHomePage) {
+    const el = document.getElementById(targetId) || document.getElementById('projects');
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+      return;
+    }
+  }
+  window.location.href = `/#${targetId}`;
 };
 
 const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.4 } } };
@@ -171,8 +183,8 @@ export default function HeroSection({ data }: { data?: HeroData }) {
             transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}
           >
-            <button className="btn-primary" onClick={() => scrollTo(d.primaryCTA.link)}>
-              {d.primaryCTA.label}
+            <button className="btn-primary" onClick={() => handleExploreClick(d.primaryCTA?.link)}>
+              {d.primaryCTA?.label || 'Explore Our Work'}
               <ArrowRight size={16} />
             </button>
           </motion.div>
@@ -186,6 +198,8 @@ export default function HeroSection({ data }: { data?: HeroData }) {
         animate={done ? { opacity: 1 } : {}}
         transition={{ delay: 0.5, duration: 0.8 }}
         aria-hidden="true"
+        onClick={() => handleExploreClick('about')}
+        style={{ cursor: 'pointer' }}
       >
         <span className="label-sm" style={{ color: 'var(--gray-600)' }}>Scroll</span>
         <div className="scroll-line" />

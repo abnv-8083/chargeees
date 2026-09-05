@@ -1,15 +1,14 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { Menu, X } from 'lucide-react';
 import type { SiteSettings } from '@/lib/types';
 
 const FALLBACK_NAV = [
-  { label: 'Home',          href: '#hero',        order: 1 },
-  { label: 'About',         href: '#about',       order: 2 },
-  { label: 'Projects',      href: '#projects',    order: 3 },
-  { label: 'Services',      href: '#services',    order: 4 },
-  { label: 'Credentials',  href: '/certificates', order: 5 },
-  { label: 'Contact',       href: '#contact',     order: 6 },
+  { label: 'Home',         href: '#hero',        id: 'hero',        order: 1 },
+  { label: 'About',        href: '#about',       id: 'about',       order: 2 },
+  { label: 'Projects',     href: '#projects',    id: 'projects',    order: 3 },
+  { label: 'Services',     href: '#services',    id: 'services',    order: 4 },
+  { label: 'Credentials', href: '/certificates', id: 'certificates', order: 5 },
+  { label: 'Contact',      href: '#contact',     id: 'contact',     order: 6 },
 ];
 
 export default function Navbar({ settings }: { settings?: SiteSettings }) {
@@ -18,42 +17,73 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navRef = useRef<HTMLElement>(null);
 
-  // Always use the hardcoded nav — ignores DB settings.navigation so code
-  // is the single source of truth and DB changes can't override the navbar.
   const navItems = FALLBACK_NAV;
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Check if on /certificates page
+    if (window.location.pathname === '/certificates' || window.location.pathname.startsWith('/certificates')) {
+      setActive('certificates');
+      const onScrollCert = () => setScrolled(window.scrollY > 30);
+      window.addEventListener('scroll', onScrollCert, { passive: true });
+      return () => window.removeEventListener('scroll', onScrollCert);
+    }
+
     const onScroll = () => {
       setScrolled(window.scrollY > 50);
-      // Active section detection
-      const sections = navItems.map(n => n.href.startsWith('#') ? n.href.slice(1) : '');
-      for (let i = sections.length - 1; i >= 0; i--) {
-        if (!sections[i]) continue;
-        const el = document.getElementById(sections[i]);
+
+      // Active section detection on home page
+      const sectionIds = ['contact', 'services', 'projects', 'about', 'hero'];
+      for (const id of sectionIds) {
+        const el = document.getElementById(id);
         if (el) {
           const rect = el.getBoundingClientRect();
-          if (rect.top <= 120) { setActive(sections[i]); break; }
+          if (rect.top <= 160) {
+            setActive(id);
+            break;
+          }
         }
       }
     };
+
+    onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [navItems]);
+  }, []);
 
   const handleNavClick = (href: string) => {
     setMobileOpen(false);
-    if (href.startsWith('/')) {
-      window.location.href = href;
+
+    if (typeof window === 'undefined') return;
+
+    // 1. Direct page route (e.g. /certificates)
+    if (href.startsWith('/') && !href.startsWith('/#')) {
+      if (window.location.pathname === href) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.location.href = href;
+      }
       return;
     }
-    if (!href.startsWith('#')) return;
-    const id = href.slice(1);
-    const el = document.getElementById(id);
-    if (el) {
-      const offset = 80;
-      const y = el.getBoundingClientRect().top + window.scrollY - offset;
-      window.scrollTo({ top: y, behavior: 'smooth' });
+
+    // 2. Section anchor link (e.g. #hero, #about, #projects, #services, #inquiry, #contact)
+    const id = href.replace(/^(\/|#)+/, '').replace(/\/$/, '');
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '';
+
+    if (isHomePage) {
+      const el = document.getElementById(id);
+      if (el) {
+        const offset = 80;
+        const y = el.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        setActive(id === 'inquiry' ? 'contact' : id);
+        return;
+      }
     }
+
+    // If on /certificates or other subpage, navigate to homepage section
+    window.location.href = `/#${id}`;
   };
 
   return (
@@ -68,7 +98,7 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
           {/* Logo */}
           <button
             onClick={() => handleNavClick('#hero')}
-            style={{ background: 'none', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}
+            style={{ background: 'none', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}
             aria-label="Home"
           >
             {settings?.logo ? (
@@ -89,19 +119,19 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
               <button
                 key={item.href}
                 onClick={() => handleNavClick(item.href)}
-                className={`nav-link ${active === (item.href.startsWith('#') ? item.href.slice(1) : '') ? 'active' : ''}`}
-                style={{ background: 'none', border: 'none', padding: '0.25rem 0' }}
-                aria-current={active === (item.href.startsWith('#') ? item.href.slice(1) : '') ? 'page' : undefined}
+                className={`nav-link ${active === item.id ? 'active' : ''}`}
+                style={{ background: 'none', border: 'none', padding: '0.25rem 0', cursor: 'pointer' }}
+                aria-current={active === item.id ? 'page' : undefined}
               >
                 {item.label}
               </button>
             ))}
           </div>
 
-          {/* Get in Touch CTA + Hamburger */}
+          {/* Get in Touch CTA (Goes to Inquiry) + Hamburger */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <button
-              onClick={() => handleNavClick('#contact')}
+              onClick={() => handleNavClick('#inquiry')}
               className="btn-primary"
               style={{ padding: '0.55rem 1.25rem', fontSize: '0.8rem' }}
             >
@@ -130,14 +160,22 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
               fontFamily: 'var(--font-display)',
               fontSize: 'clamp(1.75rem, 5vw, 3rem)',
               fontWeight: 600,
-              color: active === (item.href.startsWith('#') ? item.href.slice(1) : '') ? 'var(--white)' : 'var(--gray-600)',
+              color: active === item.id ? 'var(--white)' : 'var(--gray-600)',
               transition: 'color 0.25s ease',
               animationDelay: `${i * 0.05}s`,
+              cursor: 'pointer',
             }}
           >
             {item.label}
           </button>
         ))}
+        <button
+          onClick={() => handleNavClick('#inquiry')}
+          className="btn-primary"
+          style={{ marginTop: '1.5rem', padding: '0.75rem 2rem', fontSize: '1rem' }}
+        >
+          Get in Touch
+        </button>
       </div>
 
       <style jsx>{`

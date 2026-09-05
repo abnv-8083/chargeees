@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import type { SiteSettings } from '@/lib/types';
 import { Linkedin, Twitter, Instagram, Facebook, Youtube, Globe } from 'lucide-react';
 
-/* X (formerly Twitter) SVG icon — lucide's Twitter icon is the bird, so we use the X mark */
+/* X (formerly Twitter) SVG icon */
 function XIcon({ size = 15 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
@@ -20,7 +20,6 @@ const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   youtube:   <Youtube   size={15} />,
 };
 
-/* Fallback social links shown when CMS has no social settings configured */
 const FALLBACK_SOCIAL = [
   { key: 'instagram', href: 'https://www.instagram.com/',  icon: <Instagram size={15} />, label: 'Instagram' },
   { key: 'linkedin',  href: 'https://www.linkedin.com/',   icon: <Linkedin  size={15} />, label: 'LinkedIn'  },
@@ -36,7 +35,6 @@ const FALLBACK_NAV = [
   { label: 'Contact',      href: '#contact',     order: 6 },
 ];
 
-/* Split nav links into 2 columns of roughly equal size */
 function splitColumns<T>(arr: T[], cols: number): T[][] {
   const size = Math.ceil(arr.length / cols);
   return Array.from({ length: cols }, (_, i) => arr.slice(i * size, i * size + size));
@@ -44,22 +42,37 @@ function splitColumns<T>(arr: T[], cols: number): T[][] {
 
 export default function Footer({ settings }: { settings?: SiteSettings }) {
   const year   = new Date().getFullYear();
-  // Always use hardcoded nav — same reason as Navbar
   const nav = FALLBACK_NAV;
   const social  = settings?.social  || {};
   const contact = settings?.contact;
   const footer  = settings?.footer;
 
   const scrollTo = (href: string) => {
-    if (href.startsWith('/')) {
-      window.location.href = href;
+    if (typeof window === 'undefined') return;
+
+    if (href.startsWith('/') && !href.startsWith('/#')) {
+      if (window.location.pathname === href) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        window.location.href = href;
+      }
       return;
     }
-    const el = document.getElementById(href.replace('#', ''));
-    if (el) window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+
+    const cleanId = href.replace(/^(\/|#)+/, '').replace(/\/$/, '');
+    const isHomePage = window.location.pathname === '/' || window.location.pathname === '';
+
+    if (isHomePage) {
+      const el = document.getElementById(cleanId);
+      if (el) {
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+        return;
+      }
+    }
+
+    window.location.href = `/#${cleanId}`;
   };
 
-  /* nav split: col1 = pages, col2 = services/legal, col3 = contact info, col4 = quick */
   const [col1, col2] = splitColumns(nav, 2);
 
   const legalLinks = [
@@ -73,7 +86,6 @@ export default function Footer({ settings }: { settings?: SiteSettings }) {
     contact?.address  && { label: contact.address,     href: '#contact' },
   ].filter(Boolean) as { label: string; href: string }[];
 
-  /* link style */
   const lnk: React.CSSProperties = {
     display: 'block',
     background: 'none',
@@ -231,7 +243,6 @@ export default function Footer({ settings }: { settings?: SiteSettings }) {
           gap: '1rem',
           padding: 'clamp(1.5rem, 3vw, 2.5rem) 0',
         }}>
-          {/* Social icon circles — CMS values when set, otherwise Instagram / LinkedIn / X */}
           {(() => {
             const cmsLinks = Object.entries(social).filter(([, v]) => v);
             const items = cmsLinks.length > 0
