@@ -34,12 +34,7 @@ const FALLBACK_ABOUT: AboutData = {
   subheading: 'Who We Are',
   introduction: 'ChargEase is a forward-thinking company committed to delivering transformative solutions across industries.',
   story: 'Founded with a singular vision to redefine how businesses grow, ChargEase has evolved into a trusted partner for organizations seeking innovation and sustainable progress.',
-  coreValues: [
-    { title: 'Integrity',    description: 'Transparency and honesty in every engagement.', icon: 'Shield' },
-    { title: 'Innovation',   description: 'Pushing boundaries with emerging technologies.',         icon: 'Lightbulb' },
-    { title: 'Excellence',   description: 'Delivering nothing short of the highest quality.',              icon: 'Star' },
-    { title: 'Client-First', description: 'Our clients are at the center of every decision.',              icon: 'Heart' },
-  ],
+
   whyUs: [],
   timeline: [
     { year: '2018', title: 'Founded',          description: 'ChargEase established with a vision to transform business.' },

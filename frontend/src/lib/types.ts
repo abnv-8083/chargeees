@@ -8,7 +8,7 @@ export type HeroData = {
   backgroundImage?: string;
 };
 
-export type CoreValue = { title: string; description: string; icon: string };
+
 export type TimelineEntry = { year: string; title: string; description: string };
 
 export type AboutData = {
@@ -16,7 +16,7 @@ export type AboutData = {
   subheading: string;
   introduction: string;
   story: string;
-  coreValues: CoreValue[];
+  coreValues?: never[];
   whyUs: { title: string; description: string }[];
   timeline: TimelineEntry[];
   image?: string;
