@@ -13,8 +13,6 @@ import {
   Image as ImageIcon, Upload, Loader2,
 } from 'lucide-react';
 
-const CATEGORIES = ['ALL', 'Architecture & Infrastructure', 'Digital Ecosystems', 'Corporate Transformation', 'AI & Machine Learning', 'Consulting & Strategy'];
-
 export default function ProjectsManagerPage() {
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,10 +25,13 @@ export default function ProjectsManagerPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // Dynamic categories from projects
+  const availableCategories = ['ALL', ...Array.from(new Set(projects.map(p => p.category).filter(Boolean)))];
+
   // Form State
   const [formData, setFormData] = useState({
     title: '', slug: '', description: '',
-    category: 'Architecture & Infrastructure',
+    category: '',
     status: 'completed' as 'ongoing' | 'completed' | 'upcoming' | 'on-hold',
     completionDate: '2024', client: '', featured: false, tags: '',
   });
@@ -55,7 +56,7 @@ export default function ProjectsManagerPage() {
     setEditingId(null);
     setFormData({
       title: '', slug: '', description: '',
-      category: 'Architecture & Infrastructure',
+      category: '',
       status: 'completed', completionDate: '2024', client: '',
       featured: false, tags: 'Innovation, Enterprise, Scalable',
     });
@@ -170,7 +171,7 @@ export default function ProjectsManagerPage() {
       <div style={{ background: '#09090b', border: '1px solid #18181b', borderRadius: 12, padding: '0.85rem 1rem', display: 'flex', flexWrap: 'wrap', gap: '0.75rem', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
           <Filter size={14} color="#52525b" />
-          {CATEGORIES.map(cat => (
+          {availableCategories.map(cat => (
             <button key={cat} onClick={() => setFilterCategory(cat)} style={{
               background: filterCategory === cat ? '#fafafa' : '#18181b',
               color: filterCategory === cat ? '#000' : '#71717a',
@@ -290,9 +291,20 @@ export default function ProjectsManagerPage() {
             </div>
             <div>
               <label style={adminLabel}>Category</label>
-              <select value={formData.category} onChange={e => setFormData({ ...formData, category: e.target.value })} style={adminSelect}>
-                {CATEGORIES.filter(c => c !== 'ALL').map(cat => <option key={cat} value={cat}>{cat}</option>)}
-              </select>
+              <input
+                type="text"
+                required
+                placeholder="e.g. Technology, AI & ML"
+                list="category-suggestions"
+                value={formData.category}
+                onChange={e => setFormData({ ...formData, category: e.target.value })}
+                style={adminInput}
+              />
+              <datalist id="category-suggestions">
+                {availableCategories.filter(c => c !== 'ALL').map(cat => (
+                  <option key={cat} value={cat} />
+                ))}
+              </datalist>
             </div>
           </div>
 
