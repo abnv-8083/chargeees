@@ -16,7 +16,7 @@ export type AboutData = {
   subheading: string;
   introduction: string;
   story: string;
-  coreValues?: never[];
+  coreValues?: { title: string; description: string; icon?: string }[];
   whyUs: { title: string; description: string }[];
   timeline: TimelineEntry[];
   image?: string;
