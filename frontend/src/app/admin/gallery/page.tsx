@@ -7,8 +7,6 @@ import { AdminModal, ConfirmDialog, AdminLoading } from '@/app/admin/components'
 import { adminInput, adminSelect, adminLabel, adminBtn } from '@/app/admin/components/adminStyles';
 import { Plus, Trash2, Pencil, Image as ImageIcon, Video, FileText, Filter, Upload, Loader2 } from 'lucide-react';
 
-const folders = ['ALL', 'Corporate', 'Architecture', 'Events', 'Team', 'Projects'];
-
 export default function GalleryManagerPage() {
   const [items, setItems] = useState<GalleryItemData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -19,10 +17,13 @@ export default function GalleryManagerPage() {
   const [deleteTarget, setDeleteTarget] = useState<GalleryItemData | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Dynamic folders from gallery items
+  const availableFolders = ['ALL', ...Array.from(new Set(items.map(it => it.folder).filter(Boolean)))];
+
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [title, setTitle] = useState('');
-  const [folder, setFolder] = useState('Corporate');
+  const [folder, setFolder] = useState('');
   const [type, setType] = useState<'image' | 'video' | 'pdf'>('image');
   const [caption, setCaption] = useState('');
   const [tags, setTags] = useState('');
@@ -49,7 +50,7 @@ export default function GalleryManagerPage() {
     setFile(null);
     setFilePreview(item.url || null);
     setTitle(item.title || '');
-    setFolder(item.folder || 'Corporate');
+    setFolder(item.folder || '');
     setType((item.type as any) || 'image');
     setCaption(item.caption || '');
     setTags(Array.isArray(item.tags) ? item.tags.join(', ') : item.tags || '');
@@ -106,7 +107,7 @@ export default function GalleryManagerPage() {
     setTitle('');
     setCaption('');
     setTags('');
-    setFolder('Corporate');
+    setFolder('');
     setType('image');
     setEditingItem(null);
   };
@@ -126,7 +127,7 @@ export default function GalleryManagerPage() {
       {/* Folder Filters */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '1.5rem' }}>
         <Filter size={14} color="#52525b" style={{ marginRight: '0.25rem' }} />
-        {folders.map(f => (
+        {availableFolders.map(f => (
           <button key={f} onClick={() => setSelectedFolder(f)} style={{
             background: selectedFolder === f ? '#fafafa' : '#18181b',
             color: selectedFolder === f ? '#000' : '#71717a',
@@ -245,9 +246,19 @@ export default function GalleryManagerPage() {
           </div>
           <div>
             <label style={adminLabel}>Folder</label>
-            <select value={folder} onChange={e => setFolder(e.target.value)} style={adminSelect}>
-              {folders.filter(f => f !== 'ALL').map(fo => <option key={fo} value={fo}>{fo}</option>)}
-            </select>
+            <input
+              type="text"
+              placeholder="e.g. Corporate, Architecture, Events"
+              list="gallery-folder-suggestions"
+              value={folder}
+              onChange={e => setFolder(e.target.value)}
+              style={adminInput}
+            />
+            <datalist id="gallery-folder-suggestions">
+              {availableFolders.filter(f => f !== 'ALL').map(fo => (
+                <option key={fo} value={fo} />
+              ))}
+            </datalist>
           </div>
           <div>
             <label style={adminLabel}>Caption</label>
