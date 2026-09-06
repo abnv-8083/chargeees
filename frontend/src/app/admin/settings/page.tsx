@@ -45,14 +45,15 @@ export default function SettingsManagerPage() {
       payload.append('companyName', data.companyName || '');
       payload.append('companyTagline', data.companyTagline || '');
       payload.append('companyDescription', data.companyDescription || '');
-      payload.append('contact', JSON.stringify(data.contact));
-      payload.append('social', JSON.stringify(data.social));
-      payload.append('seo', JSON.stringify(data.seo));
-      payload.append('navigation', JSON.stringify(data.navigation));
-      payload.append('footer', JSON.stringify(data.footer));
+      payload.append('contact', JSON.stringify(data.contact || {}));
+      payload.append('social', JSON.stringify(data.social || {}));
+      payload.append('seo', JSON.stringify(data.seo || {}));
+      payload.append('navigation', JSON.stringify(data.navigation || []));
+      payload.append('footer', JSON.stringify(data.footer || {}));
       if (logoFile) payload.append('logo', logoFile);
       if (faviconFile) payload.append('favicon', faviconFile);
-      await updateSettingsAdmin(payload);
+      const res = await updateSettingsAdmin(payload);
+      if (res) setData(res);
       showToast.success('Settings saved', 'Configuration updated across all modules.');
     } catch (err: any) {
       showToast.error('Save failed', err.message || 'Could not update settings.');

@@ -4,6 +4,8 @@ const Service = require('../models/Service');
 const GalleryItem = require('../models/GalleryItem');
 const Inquiry = require('../models/Inquiry');
 
+const { uploadToCloudinary } = require('../config/cloudinary');
+
 exports.getSettings = async (req, res, next) => {
   try {
     let settings = await SiteSettings.findOne();
@@ -14,11 +16,53 @@ exports.getSettings = async (req, res, next) => {
 
 exports.updateSettings = async (req, res, next) => {
   try {
+    const body = { ...req.body };
+
+    // Parse JSON-stringified nested fields from FormData
+    const jsonFields = ['contact', 'social', 'seo', 'navigation', 'footer', 'smtp'];
+    jsonFields.forEach((field) => {
+      if (typeof body[field] === 'string') {
+        try {
+          body[field] = JSON.parse(body[field]);
+        } catch (e) {
+          // Ignore parsing error if already an object or invalid
+        }
+      }
+    });
+
+    // Handle logo and favicon uploads via Cloudinary
+    if (req.files) {
+      if (req.files.logo && req.files.logo[0]) {
+        try {
+          const logoUpload = await uploadToCloudinary(
+            req.files.logo[0].buffer,
+            req.files.logo[0].mimetype,
+            'chargeease/branding'
+          );
+          body.logo = logoUpload.url;
+        } catch (err) {
+          console.error('Logo upload error:', err);
+        }
+      }
+      if (req.files.favicon && req.files.favicon[0]) {
+        try {
+          const faviconUpload = await uploadToCloudinary(
+            req.files.favicon[0].buffer,
+            req.files.favicon[0].mimetype,
+            'chargeease/branding'
+          );
+          body.favicon = faviconUpload.url;
+        } catch (err) {
+          console.error('Favicon upload error:', err);
+        }
+      }
+    }
+
     let settings = await SiteSettings.findOne();
     if (!settings) {
-      settings = await SiteSettings.create(req.body);
+      settings = await SiteSettings.create(body);
     } else {
-      settings = await SiteSettings.findByIdAndUpdate(settings._id, req.body, {
+      settings = await SiteSettings.findByIdAndUpdate(settings._id, body, {
         new: true,
         runValidators: true,
       });
