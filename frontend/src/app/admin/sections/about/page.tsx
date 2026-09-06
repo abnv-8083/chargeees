@@ -5,13 +5,21 @@ import { showToast } from '@/lib/toast';
 import type { AboutData } from '@/lib/types';
 import { AdminLoading } from '@/app/admin/components';
 import { adminInput, adminTextarea, adminLabel, adminBtn } from '@/app/admin/components/adminStyles';
-import { Save, Sparkles, Plus, Trash2, Loader2 } from 'lucide-react';
+import { Save, Sparkles, Plus, Trash2, Loader2, BarChart3 } from 'lucide-react';
+
+const DEFAULT_STATS = [
+  { target: 200, suffix: '+', label: 'Global Clients' },
+  { target: 15, suffix: '+', label: 'Countries' },
+  { target: 6, suffix: '+', label: 'Years of Excellence' },
+  { target: 98, suffix: '%', label: 'Client Satisfaction' },
+];
 
 const FALLBACK_ABOUT: AboutData = {
   heading: 'Architects of Digital Excellence',
   subheading: 'Who We Are',
   introduction: 'ChargEase is a premier corporate innovation firm dedicated to engineering seamless digital ecosystems.',
   story: 'Founded with a singular vision to redefine enterprise technology, we combine meticulous engineering with avant-garde design principles.',
+  stats: DEFAULT_STATS,
   coreValues: [
     { title: 'Relentless Precision', description: 'Every line of code and interface pixel is crafted to exacting standards.', icon: 'target' },
     { title: 'Future-Forward Innovation', description: 'Anticipating industry shifts before they happen.', icon: 'zap' },
@@ -29,7 +37,14 @@ export default function AboutSectionEditorPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchAbout().then((res: any) => { if (res) setData(res); }).finally(() => setLoading(false));
+    fetchAbout().then((res: any) => {
+      if (res) {
+        setData({
+          ...res,
+          stats: res.stats && res.stats.length > 0 ? res.stats : DEFAULT_STATS,
+        });
+      }
+    }).finally(() => setLoading(false));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +67,7 @@ export default function AboutSectionEditorPage() {
           <Sparkles size={13} /> Sections / About
         </div>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 700, color: '#fafafa' }}>About Section Editor</h1>
-        <p style={{ color: '#71717a', fontSize: '0.875rem' }}>Manage company overview, core values, and timeline.</p>
+        <p style={{ color: '#71717a', fontSize: '0.875rem' }}>Manage company overview, key numbers & metrics, and journey timeline.</p>
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
@@ -62,6 +77,91 @@ export default function AboutSectionEditorPage() {
           <div><label style={adminLabel}>Heading</label><input type="text" value={data.heading} onChange={e => setData({ ...data, heading: e.target.value })} style={adminInput} /></div>
           <div><label style={adminLabel}>Introduction</label><textarea rows={3} value={data.introduction} onChange={e => setData({ ...data, introduction: e.target.value })} style={adminTextarea} /></div>
           <div><label style={adminLabel}>Story</label><textarea rows={4} value={data.story} onChange={e => setData({ ...data, story: e.target.value })} style={adminTextarea} /></div>
+        </div>
+
+        {/* Key Metrics / Numbers */}
+        <div style={{ background: '#09090b', border: '1px solid #18181b', borderRadius: 16, padding: '1.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #18181b', paddingBottom: '0.75rem', marginBottom: '1.25rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1rem', fontWeight: 700, color: '#fafafa', margin: 0, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <BarChart3 size={16} color="#60a5fa" /> Key Numbers & Statistics
+              </h3>
+              <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: '#71717a' }}>Edit the live animated numbers shown on the About section</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setData({
+                ...data,
+                stats: [...(data.stats || []), { target: 100, suffix: '+', label: 'New Metric' }],
+              })}
+              style={adminBtn.ghost}
+            >
+              <Plus size={14} /> Add Metric
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {(data.stats || []).map((s, i) => (
+              <div key={i} style={{ display: 'grid', gridTemplateColumns: '120px 80px 1fr auto', gap: '0.75rem', alignItems: 'center', background: '#0d0d0f', padding: '0.75rem', borderRadius: 10, border: '1px solid #18181b' }}>
+                <div>
+                  <label style={{ fontSize: '0.7rem', color: '#71717a', display: 'block', marginBottom: '0.2rem' }}>Number / Count</label>
+                  <input
+                    type="number"
+                    placeholder="200"
+                    value={s.target}
+                    onChange={e => {
+                      const u = [...(data.stats || [])];
+                      u[i].target = Number(e.target.value);
+                      setData({ ...data, stats: u });
+                    }}
+                    style={adminInput}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.7rem', color: '#71717a', display: 'block', marginBottom: '0.2rem' }}>Suffix</label>
+                  <input
+                    type="text"
+                    placeholder="+, %, K"
+                    value={s.suffix || ''}
+                    onChange={e => {
+                      const u = [...(data.stats || [])];
+                      u[i].suffix = e.target.value;
+                      setData({ ...data, stats: u });
+                    }}
+                    style={adminInput}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.7rem', color: '#71717a', display: 'block', marginBottom: '0.2rem' }}>Label</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Global Clients, Countries"
+                    value={s.label}
+                    onChange={e => {
+                      const u = [...(data.stats || [])];
+                      u[i].label = e.target.value;
+                      setData({ ...data, stats: u });
+                    }}
+                    style={adminInput}
+                  />
+                </div>
+                <div style={{ paddingTop: '1.1rem' }}>
+                  <button
+                    type="button"
+                    title="Remove metric"
+                    onClick={() => {
+                      const u = [...(data.stats || [])];
+                      u.splice(i, 1);
+                      setData({ ...data, stats: u });
+                    }}
+                    style={{ background: 'transparent', border: 'none', color: '#f87171', cursor: 'pointer', padding: '0.4rem' }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Core Values */}

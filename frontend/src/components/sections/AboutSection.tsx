@@ -29,12 +29,19 @@ function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: str
 
 
 
+const DEFAULT_STATS = [
+  { target: 200, suffix: '+', label: 'Global Clients' },
+  { target: 15, suffix: '+', label: 'Countries' },
+  { target: 6, suffix: '+', label: 'Years of Excellence' },
+  { target: 98, suffix: '%', label: 'Client Satisfaction' },
+];
+
 const FALLBACK_ABOUT: AboutData = {
   heading: 'About ChargEase',
   subheading: 'Who We Are',
   introduction: 'ChargEase is a forward-thinking company committed to delivering transformative solutions across industries.',
   story: 'Founded with a singular vision to redefine how businesses grow, ChargEase has evolved into a trusted partner for organizations seeking innovation and sustainable progress.',
-
+  stats: DEFAULT_STATS,
   whyUs: [],
   timeline: [
     { year: '2018', title: 'Founded',          description: 'ChargEase established with a vision to transform business.' },
@@ -166,18 +173,13 @@ export default function AboutSection({
           </div>
         </AnimatedBlock>
 
-        {/* ── Client Stats & Metrics Bar (Moved from Contact Section) ── */}
+        {/* ── Client Stats & Metrics Bar ── */}
         <AnimatedBlock delay={0.1}>
           <div className="stats-row" style={{ marginBottom: 'clamp(3rem, 6vw, 5rem)' }}>
-            {[
-              { target: 200, suffix: '+', label: 'Global Clients' },
-              { target: 15, suffix: '+', label: 'Countries' },
-              { target: 6, suffix: '+', label: 'Years of Excellence' },
-              { target: 98, suffix: '%', label: 'Client Satisfaction' },
-            ].map((stat, i) => (
+            {(d.stats && d.stats.length > 0 ? d.stats : DEFAULT_STATS).map((stat, i) => (
               <div key={i} className="stat-item">
                 <div className="stat-number">
-                  <AnimatedCounter target={stat.target} suffix={stat.suffix} />
+                  <AnimatedCounter target={Number(stat.target) || 0} suffix={stat.suffix || ''} />
                 </div>
                 <div className="stat-label">{stat.label}</div>
               </div>

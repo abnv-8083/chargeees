@@ -20,6 +20,13 @@ const aboutSchema = new mongoose.Schema(
     subheading: { type: String, default: 'Who We Are' },
     introduction: { type: String, default: 'ChargEase is a forward-thinking company committed to delivering transformative solutions across industries.' },
     story: { type: String, default: 'Founded with a singular vision — to redefine how businesses grow and operate — ChargEase has evolved into a trusted partner for organizations seeking precision, innovation, and sustainable progress.' },
+    stats: [
+      {
+        target: { type: Number, default: 0 },
+        suffix: { type: String, default: '+' },
+        label: { type: String, default: '' },
+      },
+    ],
     coreValues: [{ title: String, description: String, icon: String }],
     whyUs: [{ title: String, description: String }],
     timeline: [{ year: String, title: String, description: String }],

@@ -10,12 +10,14 @@ export type HeroData = {
 
 
 export type TimelineEntry = { year: string; title: string; description: string };
+export type StatEntry = { target: number; suffix?: string; label: string };
 
 export type AboutData = {
   heading: string;
   subheading: string;
   introduction: string;
   story: string;
+  stats?: StatEntry[];
   coreValues?: { title: string; description: string; icon?: string }[];
   whyUs: { title: string; description: string }[];
   timeline: TimelineEntry[];
