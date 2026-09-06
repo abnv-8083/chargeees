@@ -1,26 +1,18 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Award, Search, CheckCircle2, AlertCircle, Eye, Download,
   Copy, Check, X, ShieldCheck, FileSearch, UserCheck,
-  Calendar, Building2, Hash, ArrowRight, RefreshCw, Lock,
+  Calendar, Building2, Lock, RefreshCw,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { searchCertificateByNumber, claimCertificate, getUserCertificates } from '@/lib/api';
+import { searchCertificateByNumber, claimCertificate } from '@/lib/api';
 import type { CertificateData } from '@/lib/types';
 
 /* ─── tiny helpers ───────────────────────────────────────────────────────── */
 const fmt = (d: string) =>
   new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-
-/* ─── Step guide data ────────────────────────────────────────────────────── */
-const STEPS = [
-  { icon: <Hash size={20} />,        num: '01', title: 'Enter Certificate No.',  desc: 'Type your certificate number in the search box.' },
-  { icon: <FileSearch size={20} />,  num: '02', title: 'Verify Instantly',        desc: 'Our system fetches the official record in seconds.' },
-  { icon: <Eye size={20} />,         num: '03', title: 'Preview & Download',      desc: 'View online or download the original file.' },
-];
-
 /* ─── Status badge ───────────────────────────────────────────────────────── */
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { bg: string; color: string; border: string }> = {
@@ -36,6 +28,7 @@ function StatusBadge({ status }: { status: string }) {
     </span>
   );
 }
+
 
 /* ─── Preview modal ──────────────────────────────────────────────────────── */
 function PreviewModal({ cert, onClose }: { cert: CertificateData; onClose: () => void }) {
@@ -94,27 +87,14 @@ function PreviewModal({ cert, onClose }: { cert: CertificateData; onClose: () =>
 export default function CertificateSection() {
   const { user, openAuthModal } = useAuth();
 
-  const [certNum, setCertNum]         = useState('');
-  const [result, setResult]           = useState<any | null>(null);
-  const [loading, setLoading]         = useState(false);
-  const [error, setError]             = useState('');
-  const [claiming, setClaiming]       = useState(false);
-  const [claimOk, setClaimOk]         = useState('');
-  const [myCerts, setMyCerts]         = useState<CertificateData[]>([]);
-  const [certsLoading, setCertsLoading] = useState(false);
-  const [preview, setPreview]         = useState<CertificateData | null>(null);
-  const [copied, setCopied]           = useState<string | null>(null);
-
-  useEffect(() => {
-    if (user) loadMy(); else setMyCerts([]);
-  }, [user]);
-
-  const loadMy = async () => {
-    setCertsLoading(true);
-    try { setMyCerts(await getUserCertificates()); }
-    catch { /* silent */ }
-    finally { setCertsLoading(false); }
-  };
+  const [certNum, setCertNum]   = useState('');
+  const [result, setResult]     = useState<any | null>(null);
+  const [loading, setLoading]   = useState(false);
+  const [error, setError]       = useState('');
+  const [claiming, setClaiming] = useState(false);
+  const [claimOk, setClaimOk]   = useState('');
+  const [preview, setPreview]   = useState<CertificateData | null>(null);
+  const [copied, setCopied]     = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +114,6 @@ export default function CertificateSection() {
       await claimCertificate(result.certificateNumber);
       setClaimOk('Certificate linked to your profile successfully!');
       setResult(null); setCertNum('');
-      loadMy();
     } catch (err: any) { setError(err.message || 'Failed to link certificate.'); }
     finally { setClaiming(false); }
   };
