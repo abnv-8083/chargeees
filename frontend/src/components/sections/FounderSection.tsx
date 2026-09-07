@@ -83,7 +83,7 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
         {/* Biography */}
         {f.biography && (
           <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--gray-300)', lineHeight: 1.55, textAlign: 'left' }}>
-            {f.biography.replace(/\s+/g, ' ').trim()}
+            {f.biography.replace(/[\s\u00a0\u200b\u2002\u2003\u2009\u202f]+/g, ' ').trim()}
           </p>
         )}
 
