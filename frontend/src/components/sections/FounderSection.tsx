@@ -70,7 +70,7 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
       transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
       style={{
         marginTop: '1rem',
-        padding: '1.25rem',
+        padding: '1.5rem',
         borderRadius: 16,
         background: 'var(--gray-900)',
         border: '1px solid var(--gray-800)',
@@ -78,57 +78,81 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
         overflow: 'hidden',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+
+        {/* Biography */}
         {f.biography && (
-          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--gray-300)', lineHeight: 1.6 }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', color: 'var(--gray-300)', lineHeight: 1.75, textAlign: 'left' }}>
             {f.biography}
           </p>
         )}
+
+        {/* Divider */}
+        {f.biography && <div style={{ height: 1, background: 'var(--gray-800)' }} />}
+
+        {/* Experience */}
         {f.experience && (
-          <p className="label-sm" style={{ margin: 0, color: accent }}>
-            <Briefcase size={12} style={{ display: 'inline', marginRight: '0.35rem' }} />
-            {f.experience}
-          </p>
-        )}
-        
-        {f.messageFromFounder && (
-          <div style={{ padding: '0.75rem 1rem', background: 'var(--black)', borderRadius: 10, borderLeft: `3px solid ${accent}`, fontSize: '0.825rem', color: 'var(--gray-300)', fontStyle: 'italic' }}>
-            "{f.messageFromFounder}"
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+            <Briefcase size={13} style={{ color: accent, marginTop: '0.15rem', flexShrink: 0 }} />
+            <p style={{ margin: 0, fontSize: '0.85rem', color: accent, lineHeight: 1.5 }}>
+              {f.experience}
+            </p>
           </div>
         )}
 
+        {/* Quote / Message */}
+        {f.messageFromFounder && (
+          <div style={{
+            padding: '0.85rem 1rem',
+            background: 'var(--black)',
+            borderRadius: 10,
+            borderLeft: `3px solid ${accent}`,
+            fontSize: '0.85rem',
+            color: 'var(--gray-300)',
+            fontStyle: 'italic',
+            lineHeight: 1.6,
+          }}>
+            &ldquo;{f.messageFromFounder}&rdquo;
+          </div>
+        )}
+
+        {/* Achievements */}
         {f.achievements?.length > 0 && (
           <div>
-            <p className="label-sm" style={{ marginBottom: '0.5rem', color: 'var(--gray-400)' }}>
-              <Award size={11} style={{ display: 'inline', marginRight: '0.35rem' }} />Achievements
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.6rem' }}>
+              <Award size={12} style={{ color: 'var(--gray-400)' }} />
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--gray-400)', textTransform: 'uppercase' }}>Achievements</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
               {f.achievements.map((a, i) => (
-                <div key={i} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                  <span style={{ color: accent, fontFamily: 'var(--font-grotesk)', fontSize: '0.65rem', fontWeight: 600 }}>0{i + 1}</span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--gray-300)' }}>{a}</span>
+                <div key={i} style={{ display: 'flex', gap: '0.6rem', alignItems: 'flex-start' }}>
+                  <span style={{ color: accent, fontWeight: 700, fontSize: '0.68rem', marginTop: '0.18rem', flexShrink: 0 }}>0{i + 1}</span>
+                  <span style={{ fontSize: '0.83rem', color: 'var(--gray-300)', lineHeight: 1.55 }}>{a}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
 
+        {/* Education */}
         {f.education?.length > 0 && (
           <div>
-            <p className="label-sm" style={{ marginBottom: '0.5rem', color: 'var(--gray-400)' }}>
-              <BookOpen size={11} style={{ display: 'inline', marginRight: '0.35rem' }} />Education
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.6rem' }}>
+              <BookOpen size={12} style={{ color: 'var(--gray-400)' }} />
+              <span style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--gray-400)', textTransform: 'uppercase' }}>Education</span>
+            </div>
             {f.education.map((edu, i) => (
-              <div key={i} style={{ padding: '0.5rem 0.75rem', border: '1px solid var(--gray-800)', borderRadius: 8, background: 'var(--black)', marginBottom: '0.35rem' }}>
-                <p style={{ fontFamily: 'var(--font-grotesk)', fontSize: '0.8rem', fontWeight: 600, color: 'var(--white)', margin: '0 0 0.1rem' }}>{edu.degree}</p>
-                <p style={{ fontSize: '0.75rem', color: 'var(--gray-500)', margin: 0 }}>{edu.institution}{edu.year ? ` · ${edu.year}` : ''}</p>
+              <div key={i} style={{ padding: '0.55rem 0.85rem', border: '1px solid var(--gray-800)', borderRadius: 8, background: 'var(--black)', marginBottom: '0.4rem' }}>
+                <p style={{ fontFamily: 'var(--font-grotesk)', fontSize: '0.82rem', fontWeight: 600, color: 'var(--white)', margin: '0 0 0.15rem' }}>{edu.degree}</p>
+                <p style={{ fontSize: '0.76rem', color: 'var(--gray-500)', margin: 0 }}>{edu.institution}{edu.year ? ` · ${edu.year}` : ''}</p>
               </div>
             ))}
           </div>
         )}
 
+        {/* Social Links */}
         {Object.entries(f.socialLinks || {}).some(([, v]) => v) && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingTop: '0.25rem' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingTop: '0.1rem' }}>
             {Object.entries(f.socialLinks).map(([key, val]) =>
               val ? (
                 <a
@@ -138,7 +162,7 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
                   rel="noopener noreferrer"
                   aria-label={key}
                   style={{
-                    width: 30, height: 30,
+                    width: 32, height: 32,
                     borderRadius: '50%',
                     border: '1px solid var(--gray-700)',
                     display: 'flex',
