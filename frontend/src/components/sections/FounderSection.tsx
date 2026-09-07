@@ -79,6 +79,11 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {f.biography && (
+          <p style={{ margin: 0, fontSize: '0.875rem', color: 'var(--gray-300)', lineHeight: 1.6 }}>
+            {f.biography}
+          </p>
+        )}
         {f.experience && (
           <p className="label-sm" style={{ margin: 0, color: accent }}>
             <Briefcase size={12} style={{ display: 'inline', marginRight: '0.35rem' }} />
@@ -231,20 +236,7 @@ function FounderCard({ founder: f, index, expanded, onToggle }: {
           <span style={{ color: theme.accent, fontWeight: 600 }}>{f.title}</span>
         </h3>
 
-        {/* (Bio / Tagline in parentheses style) */}
-        {f.biography && (
-          <p
-            style={{
-              fontFamily: 'var(--font-sans)',
-              fontSize: '0.875rem',
-              color: 'var(--gray-400)',
-              margin: '0 0 0.75rem',
-              lineHeight: 1.6,
-            }}
-          >
-            {f.biography}
-          </p>
-        )}
+
 
         {/* Toggle profile detail */}
         <button
