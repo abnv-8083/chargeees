@@ -7,24 +7,53 @@ import Parallax from '@/components/ui/Parallax';
 import RevealText from '@/components/ui/RevealText';
 
 function AnimatedCounter({ target, suffix = '' }: { target: number; suffix?: string }) {
+  const [displayValue, setDisplayValue] = useState<number>(0);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-40px' });
+  const inView = useInView(ref, { once: true, margin: '0px' });
+
+  // Ensure animation triggers on mobile even if intersection observer is delayed or viewport is small
   useEffect(() => {
-    if (!inView) return;
-    const el = ref.current;
-    if (!el) return;
-    let start = 0;
-    const duration = 2000;
-    const step = 1000 / 60;
-    const increment = target / (duration / step);
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= target) { start = target; clearInterval(timer); }
-      el.textContent = Math.floor(start) + suffix;
-    }, step);
-    return () => clearInterval(timer);
-  }, [inView, target, suffix]);
-  return <span ref={ref}>0{suffix}</span>;
+    if (inView) {
+      setHasStarted(true);
+      return;
+    }
+    const fallbackTimer = setTimeout(() => {
+      setHasStarted(true);
+    }, 400);
+    return () => clearTimeout(fallbackTimer);
+  }, [inView]);
+
+  useEffect(() => {
+    if (!hasStarted) return;
+    if (!target || target <= 0) {
+      setDisplayValue(target || 0);
+      return;
+    }
+
+    let startTimestamp: number | null = null;
+    const duration = 1800;
+    let animationFrameId: number;
+
+    const step = (timestamp: number) => {
+      if (!startTimestamp) startTimestamp = timestamp;
+      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+      const easeProgress = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const current = Math.floor(easeProgress * target);
+      setDisplayValue(current);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(step);
+      } else {
+        setDisplayValue(target);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [hasStarted, target]);
+
+  return <span ref={ref}>{hasStarted ? displayValue : (target || 0)}{suffix}</span>;
 }
 
 
@@ -76,7 +105,7 @@ const FALLBACK_MISSION: MissionData = {
 
 function AnimatedBlock({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: '-80px' });
+  const inView = useInView(ref, { once: true, margin: '0px 0px -40px 0px' });
   return (
     <motion.div ref={ref}
       initial={{ opacity: 0, y: 50 }}
@@ -176,14 +205,23 @@ export default function AboutSection({
         {/* ── Client Stats & Metrics Bar ── */}
         <AnimatedBlock delay={0.1}>
           <div className="stats-row" style={{ marginBottom: 'clamp(3rem, 6vw, 5rem)' }}>
-            {(d.stats && d.stats.length > 0 ? d.stats : DEFAULT_STATS).map((stat, i) => (
-              <div key={i} className="stat-item">
-                <div className="stat-number">
-                  <AnimatedCounter target={Number(stat.target) || 0} suffix={stat.suffix || ''} />
+            {(d.stats && d.stats.length > 0 ? d.stats : DEFAULT_STATS).map((stat, i) => {
+              let targetNum = Number(stat.target);
+              if (isNaN(targetNum) || targetNum <= 0) {
+                if (stat.label && stat.label.toLowerCase().includes('found')) {
+                  const timelineYear = d.timeline?.find(t => t.title?.toLowerCase().includes('found'))?.year;
+                  targetNum = Number(timelineYear) || 2024;
+                }
+              }
+              return (
+                <div key={i} className="stat-item">
+                  <div className="stat-number">
+                    <AnimatedCounter target={targetNum || 0} suffix={stat.suffix || ''} />
+                  </div>
+                  <div className="stat-label">{stat.label}</div>
                 </div>
-                <div className="stat-label">{stat.label}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </AnimatedBlock>
 
