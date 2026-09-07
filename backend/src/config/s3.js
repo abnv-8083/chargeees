@@ -160,3 +160,6 @@ exports.uploadFounderImage = (buf, name, mime) =>
 
 exports.uploadProjectImage = (buf, name, mime) =>
   uploadToS3WithFolder(buf, name, mime, 'projects');
+
+exports.uploadGalleryAsset = (buf, name, mime, folder = 'general') =>
+  uploadToS3WithFolder(buf, name, mime, `chargeease/${folder}`);

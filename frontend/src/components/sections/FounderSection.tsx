@@ -78,7 +78,7 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
         overflow: 'hidden',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
 
         {/* Biography */}
         {f.biography && (
@@ -112,7 +112,7 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
             fontStyle: 'italic',
             lineHeight: 1.6,
           }}>
-            &ldquo;{f.messageFromFounder}&rdquo;
+            {f.messageFromFounder}
           </div>
         )}
 

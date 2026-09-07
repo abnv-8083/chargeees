@@ -7,8 +7,9 @@ const FALLBACK_NAV = [
   { label: 'About',        href: '#about',       id: 'about',       order: 2 },
   { label: 'Projects',     href: '#projects',    id: 'projects',    order: 3 },
   { label: 'Services',     href: '#services',    id: 'services',    order: 4 },
-  { label: 'Credentials', href: '/certificates', id: 'certificates', order: 5 },
-  { label: 'Contact',      href: '#contact',     id: 'contact',     order: 6 },
+  { label: 'Gallery',      href: '#gallery',     id: 'gallery',     order: 5 },
+  { label: 'Credentials', href: '/certificates', id: 'certificates', order: 6 },
+  { label: 'Contact',      href: '#contact',     id: 'contact',     order: 7 },
 ];
 
 export default function Navbar({ settings }: { settings?: SiteSettings }) {
@@ -34,7 +35,7 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
       setScrolled(window.scrollY > 50);
 
       // Active section detection on home page
-      const sectionIds = ['contact', 'services', 'projects', 'about', 'hero'];
+      const sectionIds = ['contact', 'gallery', 'services', 'projects', 'about', 'hero'];
       for (const id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {

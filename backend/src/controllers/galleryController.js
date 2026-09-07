@@ -1,5 +1,5 @@
 const GalleryItem = require('../models/GalleryItem');
-const { cloudinary, uploadToCloudinary } = require('../config/cloudinary');
+const { uploadGalleryAsset, deleteFromS3 } = require('../config/s3');
 
 exports.getGallery = async (req, res, next) => {
   try {
@@ -28,12 +28,11 @@ exports.uploadGalleryItem = async (req, res, next) => {
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded.' });
 
     const folderName = req.body.folder || 'general';
-    const cloudinaryFolder = `chargeease/${folderName}`;
-    const { url, publicId } = await uploadToCloudinary(req.file.buffer, req.file.mimetype, cloudinaryFolder);
+    const { fileUrl, s3Key } = await uploadGalleryAsset(req.file.buffer, req.file.originalname, req.file.mimetype, folderName);
 
     const item = await GalleryItem.create({
-      url,
-      publicId,
+      url: fileUrl,
+      publicId: s3Key,
       type: req.file.mimetype.startsWith('video') ? 'video'
         : req.file.mimetype === 'application/pdf' ? 'pdf' : 'image',
       mimeType: req.file.mimetype,
@@ -67,17 +66,14 @@ exports.updateGalleryItem = async (req, res, next) => {
     if (req.file) {
       // Delete old asset from Cloudinary
       if (item.publicId) {
-        await cloudinary.uploader.destroy(item.publicId, {
-          resource_type: item.type === 'video' ? 'video' : item.type === 'pdf' ? 'raw' : 'image',
-        }).catch((e) => console.warn('Cloudinary delete old asset warning:', e?.message));
+        await deleteFromS3(item.publicId, item.url);
       }
 
       const folderName = req.body.folder || item.folder || 'general';
-      const cloudinaryFolder = `chargeease/${folderName}`;
-      const { url, publicId } = await uploadToCloudinary(req.file.buffer, req.file.mimetype, cloudinaryFolder);
+      const { fileUrl, s3Key } = await uploadGalleryAsset(req.file.buffer, req.file.originalname, req.file.mimetype, folderName);
 
-      item.url = url;
-      item.publicId = publicId;
+      item.url = fileUrl;
+      item.publicId = s3Key;
       item.mimeType = req.file.mimetype;
       item.type = req.file.mimetype.startsWith('video') ? 'video'
         : req.file.mimetype === 'application/pdf' ? 'pdf' : 'image';
@@ -117,9 +113,7 @@ exports.deleteGalleryItem = async (req, res, next) => {
     const item = await GalleryItem.findById(req.params.id);
     if (!item) return res.status(404).json({ success: false, message: 'Item not found.' });
     if (item.publicId) {
-      await cloudinary.uploader.destroy(item.publicId, {
-        resource_type: item.type === 'video' ? 'video' : item.type === 'pdf' ? 'raw' : 'image',
-      }).catch((e) => console.warn('Cloudinary delete warning:', e?.message));
+      await deleteFromS3(item.publicId, item.url);
     }
     await item.deleteOne();
     res.status(200).json({ success: true, message: 'Item deleted.' });
