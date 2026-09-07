@@ -87,8 +87,6 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
           </p>
         )}
 
-        {/* Divider */}
-        {f.biography && <div style={{ height: 1, background: 'var(--gray-800)' }} />}
 
         {/* Experience */}
         {f.experience && (
@@ -112,7 +110,7 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
             fontStyle: 'italic',
             lineHeight: 1.6,
           }}>
-            {f.messageFromFounder}
+            {f.messageFromFounder.replace(/^"|"$/g, '').replace(/^'|'$/g, '').trim()}
           </div>
         )}
 
