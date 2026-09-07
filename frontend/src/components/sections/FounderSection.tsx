@@ -239,14 +239,10 @@ function FounderCard({ founder: f, index, expanded, onToggle }: {
               fontSize: '0.875rem',
               color: 'var(--gray-400)',
               margin: '0 0 0.75rem',
-              lineHeight: 1.5,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
+              lineHeight: 1.6,
             }}
           >
-            ({f.biography})
+            {f.biography}
           </p>
         )}
 
