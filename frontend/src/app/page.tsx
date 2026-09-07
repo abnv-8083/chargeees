@@ -1,7 +1,7 @@
 import {
   fetchHero, fetchAbout, fetchVision, fetchMission,
   fetchFounders, fetchCoFounders, fetchProjects,
-  fetchServices, fetchSettings,
+  fetchServices, fetchSettings, fetchGallery
 } from '@/lib/api';
 import ClientPage from './ClientPage';
 
@@ -11,7 +11,7 @@ export const revalidate = 0;
 
 export default async function HomePage() {
   // Fetch all data in parallel
-  const [hero, about, vision, mission, founders, cofounders, projectsRes, services, settings] = await Promise.all([
+  const [hero, about, vision, mission, founders, cofounders, projectsRes, services, settings, galleryRes] = await Promise.all([
     fetchHero(),
     fetchAbout(),
     fetchVision(),
@@ -21,6 +21,7 @@ export default async function HomePage() {
     fetchProjects(),
     fetchServices(),
     fetchSettings(),
+    fetchGallery(),
   ]);
 
   return (
@@ -34,6 +35,7 @@ export default async function HomePage() {
       projects={projectsRes?.data || []}
       services={services}
       settings={settings}
+      gallery={galleryRes?.data || []}
     />
   );
 }
