@@ -145,7 +145,7 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
               <>
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2.5rem' }}>
                   <div>
-                    <p className="body-lg" style={{ marginBottom: '1.5rem' }}>{project.description}</p>
+                    <p className="body-lg" style={{ marginBottom: '1.5rem', textAlign: 'justify' }}>{project.description}</p>
                     {project.tags.length > 0 && (
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {project.tags.map((tag, i) => <span key={i} className="tag">{tag}</span>)}
