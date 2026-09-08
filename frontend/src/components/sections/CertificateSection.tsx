@@ -2,12 +2,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Award, Search, CheckCircle2, AlertCircle, Eye, Download,
-  Copy, Check, X, ShieldCheck, FileSearch, UserCheck,
+  Award, Search, AlertCircle, Eye, Download,
+  Copy, Check, X, ShieldCheck, FileSearch,
   Calendar, Building2, Lock, RefreshCw,
 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { searchCertificateByNumber, claimCertificate } from '@/lib/api';
+import { searchCertificateByNumber } from '@/lib/api';
 import type { CertificateData } from '@/lib/types';
 
 /* ─── tiny helpers ───────────────────────────────────────────────────────── */
@@ -365,28 +364,6 @@ export default function CertificateSection() {
                           <Download size={15} /> Download
                         </a>
                       </div>
-
-                      {result.isClaimedByMe ? (
-                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem',
-                          color: '#4ade80', fontSize: '0.825rem', fontWeight: 600 }}>
-                          <CheckCircle2 size={16} /> Added to Your Profile
-                        </span>
-                      ) : result.isClaimedByOthers ? (
-                        <span style={{ fontSize: '0.8rem', color: 'var(--gray-600)' }}>
-                          Already claimed by another account
-                        </span>
-                      ) : (
-                        <button onClick={handleClaim} disabled={claiming}
-                          style={{ display: 'flex', alignItems: 'center', gap: '0.4rem',
-                            background: 'transparent', border: '1px solid var(--gray-600)',
-                            color: 'var(--white)', padding: '0.6rem 1.1rem', borderRadius: 8,
-                            fontSize: '0.825rem', fontWeight: 600,
-                            cursor: claiming ? 'not-allowed' : 'pointer',
-                            opacity: claiming ? 0.7 : 1 }}>
-                          <UserCheck size={15} />
-                          {claiming ? 'Linking…' : 'Add to My Profile'}
-                        </button>
-                      )}
                     </div>
                   </div>
                 </motion.div>
