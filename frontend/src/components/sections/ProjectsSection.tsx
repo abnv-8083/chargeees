@@ -115,7 +115,7 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
           <div style={{ display: 'flex', borderBottom: '1px solid var(--gray-800)', padding: '0 2.5rem' }}>
             {([
               { id: 'details', label: 'Project Details', icon: <Info size={15} /> },
-              { id: 'inquiry', label: 'Send Inquiry', icon: <MessageSquare size={15} /> },
+              ...(project.status === 'ongoing' ? [{ id: 'inquiry' as const, label: 'Send Inquiry', icon: <MessageSquare size={15} /> }] : []),
             ] as const).map(tab => (
               <button
                 key={tab.id}
@@ -166,13 +166,15 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
                         </div>
                       ))}
                     </div>
-                    {/* CTA to inquiry tab */}
-                    <button
-                      onClick={() => setActiveTab('inquiry')}
-                      style={{ marginTop: '1rem', width: '100%', background: 'var(--white)', color: 'var(--black)', border: 'none', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
-                    >
-                      <MessageSquare size={15} /> Inquire About This Project
-                    </button>
+                    {/* CTA to inquiry tab — only for ongoing projects */}
+                    {project.status === 'ongoing' && (
+                      <button
+                        onClick={() => setActiveTab('inquiry')}
+                        style={{ marginTop: '1rem', width: '100%', background: 'var(--white)', color: 'var(--black)', border: 'none', borderRadius: 8, padding: '0.75rem 1rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+                      >
+                        <MessageSquare size={15} /> Inquire About This Project
+                      </button>
+                    )}
                   </div>
                 </div>
 
