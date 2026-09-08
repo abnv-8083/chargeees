@@ -1,7 +1,7 @@
 'use client';
 import { motion } from 'framer-motion';
 import type { ServiceData } from '@/lib/types';
-import { Target, Zap, Code, BarChart2, Lightbulb, Globe, Shield, Users, ArrowRight, Layers, Database, TrendingUp } from 'lucide-react';
+import { Target, Zap, Code, BarChart2, Lightbulb, Globe, Shield, Users, Layers, Database, TrendingUp } from 'lucide-react';
 import Parallax from '@/components/ui/Parallax';
 import RevealText from '@/components/ui/RevealText';
 
@@ -56,14 +56,7 @@ export default function ServicesSection({ data }: { data?: ServiceData[] }) {
                 {ICON_MAP[service.icon] || <Zap size={22} />}
               </div>
               <h3 className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.75rem' }}>{service.name}</h3>
-              <p className="body-md" style={{ marginBottom: '1.5rem' }}>{service.description}</p>
-              <a
-                href={service.learnMoreLink}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8125rem', fontFamily: 'var(--font-grotesk)', fontWeight: 600, color: 'var(--white)', textDecoration: 'none', marginTop: 'auto', transition: 'gap 0.2s ease' }}
-                className="service-learn-more"
-              >
-                Learn More <ArrowRight size={14} />
-              </a>
+              <p className="body-md" style={{ margin: 0 }}>{service.description}</p>
             </motion.div>
           ))}
         </div>
