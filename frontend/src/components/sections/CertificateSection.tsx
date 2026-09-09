@@ -84,37 +84,21 @@ function PreviewModal({ cert, onClose }: { cert: CertificateData; onClose: () =>
 
 /* ─── Main section ───────────────────────────────────────────────────────── */
 export default function CertificateSection() {
-  const { user, openAuthModal } = useAuth();
-
   const [certNum, setCertNum]   = useState('');
   const [result, setResult]     = useState<any | null>(null);
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
-  const [claiming, setClaiming] = useState(false);
-  const [claimOk, setClaimOk]   = useState('');
   const [preview, setPreview]   = useState<CertificateData | null>(null);
   const [copied, setCopied]     = useState<string | null>(null);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); setClaimOk(''); setResult(null);
+    setError(''); setResult(null);
     if (!certNum.trim()) { setError('Please enter a certificate number.'); return; }
     setLoading(true);
     try { setResult(await searchCertificateByNumber(certNum.trim())); }
     catch (err: any) { setError(err.message || 'No certificate found with that number.'); }
     finally { setLoading(false); }
-  };
-
-  const handleClaim = async () => {
-    if (!user) { openAuthModal('login'); return; }
-    if (!result) return;
-    setClaiming(true); setError('');
-    try {
-      await claimCertificate(result.certificateNumber);
-      setClaimOk('Certificate linked to your profile successfully!');
-      setResult(null); setCertNum('');
-    } catch (err: any) { setError(err.message || 'Failed to link certificate.'); }
-    finally { setClaiming(false); }
   };
 
   const copy = (val: string) => {
@@ -252,18 +236,7 @@ export default function CertificateSection() {
                 )}
               </AnimatePresence>
 
-              {/* claim success */}
-              <AnimatePresence>
-                {claimOk && (
-                  <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem',
-                      background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)',
-                      color: '#4ade80', padding: '0.85rem 1rem', borderRadius: 10,
-                      fontSize: '0.85rem', marginTop: '1rem' }}>
-                    <CheckCircle2 size={16} /> {claimOk}
-                  </motion.div>
-                )}
-              </AnimatePresence>
+
             </div>
 
             {/* ── Result card (inside portal card) ── */}
