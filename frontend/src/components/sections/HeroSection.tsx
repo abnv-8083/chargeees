@@ -1,5 +1,4 @@
 'use client';
-import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
@@ -7,6 +6,7 @@ import type { HeroData } from '@/lib/types';
 import { ArrowRight } from 'lucide-react';
 
 const GradientWaves = dynamic(() => import('@/components/ui/GradientWaves'), { ssr: false });
+const FoldText = dynamic(() => import('@/components/ui/FoldText'), { ssr: false });
 
 const FALLBACK: HeroData = {
   companyName: 'ChargEase',
@@ -16,32 +16,6 @@ const FALLBACK: HeroData = {
   secondaryCTA: { label: 'Get in Touch', link: '#inquiry' },
   backgroundType: 'particles',
 };
-
-/* ─── Typing animation hook ─────────────────────────────────────────────── */
-function useTypingAnimation(text: string, speed = 60, delay = 800) {
-  const [displayed, setDisplayed] = useState('');
-  const [done, setDone] = useState(false);
-
-  useEffect(() => {
-    let timeout: NodeJS.Timeout;
-    let i = 0;
-    const start = () => {
-      timeout = setTimeout(function type() {
-        if (i < text.length) {
-          setDisplayed(text.slice(0, i + 1));
-          i++;
-          timeout = setTimeout(type, text[i - 1] === '\n' ? 300 : speed);
-        } else {
-          setDone(true);
-        }
-      }, delay);
-    };
-    start();
-    return () => clearTimeout(timeout);
-  }, [text, speed, delay]);
-
-  return { displayed, done };
-}
 
 const handleExploreClick = (link?: string) => {
   if (typeof window === 'undefined') return;
@@ -60,17 +34,18 @@ const handleExploreClick = (link?: string) => {
   window.location.href = `/#${targetId}`;
 };
 
-const container: Variants = { hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.4 } } };
-const fadeUp: Variants = { hidden: { opacity: 0, y: 40 }, show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: 'easeOut' as const } } };
+const container: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.15, delayChildren: 0.3 } },
+};
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+};
 
 export default function HeroSection({ data }: { data?: HeroData }) {
   const d = data || FALLBACK;
-  const lines = d.tagline.split('\n');
-  const fullText = lines.join(' ');
-  const { displayed, done } = useTypingAnimation(fullText, 55, 1000);
-
-  // Split displayed text back into lines for rendering
-  const displayedLines = displayed.split('\n');
 
   return (
     <section id="hero" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -131,46 +106,36 @@ export default function HeroSection({ data }: { data?: HeroData }) {
             <span className="label-sm" style={{ fontSize: '1rem', letterSpacing: 'normal', color: 'var(--gray-300)', fontWeight: 600 }}>{d.companyName}</span>
           </motion.div>
 
-          {/* Main heading — typing animation */}
-          <h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1rem', minHeight: '1.1em' }}>
-            {displayedLines.map((line, li) => (
-              <span key={li} style={{ display: 'block' }}>
-                {line.split(' ').map((word, wi) => (
-                  <span key={wi} style={{ display: 'inline-block', marginRight: '0.25em' }}>
-                    {word}
-                  </span>
-                ))}
-              </span>
-            ))}
-            {!done && (
-              <span className="hero-cursor" style={{
-                display: 'inline-block',
-                width: '3px',
-                height: '0.9em',
-                background: 'var(--white)',
-                marginLeft: '2px',
-                verticalAlign: 'text-bottom',
-                animation: 'blink 1s step-end infinite',
-              }} />
-            )}
+          {/* Main heading — 3D FoldText animation */}
+          <h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1.25rem', minHeight: '1.1em' }}>
+            <FoldText
+              text={d.tagline}
+              splitBy="char"
+              hinge="top"
+              trigger="mount"
+              duration={0.65}
+              stagger={0.035}
+              ease="power3.out"
+              perspective={700}
+              creaseShading={0.55}
+              fontSize="clamp(2.5rem, 6.5vw, 4.75rem)"
+              fontWeight={700}
+              color="#ffffff"
+            />
           </h1>
 
-          {/* Introduction — fades in after typing */}
+          {/* Introduction */}
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={done ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            variants={fadeUp}
             className="body-lg"
             style={{ maxWidth: '480px', margin: '0 auto 2rem', color: 'var(--gray-400)' }}
           >
             {d.introduction}
           </motion.p>
 
-          {/* CTAs — slide up after intro */}
+          {/* CTAs */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={done ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+            variants={fadeUp}
             style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}
           >
             <button className="btn-primary" onClick={() => handleExploreClick(d.primaryCTA?.link)}>
@@ -185,8 +150,8 @@ export default function HeroSection({ data }: { data?: HeroData }) {
       <motion.div
         className="scroll-indicator"
         initial={{ opacity: 0 }}
-        animate={done ? { opacity: 1 } : {}}
-        transition={{ delay: 0.5, duration: 0.8 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.8, duration: 0.8 }}
         aria-hidden="true"
         onClick={() => handleExploreClick('about')}
         style={{ cursor: 'pointer' }}
@@ -194,10 +159,7 @@ export default function HeroSection({ data }: { data?: HeroData }) {
         <span className="label-sm" style={{ color: 'var(--gray-600)' }}>Scroll</span>
         <div className="scroll-line" />
       </motion.div>
-
-      <style>{`
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-      `}</style>
     </section>
   );
 }
+
