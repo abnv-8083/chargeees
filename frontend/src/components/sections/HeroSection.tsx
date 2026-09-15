@@ -1,9 +1,12 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
 import type { HeroData } from '@/lib/types';
 import { ArrowRight } from 'lucide-react';
+
+const GradientWaves = dynamic(() => import('@/components/ui/GradientWaves'), { ssr: false });
 
 const FALLBACK: HeroData = {
   companyName: 'ChargEase',
@@ -13,62 +16,6 @@ const FALLBACK: HeroData = {
   secondaryCTA: { label: 'Get in Touch', link: '#inquiry' },
   backgroundType: 'particles',
 };
-
-function ParticleCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    let W = canvas.width = canvas.offsetWidth;
-    let H = canvas.height = canvas.offsetHeight;
-    let raf: number;
-
-    const particles = Array.from({ length: 60 }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.3,
-      vy: (Math.random() - 0.5) * 0.3,
-      r: Math.random() * 1.5 + 0.3,
-      o: Math.random() * 0.5 + 0.1,
-    }));
-
-    const draw = () => {
-      ctx.clearRect(0, 0, W, H);
-      particles.forEach(p => {
-        p.x += p.vx; p.y += p.vy;
-        if (p.x < 0) p.x = W; if (p.x > W) p.x = 0;
-        if (p.y < 0) p.y = H; if (p.y > H) p.y = 0;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(255,255,255,${p.o})`;
-        ctx.fill();
-      });
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x;
-          const dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.strokeStyle = `rgba(255,255,255,${0.06 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.5;
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.stroke();
-          }
-        }
-      }
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
-    const onResize = () => { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; };
-    window.addEventListener('resize', onResize);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', onResize); };
-  }, []);
-  return <canvas ref={canvasRef} id="hero-canvas" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} aria-hidden="true" />;
-}
 
 /* ─── Typing animation hook ─────────────────────────────────────────────── */
 function useTypingAnimation(text: string, speed = 60, delay = 800) {
@@ -126,14 +73,57 @@ export default function HeroSection({ data }: { data?: HeroData }) {
   const displayedLines = displayed.split('\n');
 
   return (
-    <section id="hero">
-      <ParticleCanvas />
+    <section id="hero" style={{ position: 'relative', overflow: 'hidden' }}>
+      {/* 3D WebGL Gradient Waves Background */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+        <GradientWaves
+          horizonColor="#5227FF"
+          waveColor="#FF9FFC"
+          crestColor="#FFFFFF"
+          speed={0.4}
+          amplitude={2.5}
+          waveScale={0.6}
+          waveRatio={0.9}
+          swell={35}
+          turbulence={20}
+          tilt={1.11}
+          zoom={1.0}
+          height={5.5}
+          fogDepth={15}
+          detail="medium"
+          brightness={1.0}
+          opacity={1.0}
+          mouseInteraction={true}
+          parallaxStrength={0.5}
+          grain={true}
+          grainIntensity={0.05}
+        />
+      </div>
 
-      {/* Gradient overlays */}
-      <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255,255,255,0.04) 0%, transparent 70%)' }} />
-      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40%', background: 'linear-gradient(0deg, #000 0%, transparent 100%)' }} />
+      {/* Subtle vignette & bottom fade overlays to ensure hero text is crisp & readable */}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'radial-gradient(ellipse 85% 75% at 50% 50%, rgba(5, 5, 15, 0.35) 0%, rgba(5, 5, 15, 0.78) 100%)',
+          zIndex: 1,
+          pointerEvents: 'none',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: '40%',
+          background: 'linear-gradient(0deg, #05050f 0%, transparent 100%)',
+          zIndex: 1,
+          pointerEvents: 'none',
+        }}
+      />
 
-      <div className="hero-content">
+      <div className="hero-content" style={{ position: 'relative', zIndex: 2 }}>
         <motion.div variants={container} initial="hidden" animate="show">
           {/* Label */}
           <motion.div variants={fadeUp} className="hero-label" style={{ justifyContent: 'center' }}>
