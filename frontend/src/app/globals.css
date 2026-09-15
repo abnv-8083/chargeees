@@ -176,33 +176,6 @@ body:not(.custom-cursor-active) textarea { cursor: text !important; }
 #cursor-arrow.clicking {
   transform: translate(-3px, -3px) scale(0.85);
 }
-#cursor-trail {
-  position: fixed;
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--cursor-color, rgba(255,255,255,0.15));
-  border-radius: 50%;
-  pointer-events: none;
-  z-index: 9999998;
-  opacity: 0.3;
-  transition: width 0.3s var(--ease-out-expo),
-              height 0.3s var(--ease-out-expo),
-              border-color 0.35s ease,
-              opacity 0.3s ease;
-  will-change: left, top;
-}
-#cursor-trail.hovering {
-  width: 56px;
-  height: 56px;
-  opacity: 0.15;
-  border-color: var(--cursor-color, rgba(255,255,255,0.25));
-}
-#cursor-trail.clicking {
-  width: 24px;
-  height: 24px;
-  opacity: 0.4;
-}
-
 /* ============================================================
    LOADING SCREEN
    ============================================================ */

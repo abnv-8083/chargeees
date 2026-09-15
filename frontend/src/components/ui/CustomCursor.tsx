@@ -3,7 +3,6 @@ import { useEffect, useRef } from 'react';
 
 export default function CustomCursor() {
   const arrowRef = useRef<HTMLDivElement>(null);
-  const trailRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (typeof window !== 'undefined' && window.location.pathname.startsWith('/admin')) {
@@ -11,14 +10,12 @@ export default function CustomCursor() {
     }
 
     const arrow = arrowRef.current;
-    const trail = trailRef.current;
-    if (!arrow || !trail) return;
+    if (!arrow) return;
 
     document.body.classList.add('custom-cursor-active');
 
     let mx = 0, my = 0;   // mouse position
     let ax = 0, ay = 0;   // arrow position (lerped)
-    let tx = 0, ty = 0;   // trail position (lerped, slower)
     let raf: number;
 
     const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
@@ -35,16 +32,10 @@ export default function CustomCursor() {
 
     const animate = () => {
       // Arrow follows tightly
-      ax = lerp(ax, mx, 0.18);
-      ay = lerp(ay, my, 0.18);
+      ax = lerp(ax, mx, 0.22);
+      ay = lerp(ay, my, 0.22);
       arrow.style.left = `${ax}px`;
       arrow.style.top = `${ay}px`;
-
-      // Trail follows slower for a ghostly lag
-      tx = lerp(tx, mx, 0.08);
-      ty = lerp(ty, my, 0.08);
-      trail.style.left = `${tx}px`;
-      trail.style.top = `${ty}px`;
 
       raf = requestAnimationFrame(animate);
     };
@@ -52,19 +43,15 @@ export default function CustomCursor() {
 
     const onEnter = () => {
       arrow.classList.add('hovering');
-      trail.classList.add('hovering');
     };
     const onLeave = () => {
       arrow.classList.remove('hovering');
-      trail.classList.remove('hovering');
     };
     const onDown = () => {
       arrow.classList.add('clicking');
-      trail.classList.add('clicking');
     };
     const onUp = () => {
       arrow.classList.remove('clicking');
-      trail.classList.remove('clicking');
     };
 
     // Use mutation observer to catch dynamically added elements
@@ -107,16 +94,13 @@ export default function CustomCursor() {
   }, []);
 
   return (
-    <>
-      <div ref={trailRef} id="cursor-trail" aria-hidden="true" />
-      <div ref={arrowRef} id="cursor-arrow" aria-hidden="true">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path
-            d="M4 2L16 10L9 11.5L6.5 18L4 2Z"
-            fill="currentColor"
-          />
-        </svg>
-      </div>
-    </>
+    <div ref={arrowRef} id="cursor-arrow" aria-hidden="true">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M4 2L16 10L9 11.5L6.5 18L4 2Z"
+          fill="currentColor"
+        />
+      </svg>
+    </div>
   );
 }
