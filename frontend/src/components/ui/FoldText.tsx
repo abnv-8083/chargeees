@@ -108,9 +108,35 @@ const FoldText: React.FC<FoldTextProps> = ({
       });
     }
 
-    return Array.from(text).map((char, index) => {
-      if (char === '\n') return <br key={`br-${index}`} />;
-      return renderSegment(char === ' ' ? '\u00A0' : char, `segment-char-${index}`);
+    // splitBy === 'char'
+    // Group characters into unbreakable words so that words and attached punctuation
+    // (e.g. "US..!") never break mid-word or orphan punctuation across lines.
+    return text.split('\n').map((line, lineIndex, lineArray) => {
+      const tokens = line.split(/(\s+)/);
+      const lineNodes = tokens.map((token, tokenIndex) => {
+        if (!token) return null;
+        if (/^\s+$/.test(token)) {
+          return (
+            <span className="fold-text-space" key={`space-${lineIndex}-${tokenIndex}`}>
+              {token}
+            </span>
+          );
+        }
+        return (
+          <span className="fold-text-word" key={`word-${lineIndex}-${tokenIndex}`}>
+            {Array.from(token).map((char, charIndex) =>
+              renderSegment(char, `char-${lineIndex}-${tokenIndex}-${charIndex}`)
+            )}
+          </span>
+        );
+      });
+
+      return (
+        <React.Fragment key={`line-${lineIndex}`}>
+          {lineNodes}
+          {lineIndex < lineArray.length - 1 && <br key={`br-${lineIndex}`} />}
+        </React.Fragment>
+      );
     });
   }, [text, splitBy, hinge, hingeConfig.origin, safePerspective]);
 

@@ -3,9 +3,10 @@
   color: var(--fold-text-color, currentColor);
   font-size: var(--fold-text-font-size, inherit);
   font-weight: var(--fold-text-font-weight, inherit);
-  line-height: 1.05;
+  line-height: 1.12;
   letter-spacing: normal;
-  white-space: pre-wrap;
+  white-space: normal;
+  text-wrap: balance;
   user-select: text;
 }
 
@@ -31,6 +32,17 @@
 
 .fold-text-whitespace {
   display: inline;
+}
+
+.fold-text-word {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: baseline;
+}
+
+.fold-text-space {
+  display: inline;
+  white-space: pre-wrap;
 }
 
 .fold-text-segment {

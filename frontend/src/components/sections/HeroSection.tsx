@@ -52,6 +52,7 @@ export default function HeroSection({
   isLoaded?: boolean;
 }) {
   const d = data || FALLBACK;
+  const cleanTagline = (d.tagline || '').replace(/\s+([!?,.:;]+)/g, '$1');
 
   return (
     <section id="hero" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -113,10 +114,10 @@ export default function HeroSection({
           </motion.div>
 
           {/* Main heading — 3D FoldText animation */}
-          <h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1.25rem', minHeight: '1.1em' }}>
+          <h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1.25rem', minHeight: '1.1em', maxWidth: '1200px', marginInline: 'auto' }}>
             {isLoaded ? (
               <FoldText
-                text={d.tagline}
+                text={cleanTagline}
                 splitBy="char"
                 hinge="top"
                 trigger="mount"
@@ -125,12 +126,12 @@ export default function HeroSection({
                 ease="power3.out"
                 perspective={700}
                 creaseShading={0.55}
-                fontSize="clamp(2.5rem, 6.5vw, 4.75rem)"
+                fontSize="clamp(2.25rem, 5vw, 4.25rem)"
                 fontWeight={700}
                 color="#ffffff"
               />
             ) : (
-              <span style={{ opacity: 0 }}>{d.tagline}</span>
+              <span style={{ opacity: 0 }}>{cleanTagline}</span>
             )}
           </h1>
 
