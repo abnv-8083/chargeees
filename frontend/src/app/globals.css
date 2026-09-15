@@ -183,7 +183,7 @@ body:not(.custom-cursor-active) textarea { cursor: text !important; }
   position: fixed;
   inset: 0;
   background: var(--bg-deep);
-  z-index: 9997;
+  z-index: 99999999;
   display: flex;
   align-items: center;
   justify-content: center;

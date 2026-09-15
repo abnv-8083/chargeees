@@ -16,8 +16,9 @@ import type {
   FounderData, ProjectData, ServiceData, SiteSettings, GalleryItemData,
 } from '@/lib/types';
 
+import LoadingScreen from '@/components/ui/LoadingScreen';
+
 const CustomCursor  = dynamic(() => import('@/components/ui/CustomCursor'),  { ssr: false });
-const LoadingScreen = dynamic(() => import('@/components/ui/LoadingScreen'), { ssr: false });
 const ScrollProgress = dynamic(() => import('@/components/ui/ScrollProgress'), { ssr: false });
 
 type Props = {
@@ -69,34 +70,36 @@ export default function ClientPage({
       <LoadingScreen onComplete={() => setIsLoaded(true)} />
       <CustomCursor />
       <ScrollProgress />
-      <Navbar settings={settings || undefined} />
-      <main>
-        <HeroSection data={hero || undefined} isLoaded={isLoaded} />
-        <div className="divider" />
+      <div style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.4s ease' }}>
+        <Navbar settings={settings || undefined} />
+        <main>
+          <HeroSection data={hero || undefined} isLoaded={isLoaded} />
+          <div className="divider" />
 
-        {/* About — includes Vision & Mission tabs inside */}
-        <AboutSection
-          data={about || undefined}
-          vision={vision || undefined}
-          mission={mission || undefined}
-        />
-        <div className="divider" />
+          {/* About — includes Vision & Mission tabs inside */}
+          <AboutSection
+            data={about || undefined}
+            vision={vision || undefined}
+            mission={mission || undefined}
+          />
+          <div className="divider" />
 
-        {/* Founders */}
-        <FounderSection data={allFounders.length > 0 ? allFounders : undefined} />
-        <div className="divider" />
+          {/* Founders */}
+          <FounderSection data={allFounders.length > 0 ? allFounders : undefined} />
+          <div className="divider" />
 
-        <ProjectsSection data={projects.length > 0 ? projects : undefined} />
-        <div className="divider" />
-        <ServicesSection data={services.length > 0 ? services : undefined} />
-        <div className="divider" />
-        <GallerySection data={gallery.length > 0 ? gallery : undefined} />
-        <div className="divider" />
-        <InquirySection />
-        <div className="divider" />
-        <ContactSection settings={settings || undefined} />
-      </main>
-      <Footer settings={settings || undefined} />
+          <ProjectsSection data={projects.length > 0 ? projects : undefined} />
+          <div className="divider" />
+          <ServicesSection data={services.length > 0 ? services : undefined} />
+          <div className="divider" />
+          <GallerySection data={gallery.length > 0 ? gallery : undefined} />
+          <div className="divider" />
+          <InquirySection />
+          <div className="divider" />
+          <ContactSection settings={settings || undefined} />
+        </main>
+        <Footer settings={settings || undefined} />
+      </div>
     </>
   );
 }
