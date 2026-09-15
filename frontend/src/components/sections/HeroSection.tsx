@@ -44,7 +44,13 @@ const fadeUp: Variants = {
   show: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
 };
 
-export default function HeroSection({ data }: { data?: HeroData }) {
+export default function HeroSection({
+  data,
+  isLoaded = false,
+}: {
+  data?: HeroData;
+  isLoaded?: boolean;
+}) {
   const d = data || FALLBACK;
 
   return (
@@ -99,7 +105,7 @@ export default function HeroSection({ data }: { data?: HeroData }) {
       />
 
       <div className="hero-content" style={{ position: 'relative', zIndex: 2 }}>
-        <motion.div variants={container} initial="hidden" animate="show">
+        <motion.div variants={container} initial="hidden" animate={isLoaded ? 'show' : 'hidden'}>
           {/* Label */}
           <motion.div variants={fadeUp} className="hero-label" style={{ justifyContent: 'center' }}>
             <span className="hero-label-dot" />
@@ -108,20 +114,24 @@ export default function HeroSection({ data }: { data?: HeroData }) {
 
           {/* Main heading — 3D FoldText animation */}
           <h1 className="heading-hero" style={{ color: 'var(--white)', marginBottom: '1.25rem', minHeight: '1.1em' }}>
-            <FoldText
-              text={d.tagline}
-              splitBy="char"
-              hinge="top"
-              trigger="mount"
-              duration={0.65}
-              stagger={0.035}
-              ease="power3.out"
-              perspective={700}
-              creaseShading={0.55}
-              fontSize="clamp(2.5rem, 6.5vw, 4.75rem)"
-              fontWeight={700}
-              color="#ffffff"
-            />
+            {isLoaded ? (
+              <FoldText
+                text={d.tagline}
+                splitBy="char"
+                hinge="top"
+                trigger="mount"
+                duration={0.65}
+                stagger={0.035}
+                ease="power3.out"
+                perspective={700}
+                creaseShading={0.55}
+                fontSize="clamp(2.5rem, 6.5vw, 4.75rem)"
+                fontWeight={700}
+                color="#ffffff"
+              />
+            ) : (
+              <span style={{ opacity: 0 }}>{d.tagline}</span>
+            )}
           </h1>
 
           {/* Introduction */}
@@ -150,7 +160,7 @@ export default function HeroSection({ data }: { data?: HeroData }) {
       <motion.div
         className="scroll-indicator"
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
+        animate={{ opacity: isLoaded ? 1 : 0 }}
         transition={{ delay: 0.8, duration: 0.8 }}
         aria-hidden="true"
         onClick={() => handleExploreClick('about')}

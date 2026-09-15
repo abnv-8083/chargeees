@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function LoadingScreen() {
+export default function LoadingScreen({ onComplete }: { onComplete?: () => void }) {
   const [progress, setProgress] = useState(0);
   const [done, setDone] = useState(false);
   const lineRef = useRef<HTMLDivElement>(null);
@@ -14,7 +14,7 @@ export default function LoadingScreen() {
       if (p >= 100) {
         p = 100;
         clearInterval(interval);
-        setTimeout(() => setDone(true), 600);
+        setTimeout(() => setDone(true), 400);
       }
       setProgress(Math.min(Math.round(p), 100));
       if (lineRef.current) lineRef.current.style.width = `${Math.min(p, 100)}%`;
@@ -23,7 +23,7 @@ export default function LoadingScreen() {
   }, []);
 
   return (
-    <AnimatePresence>
+    <AnimatePresence onExitComplete={onComplete}>
       {!done && (
         <motion.div
           id="loading-screen"

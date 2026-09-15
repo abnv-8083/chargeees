@@ -1,5 +1,5 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/sections/HeroSection';
@@ -38,6 +38,15 @@ export default function ClientPage({
   founders, cofounders, projects, services, settings, gallery,
 }: Props) {
   const allFounders = [...founders, ...cofounders];
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Safety fallback: ensure hero starts even if loader completes abnormally
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 3500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Auto-scroll to anchor hash when arriving from other pages (e.g. /#projects, /#inquiry, /#contact)
   useEffect(() => {
@@ -57,12 +66,12 @@ export default function ClientPage({
 
   return (
     <>
-      <LoadingScreen />
+      <LoadingScreen onComplete={() => setIsLoaded(true)} />
       <CustomCursor />
       <ScrollProgress />
       <Navbar settings={settings || undefined} />
       <main>
-        <HeroSection data={hero || undefined} />
+        <HeroSection data={hero || undefined} isLoaded={isLoaded} />
         <div className="divider" />
 
         {/* About — includes Vision & Mission tabs inside */}
