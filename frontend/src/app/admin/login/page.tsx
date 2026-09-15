@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
-import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const { login } = useAuth();
@@ -151,6 +151,7 @@ export default function AdminLoginPage() {
             disabled={loading}
             style={{
               width: '100%',
+              minHeight: '46px',
               background: '#fff',
               color: '#000',
               border: 'none',
@@ -164,11 +165,19 @@ export default function AdminLoginPage() {
               justifyContent: 'center',
               gap: '0.5rem',
               marginTop: '0.5rem',
-              opacity: loading ? 0.7 : 1,
+              opacity: loading ? 0.75 : 1,
               transition: 'all 0.2s ease',
             }}
           >
-            {loading ? 'Authenticating...' : (
+            {loading ? (
+              <Loader2
+                size={20}
+                style={{
+                  animation: 'spin 0.8s linear infinite',
+                  color: '#000',
+                }}
+              />
+            ) : (
               <>Sign In to CMS <ArrowRight size={16} /></>
             )}
           </button>

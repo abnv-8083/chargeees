@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { adminForgotPassword } from '@/lib/api';
-import { Mail, ArrowLeft, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -82,9 +82,30 @@ export default function ForgotPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              style={{ width: '100%', background: '#fff', color: '#000', border: 'none', borderRadius: '10px', padding: '0.85rem', fontSize: '0.9rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}
+              style={{
+                width: '100%',
+                minHeight: '46px',
+                background: '#fff',
+                color: '#000',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '0.85rem',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                opacity: loading ? 0.75 : 1,
+                transition: 'all 0.2s ease',
+              }}
             >
-              {loading ? 'Sending...' : 'Send Reset Instructions'}
+              {loading ? (
+                <Loader2 size={20} style={{ animation: 'spin 0.8s linear infinite', color: '#000' }} />
+              ) : (
+                'Send Reset Instructions'
+              )}
             </button>
           </form>
         )}

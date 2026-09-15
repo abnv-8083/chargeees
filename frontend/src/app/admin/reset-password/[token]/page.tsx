@@ -3,7 +3,7 @@ import React, { useState, use } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { adminResetPassword } from '@/lib/api';
-import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
+import { Lock, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 export default function ResetPasswordPage({ params }: { params: Promise<{ token: string }> }) {
   const resolvedParams = use(params);
@@ -93,9 +93,30 @@ export default function ResetPasswordPage({ params }: { params: Promise<{ token:
             <button
               type="submit"
               disabled={loading}
-              style={{ width: '100%', background: '#fff', color: '#000', border: 'none', borderRadius: '10px', padding: '0.85rem', fontSize: '0.9rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1 }}
+              style={{
+                width: '100%',
+                minHeight: '46px',
+                background: '#fff',
+                color: '#000',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '0.85rem',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                opacity: loading ? 0.75 : 1,
+                transition: 'all 0.2s ease',
+              }}
             >
-              {loading ? 'Updating...' : 'Update Password'}
+              {loading ? (
+                <Loader2 size={20} style={{ animation: 'spin 0.8s linear infinite', color: '#000' }} />
+              ) : (
+                'Update Password'
+              )}
             </button>
           </form>
         )}

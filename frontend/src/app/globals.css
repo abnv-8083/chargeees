@@ -1251,3 +1251,13 @@ div[class*="nextjs-container"] {
   opacity: 0 !important;
   pointer-events: none !important;
 }
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
