@@ -7,8 +7,17 @@ import { AdminModal, ConfirmDialog, AdminLoading } from '@/app/admin/components'
 import { adminInput, adminTextarea, adminLabel, adminBtn } from '@/app/admin/components/adminStyles';
 import {
   Plus, Edit2, Trash2, Users, Upload, ImageIcon,
-  Linkedin, Twitter, Instagram, Globe, Loader2,
+  Linkedin, Instagram, Globe, Loader2,
 } from 'lucide-react';
+
+/* X (formerly Twitter) SVG icon */
+function XIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+    </svg>
+  );
+}
 
 const EMPTY_FORM = {
   type: 'founder' as 'founder' | 'cofounder',
@@ -280,7 +289,7 @@ export default function FoundersManagerPage() {
               {(['linkedin', 'twitter', 'instagram', 'website'] as const).map(key => (
                 <div key={key} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#0d0d0f', border: '1px solid #27272a', borderRadius: 8, padding: '0 0.75rem' }}>
                   <span style={{ color: '#3f3f46', flexShrink: 0 }}>
-                    {key === 'linkedin' ? <Linkedin size={14} /> : key === 'twitter' ? <Twitter size={14} /> : key === 'instagram' ? <Instagram size={14} /> : <Globe size={14} />}
+                    {key === 'linkedin' ? <Linkedin size={14} /> : key === 'twitter' ? <XIcon size={14} /> : key === 'instagram' ? <Instagram size={14} /> : <Globe size={14} />}
                   </span>
                   <input type="text" placeholder={key.charAt(0).toUpperCase() + key.slice(1)} value={(formData.socialLinks as any)[key]} onChange={e => setFormData({ ...formData, socialLinks: { ...formData.socialLinks, [key]: e.target.value } })}
                     style={{ ...adminInput, border: 'none', padding: '0.65rem 0', background: 'transparent' }} />
@@ -347,7 +356,7 @@ function FounderCard({ founder: f, onEdit, onDelete }: { founder: FounderData; o
       {f.socialLinks && Object.values(f.socialLinks).some(Boolean) && (
         <div style={{ display: 'flex', gap: '0.5rem', padding: '0 1.15rem 0.85rem' }}>
           {f.socialLinks.linkedin && <a href={f.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" style={{ color: '#3f3f46' }}><Linkedin size={14} /></a>}
-          {f.socialLinks.twitter && <a href={f.socialLinks.twitter} target="_blank" rel="noopener noreferrer" style={{ color: '#3f3f46' }}><Twitter size={14} /></a>}
+          {f.socialLinks.twitter && <a href={f.socialLinks.twitter} target="_blank" rel="noopener noreferrer" style={{ color: '#3f3f46' }}><XIcon size={14} /></a>}
           {f.socialLinks.instagram && <a href={f.socialLinks.instagram} target="_blank" rel="noopener noreferrer" style={{ color: '#3f3f46' }}><Instagram size={14} /></a>}
           {f.socialLinks.website && <a href={f.socialLinks.website} target="_blank" rel="noopener noreferrer" style={{ color: '#3f3f46' }}><Globe size={14} /></a>}
         </div>

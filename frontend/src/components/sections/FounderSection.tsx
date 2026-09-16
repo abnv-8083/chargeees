@@ -3,9 +3,18 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import type { FounderData } from '@/lib/types';
-import { Linkedin, Twitter, Instagram, Globe, Award, BookOpen, Briefcase, ChevronDown } from 'lucide-react';
+import { Linkedin, Instagram, Globe, Award, BookOpen, Briefcase, ChevronDown } from 'lucide-react';
 import Parallax from '@/components/ui/Parallax';
 import RevealText from '@/components/ui/RevealText';
+
+/* X (formerly Twitter) SVG icon */
+function XIcon({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+    </svg>
+  );
+}
 
 /* ─── fallback data ──────────────────────────────────────────────────────── */
 const FALLBACK: FounderData[] = [
@@ -42,7 +51,7 @@ const CARD_THEMES = [
 
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
   linkedin: <Linkedin size={15} />,
-  twitter: <Twitter size={15} />,
+  twitter: <XIcon size={14} />,
   instagram: <Instagram size={15} />,
   facebook: <Globe size={15} />,
   website: <Globe size={15} />,

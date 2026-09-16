@@ -2,9 +2,18 @@
 import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import type { SiteSettings } from '@/lib/types';
-import { Mail, Phone, MapPin, Clock, Linkedin, Twitter, Instagram, Facebook, Youtube, Globe } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Linkedin, Instagram, Facebook, Youtube, Globe } from 'lucide-react';
 import Parallax from '@/components/ui/Parallax';
 import RevealText from '@/components/ui/RevealText';
+
+/* X (formerly Twitter) SVG icon */
+function XIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.253 5.622L18.244 2.25zm-1.161 17.52h1.833L7.084 4.126H5.117L17.083 19.77z" />
+    </svg>
+  );
+}
 
 const DEFAULT_SETTINGS: Partial<SiteSettings> = {
   contact: { email: 'info@chargeease.com', phone: '+1 (555) 000-0000', address: '100 Innovation Drive, Suite 500\nNew York, NY 10001', officeHours: 'Monday – Friday\n9:00 AM – 6:00 PM EST' },
@@ -12,7 +21,7 @@ const DEFAULT_SETTINGS: Partial<SiteSettings> = {
 };
 
 const SOCIAL_ICONS: Record<string, React.ReactNode> = {
-  linkedin: <Linkedin size={16} />, twitter: <Twitter size={16} />,
+  linkedin: <Linkedin size={16} />, twitter: <XIcon size={15} />,
   instagram: <Instagram size={16} />, facebook: <Facebook size={16} />, youtube: <Youtube size={16} />,
 };
 
