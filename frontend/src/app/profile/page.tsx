@@ -289,7 +289,7 @@ export default function UserProfilePage() {
             <h2 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>Certificate Search & Verification</h2>
           </div>
           <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '1.75rem' }}>
-            No login required! Enter any <strong>Certificate Number</strong> (e.g. <code>CERT-2026-8912</code>) below to verify, preview, and download the official certificate document.
+            No login required! Enter any <strong>Certificate Number</strong> (e.g. <code>CHG-XXX-YYYY-ZZZ</code>) below to verify, preview, and download the official certificate document.
           </p>
 
           <form onSubmit={handleSearchSubmit} style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', maxWidth: '650px', marginBottom: '1.5rem' }}>
@@ -297,7 +297,7 @@ export default function UserProfilePage() {
               <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
               <input
                 type="text"
-                placeholder="Enter Certificate Number (e.g. CERT-2026-1049)"
+                placeholder="Enter Certificate Number (e.g. CHG-XXX-YYYY-ZZZ)"
                 value={searchCertNum}
                 onChange={e => setSearchCertNum(e.target.value.toUpperCase())}
                 style={{

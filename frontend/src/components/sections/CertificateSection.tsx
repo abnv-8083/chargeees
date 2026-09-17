@@ -184,7 +184,7 @@ export default function CertificateSection() {
                       top: '50%', transform: 'translateY(-50%)', color: 'var(--gray-600)' }} />
                     <input
                       type="text"
-                      placeholder="e.g. CERT-2026-1234"
+                      placeholder="e.g. CHG-XXX-YYYY-ZZZ"
                       value={certNum}
                       onChange={e => setCertNum(e.target.value.toUpperCase())}
                       style={{ width: '100%', padding: '0.85rem 1rem 0.85rem 2.75rem',
@@ -218,7 +218,7 @@ export default function CertificateSection() {
                 <p style={{ margin: 0, fontSize: '0.775rem', color: 'var(--gray-600)', lineHeight: 1.5 }}>
                   Certificate numbers follow the format <code style={{ color: 'var(--gray-400)',
                     background: 'var(--gray-900)', padding: '0.1rem 0.4rem', borderRadius: 4,
-                    fontFamily: 'monospace' }}>CERT-YYYY-XXXX</code>.
+                    fontFamily: 'monospace' }}>CHG-XXX-YYYY-ZZZ</code>.
                   All data is secured and tamper-proof.
                 </p>
               </div>
