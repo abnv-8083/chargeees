@@ -19,7 +19,6 @@ import type {
 import LoadingScreen from '@/components/ui/LoadingScreen';
 
 const CustomCursor  = dynamic(() => import('@/components/ui/CustomCursor'),  { ssr: false });
-const ScrollProgress = dynamic(() => import('@/components/ui/ScrollProgress'), { ssr: false });
 
 type Props = {
   hero: HeroData | null;
@@ -69,7 +68,6 @@ export default function ClientPage({
     <>
       <LoadingScreen onComplete={() => setIsLoaded(true)} />
       <CustomCursor />
-      <ScrollProgress />
       <div style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.4s ease' }}>
         <Navbar settings={settings || undefined} />
         <main>

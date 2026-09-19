@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
 import PageTransition from '@/components/ui/PageTransition';
+import ScrollProgress from '@/components/ui/ScrollProgress';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
@@ -47,6 +48,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PageTransition>
             {children}
           </PageTransition>
+          <ScrollProgress />
         </AuthProvider>
       </body>
     </html>
