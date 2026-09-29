@@ -45,74 +45,80 @@ export default function ContactSection({ settings }: { settings?: SiteSettings }
           <RevealText as="h2" className="heading-xl" delay={0.1}>Contact Us</RevealText>
         </motion.div>
 
-        <div className="contact-grid">
-          {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {[
-              { icon: <Mail size={20} />, label: 'Email', value: s.contact?.email, href: `mailto:${s.contact?.email}` },
-              { icon: <Phone size={20} />, label: 'Phone', value: s.contact?.phone, href: `tel:${s.contact?.phone}` },
-              { icon: <MapPin size={20} />, label: 'Address', value: s.contact?.address },
-              { icon: <Clock size={20} />, label: 'Office Hours', value: s.contact?.officeHours },
-            ].map((item, i) => (
-              <div key={i} className="contact-info-item">
-                <div className="contact-icon">{item.icon}</div>
-                <div>
-                  <p className="label-sm" style={{ marginBottom: '0.25rem' }}>{item.label}</p>
-                  {item.href ? (
-                    <a href={item.href} style={{ color: 'var(--white)', textDecoration: 'none', fontFamily: 'var(--font-grotesk)', fontSize: '0.9375rem', transition: 'color 0.2s ease' }}>
-                      {item.value}
-                    </a>
-                  ) : (
-                    <p style={{ color: 'var(--white)', fontFamily: 'var(--font-grotesk)', fontSize: '0.9375rem', whiteSpace: 'pre-line', margin: 0 }}>{item.value}</p>
-                  )}
-                </div>
+        {/* Contact Info Cards Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+          {[
+            { icon: <Mail size={22} />, label: 'Email', value: s.contact?.email, href: `mailto:${s.contact?.email}` },
+            { icon: <Phone size={22} />, label: 'Phone', value: s.contact?.phone, href: `tel:${s.contact?.phone}` },
+            { icon: <MapPin size={22} />, label: 'Address', value: s.contact?.address },
+            { icon: <Clock size={22} />, label: 'Office Hours', value: s.contact?.officeHours },
+          ].map((item, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.03)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: '16px',
+                padding: '1.75rem',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+              }}
+            >
+              <div className="contact-icon">{item.icon}</div>
+              <div>
+                <p className="label-sm" style={{ marginBottom: '0.35rem' }}>{item.label}</p>
+                {item.href ? (
+                  <a href={item.href} style={{ color: 'var(--white)', textDecoration: 'none', fontFamily: 'var(--font-grotesk)', fontSize: '0.9375rem', fontWeight: 500, transition: 'color 0.2s ease' }}>
+                    {item.value}
+                  </a>
+                ) : (
+                  <p style={{ color: 'var(--white)', fontFamily: 'var(--font-grotesk)', fontSize: '0.9375rem', fontWeight: 500, whiteSpace: 'pre-line', margin: 0 }}>{item.value}</p>
+                )}
               </div>
-            ))}
+            </motion.div>
+          ))}
+        </div>
 
-            {/* Social */}
-            {s.social && Object.entries(s.social).some(([, v]) => v) && (
-              <div style={{ marginTop: '2rem' }}>
-                <p className="label-sm" style={{ marginBottom: '1rem' }}>Follow Us</p>
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  {Object.entries(s.social).map(([key, val]) =>
-                    val ? (
-                      <a key={key} href={val} target="_blank" rel="noopener noreferrer" aria-label={key}
-                        style={{ width: 40, height: 40, border: '1px solid var(--gray-700)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gray-400)', textDecoration: 'none', transition: 'all 0.25s ease' }}
-                        className="contact-social-link"
-                      >
-                        {SOCIAL_ICONS[key] || <Globe size={16} />}
-                      </a>
-                    ) : null
-                  )}
-                </div>
-              </div>
-            )}
-          </motion.div>
-
-          {/* Map */}
+        {/* Social */}
+        {s.social && Object.entries(s.social).some(([, v]) => v) && (
           <motion.div
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            style={{
+              paddingTop: '2rem',
+              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '1.5rem',
+            }}
           >
-            <div className="map-container">
-              {s.contact?.googleMapsEmbed ? (
-                <iframe src={s.contact.googleMapsEmbed} title="ChargEase Office Location" loading="lazy" allowFullScreen referrerPolicy="no-referrer-when-downgrade" />
-              ) : (
-                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--gray-800)', color: 'var(--gray-600)', flexDirection: 'column', gap: '0.75rem' }}>
-                  <MapPin size={32} />
-                  <p style={{ fontFamily: 'var(--font-grotesk)', fontSize: '0.875rem' }}>Map will appear when configured in admin</p>
-                </div>
+            <div>
+              <p className="label-sm" style={{ marginBottom: '0.25rem' }}>Follow Us</p>
+              <p style={{ color: 'var(--white)', fontFamily: 'var(--font-grotesk)', fontSize: '1rem', margin: 0 }}>Connect with us on our social platforms</p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              {Object.entries(s.social).map(([key, val]) =>
+                val ? (
+                  <a key={key} href={val} target="_blank" rel="noopener noreferrer" aria-label={key}
+                    style={{ width: 44, height: 44, border: '1px solid var(--gray-700)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gray-400)', textDecoration: 'none', transition: 'all 0.25s ease' }}
+                    className="contact-social-link"
+                  >
+                    {SOCIAL_ICONS[key] || <Globe size={16} />}
+                  </a>
+                ) : null
               )}
             </div>
           </motion.div>
-        </div>
+        )}
       </div>
     </section>
   );
