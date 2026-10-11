@@ -105,6 +105,7 @@ export type SiteSettings = {
   companyTagline: string;
   companyDescription: string;
   logo?: string;
+  favicon?: string;
   contact: {
     email: string;
     phone: string;

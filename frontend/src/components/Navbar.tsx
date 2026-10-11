@@ -99,19 +99,29 @@ export default function Navbar({ settings }: { settings?: SiteSettings }) {
           {/* Logo */}
           <button
             onClick={() => handleNavClick('#hero')}
-            style={{ background: 'none', border: 'none', padding: 0, display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }}
-            aria-label="Home"
+            style={{
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              outline: 'none',
+            }}
+            aria-label={settings?.companyName || 'ChargEase'}
           >
-            {settings?.logo ? (
-              <img src={settings.logo} alt={settings.companyName || 'ChargEase'} style={{ height: 32, width: 'auto', objectFit: 'contain' }} />
-            ) : null}
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.375rem', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--white)' }}>
-              {settings?.companyName ? (
-                settings.companyName
-              ) : (
-                <>Charg<span style={{ color: 'var(--gray-500)' }}>Ease</span></>
-              )}
-            </span>
+            <img
+              src={settings?.logo || '/logo.png'}
+              alt={settings?.companyName || 'ChargEase'}
+              style={{
+                height: scrolled ? '32px' : '38px',
+                width: 'auto',
+                maxWidth: '180px',
+                objectFit: 'contain',
+                display: 'block',
+                transition: 'height 0.25s ease',
+              }}
+            />
           </button>
 
           {/* Desktop Nav */}

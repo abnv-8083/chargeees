@@ -55,11 +55,20 @@ export default function AdminLoginPage() {
         {/* Brand */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <Link href="/" style={{ textDecoration: 'none', display: 'inline-block' }}>
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 700, color: 'var(--white)' }}>
-              Charg<span style={{ color: '#666' }}>Ease</span>
-            </span>
+            <img
+              src="/logo.png"
+              alt="ChargEase"
+              style={{
+                height: 44,
+                width: 'auto',
+                maxWidth: '220px',
+                objectFit: 'contain',
+                margin: '0 auto',
+                display: 'block',
+              }}
+            />
           </Link>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginTop: '0.5rem', color: '#888', fontSize: '0.8rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', marginTop: '0.75rem', color: '#888', fontSize: '0.8rem' }}>
             <ShieldCheck size={15} color="#4ade80" /> Enterprise Admin Portal
           </div>
         </div>

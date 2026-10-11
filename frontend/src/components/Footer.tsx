@@ -130,19 +130,19 @@ export default function Footer({ settings }: { settings?: SiteSettings }) {
           {/* Logo + tagline */}
           <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <div style={{
-              fontFamily: 'var(--font-display)',
-              fontSize: '1.6rem',
-              fontWeight: 700,
-              letterSpacing: '-0.02em',
-              color: 'var(--white)',
-              marginBottom: '0.4rem',
-              lineHeight: 1,
-            }}>
-              {settings?.companyName
-                ? settings.companyName
-                : <>Charg<span style={{ color: 'var(--gray-600)' }}>Ease</span></>}
-            </div>
+            <a href="#hero" style={{ display: 'inline-block', marginBottom: '0.6rem', textDecoration: 'none' }} aria-label={settings?.companyName || 'ChargEase'}>
+              <img
+                src={settings?.logo || '/logo.png'}
+                alt={settings?.companyName || 'ChargEase'}
+                style={{
+                  height: 38,
+                  width: 'auto',
+                  maxWidth: '180px',
+                  objectFit: 'contain',
+                  display: 'block',
+                }}
+              />
+            </a>
             <p style={{
               margin: 0,
               fontSize: '0.7rem',

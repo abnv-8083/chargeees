@@ -120,6 +120,13 @@ export default function SettingsManagerPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
               <div>
                 <label style={adminLabel}>Logo</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                  <img
+                    src={logoPreview || data.logo || '/logo.png'}
+                    alt="Logo preview"
+                    style={{ height: 32, width: 'auto', background: '#000', padding: '4px 8px', borderRadius: 6, border: '1px solid #333', objectFit: 'contain' }}
+                  />
+                </div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#0d0d0f', border: '1px dashed #3f3f46', borderRadius: 8, padding: '0.6rem 0.85rem', cursor: 'pointer', fontSize: '0.8rem', color: '#71717a' }}>
                   <Upload size={14} />{logoFile ? logoFile.name : 'Upload Logo (PNG/SVG)'}
                   <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) { setLogoFile(f); setLogoPreview(URL.createObjectURL(f)); } }} style={{ display: 'none' }} />
@@ -127,6 +134,13 @@ export default function SettingsManagerPage() {
               </div>
               <div>
                 <label style={adminLabel}>Favicon</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                  <img
+                    src={faviconPreview || data.favicon || '/icon.png'}
+                    alt="Favicon preview"
+                    style={{ height: 32, width: 32, background: '#000', padding: '2px', borderRadius: 6, border: '1px solid #333', objectFit: 'contain' }}
+                  />
+                </div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#0d0d0f', border: '1px dashed #3f3f46', borderRadius: 8, padding: '0.6rem 0.85rem', cursor: 'pointer', fontSize: '0.8rem', color: '#71717a' }}>
                   <Upload size={14} />{faviconFile ? faviconFile.name : 'Upload Favicon (ICO/PNG)'}
                   <input type="file" accept="image/*" onChange={e => { const f = e.target.files?.[0]; if (f) { setFaviconFile(f); setFaviconPreview(URL.createObjectURL(f)); } }} style={{ display: 'none' }} />

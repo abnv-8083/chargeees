@@ -109,17 +109,13 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
         <div style={{ padding: '1.25rem 1rem', borderBottom: '1px solid #1a1a1a', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           {sidebarOpen ? (
             <Link href="/admin" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--white)' }}>
-                Charg<span style={{ color: '#888' }}>Ease</span>
-              </span>
+              <img src="/logo.png" alt="ChargEase" style={{ height: 26, width: 'auto', objectFit: 'contain', display: 'block' }} />
               <span style={{ background: '#222', color: '#38bdf8', fontSize: '0.65rem', padding: '0.15rem 0.45rem', borderRadius: 4, fontWeight: 700, letterSpacing: '0.05em' }}>
                 ADMIN
               </span>
             </Link>
           ) : (
-            <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, color: 'var(--white)', margin: '0 auto' }}>
-              C<span style={{ color: '#888' }}>E</span>
-            </span>
+            <img src="/icon.png" alt="ChargEase" style={{ height: 28, width: 28, objectFit: 'contain', margin: '0 auto', display: 'block' }} />
           )}
         </div>
 
