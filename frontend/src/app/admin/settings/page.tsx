@@ -10,7 +10,7 @@ import { Save, Settings, MapPin, Share2, Search, Menu as MenuIcon, LayoutTemplat
 export default function SettingsManagerPage() {
   const [activeTab, setActiveTab] = useState<'general' | 'contact' | 'social' | 'seo' | 'navigation' | 'footer'>('general');
   const [data, setData] = useState<Partial<SiteSettings>>({
-    companyName: 'ChargEase', companyTagline: 'Powering the Future of Business',
+    companyName: 'ChargEase', companyTagline: 'Charge Up Your Life With US..!',
     companyDescription: 'Leading corporate enterprise solutions provider.',
     contact: { email: 'info@chargeease.com', phone: '+1 (555) 000-0000', address: '100 Innovation Drive, Suite 500\nNew York, NY 10001', officeHours: 'Monday – Friday\n9:00 AM – 6:00 PM EST', googleMapsEmbed: '' },
     social: { linkedin: '#', twitter: '#', instagram: '#', facebook: '#', youtube: '#' },

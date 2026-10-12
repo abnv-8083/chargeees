@@ -152,7 +152,7 @@ export default function Footer({ settings }: { settings?: SiteSettings }) {
               textTransform: 'uppercase',
               color: 'var(--gray-600)',
             }}>
-              {settings?.companyTagline || 'Powering Business Excellence'}
+              {settings?.companyTagline || 'Charge Up Your Life With US..!'}
             </p>
           </motion.div>
 

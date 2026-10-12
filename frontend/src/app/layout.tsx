@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.chargease.in'),
-  title: 'ChargEase — Powering the Future of Business',
+  title: 'ChargEase — Charge Up Your Life With US..!',
   description: 'ChargEase delivers cutting-edge solutions that transform industries and accelerate growth through innovation, precision, and excellence.',
   keywords: ['ChargEase', 'business solutions', 'consulting', 'innovation', 'digital transformation'],
   authors: [{ name: 'ChargEase' }],
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: 'https://www.chargease.in',
-    title: 'ChargEase — Powering the Future of Business',
+    title: 'ChargEase — Charge Up Your Life With US..!',
     description: 'ChargEase delivers cutting-edge solutions that transform industries and accelerate growth.',
     siteName: 'ChargEase',
     images: [
@@ -25,13 +25,13 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'ChargEase — Powering the Future of Business',
+        alt: 'ChargEase — Charge Up Your Life With US..!',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'ChargEase — Powering the Future of Business',
+    title: 'ChargEase — Charge Up Your Life With US..!',
     description: 'ChargEase delivers cutting-edge solutions that transform industries.',
     images: ['/og-image.png'],
   },

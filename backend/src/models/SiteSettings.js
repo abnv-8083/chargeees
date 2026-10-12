@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const siteSettingsSchema = new mongoose.Schema(
   {
     companyName: { type: String, default: 'ChargEase' },
-    companyTagline: { type: String, default: 'Powering the Future of Business' },
+    companyTagline: { type: String, default: 'Charge Up Your Life With US..!' },
     companyDescription: { type: String, default: '' },
     logo: { type: String, default: null },
     favicon: { type: String, default: null },

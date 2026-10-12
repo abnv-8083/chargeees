@@ -118,7 +118,7 @@ const BG_OPTIONS = [
 export default function HeroSectionEditorPage() {
   const [data, setData] = useState<HeroData>({
     companyName: 'ChargEase',
-    tagline: 'Powering the Future of Business',
+    tagline: 'Charge Up Your Life With US..!',
     introduction: 'We deliver cutting-edge solutions that transform industries and accelerate growth through innovation, precision, and excellence.',
     primaryCTA: { label: 'Our Projects', link: '#projects' },
     secondaryCTA: { label: 'Get in Touch', link: '#contact' },
@@ -264,7 +264,7 @@ export default function HeroSectionEditorPage() {
               required
               value={data.tagline}
               onChange={e => update({ tagline: e.target.value })}
-              placeholder="e.g. Powering the Future of Business"
+              placeholder="e.g. Charge Up Your Life With US..!"
               style={inputStyle}
             />
           </Field>

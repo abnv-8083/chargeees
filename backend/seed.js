@@ -37,7 +37,7 @@ const seed = async () => {
   // Site Settings
   await SiteSettings.create({
     companyName: 'ChargEase',
-    companyTagline: 'Powering the Future of Business',
+    companyTagline: 'Charge Up Your Life With US..!',
     companyDescription: 'ChargEase delivers cutting-edge solutions that transform industries and accelerate growth through innovation, precision, and excellence.',
     contact: {
       email: 'info@chargeease.com',
@@ -61,7 +61,7 @@ const seed = async () => {
   // Hero
   await HeroSection.create({
     companyName: 'ChargEase',
-    tagline: 'Powering the Future of Business',
+    tagline: 'Charge Up Your Life With US..!',
     introduction: 'We deliver cutting-edge solutions that transform industries and accelerate growth through innovation, precision, and excellence.',
     primaryCTA: { label: 'Explore Our Work', link: '#projects' },
     secondaryCTA: { label: 'Get in Touch', link: '#contact' },

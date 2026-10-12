@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const heroSchema = new mongoose.Schema(
   {
     companyName: { type: String, default: 'ChargEase' },
-    tagline: { type: String, default: 'Powering the Future of Business' },
+    tagline: { type: String, default: 'Charge Up Your Life With US..!' },
     introduction: { type: String, default: 'We deliver cutting-edge solutions that transform industries and accelerate growth through innovation, precision, and excellence.' },
     primaryCTA: { label: String, link: String },
     secondaryCTA: { label: String, link: String },
