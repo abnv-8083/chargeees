@@ -123,6 +123,7 @@ const seed = async () => {
       type: 'founder',
       name: 'Alexandra Morgan',
       title: 'Founder & CEO',
+      email: 'executive@chargease.in',
       biography: 'Alexandra Morgan is a visionary entrepreneur with over 15 years of experience in building high-impact businesses. Her strategic thinking and passion for innovation have been the cornerstone of ChargEase\'s rapid growth.',
       experience: '15+ years in business strategy, technology leadership, and venture building across Fortune 500 companies and startups.',
       achievements: [
@@ -143,6 +144,7 @@ const seed = async () => {
       type: 'cofounder',
       name: 'Daniel Reeves',
       title: 'Co-Founder & CTO',
+      email: 'operations@chargease.in',
       biography: 'Daniel Reeves is a technology architect and serial entrepreneur who has spent two decades designing the systems that power modern business. He leads ChargEase\'s technical vision with precision and creativity.',
       experience: '20+ years in software engineering, cloud infrastructure, and enterprise technology architecture.',
       achievements: [
@@ -157,7 +159,27 @@ const seed = async () => {
       ],
       messageFromFounder: 'Technology should serve people, not the other way around. At ChargEase, we build tools that are powerful yet human — designed to amplify what you can achieve.',
       socialLinks: { linkedin: '#', twitter: '#', instagram: '#' },
-      order: 1,
+      order: 2,
+    },
+    {
+      type: 'cofounder',
+      name: 'Marcus Vance',
+      title: 'Co-Founder & CFO',
+      email: 'finance@chargease.in',
+      biography: 'Marcus Vance is a seasoned financial executive and corporate strategist guiding sustainable capital growth and investment governance across global markets.',
+      experience: '18+ years in corporate finance, venture capital, and strategic fiscal governance.',
+      achievements: [
+        'Managed $200M+ in corporate investment rounds',
+        'Former VP at Goldman Sachs & Morgan Stanley',
+        'Global Corporate Finance Leader Award 2024',
+      ],
+      education: [
+        { degree: 'MS — Finance & Economics', institution: 'London School of Economics', year: '2008' },
+        { degree: 'BSc — Economics', institution: 'Columbia University', year: '2005' },
+      ],
+      messageFromFounder: 'True enterprise value is forged through transparency, disciplined capital allocation, and relentless execution.',
+      socialLinks: { linkedin: '#', twitter: '#', instagram: '#' },
+      order: 3,
     },
   ]);
 

@@ -5,6 +5,7 @@ const founderSchema = new mongoose.Schema(
     type: { type: String, enum: ['founder', 'cofounder'], default: 'founder' },
     name: { type: String, required: true },
     title: { type: String, default: 'Founder & CEO' },
+    email: { type: String, default: '' },
     profileImage: { type: String, default: null },
     profileImageS3Key: { type: String, default: null },
     biography: { type: String, default: '' },
