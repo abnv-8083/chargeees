@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import type { FounderData } from '@/lib/types';
-import { Linkedin, Instagram, Globe, Award, BookOpen, Briefcase, ChevronDown } from 'lucide-react';
+import { Linkedin, Instagram, Globe, Award, BookOpen, Briefcase, ChevronDown, Mail } from 'lucide-react';
 import Parallax from '@/components/ui/Parallax';
 import RevealText from '@/components/ui/RevealText';
 
@@ -21,6 +21,7 @@ const FALLBACK: FounderData[] = [
   {
     _id: '1', type: 'founder',
     name: 'Alexandra Morgan', title: 'Founder & CEO',
+    email: 'executive@chargease.in',
     profileImage: '',
     biography: 'Visionary entrepreneur with 15+ years building high-impact tech & strategy solutions.',
     experience: '15+ years in business strategy and technology leadership.',
@@ -32,12 +33,25 @@ const FALLBACK: FounderData[] = [
   {
     _id: '2', type: 'cofounder',
     name: 'Daniel Reeves', title: 'Co-Founder & CTO',
+    email: 'operations@chargease.in',
     profileImage: '',
     biography: 'Technology architect designing systems that power modern business at scale.',
     experience: '20+ years in software engineering and enterprise technology architecture.',
     achievements: ['Architected systems serving 50M+ users', 'Multiple patents in distributed computing', 'MIT Technology Review Innovator'],
     education: [{ degree: 'PhD — Computer Science', institution: 'Stanford University', year: '2005' }],
     messageFromFounder: 'Technology should serve people, not the other way around. We build tools that are powerful yet human.',
+    socialLinks: { linkedin: '#', twitter: '#', instagram: '#', facebook: '', website: '' },
+  },
+  {
+    _id: '3', type: 'cofounder',
+    name: 'Marcus Vance', title: 'Co-Founder & CFO',
+    email: 'finance@chargease.in',
+    profileImage: '',
+    biography: 'Strategic finance executive steering global investment, financial engineering, and fiscal growth.',
+    experience: '18+ years in corporate finance, private equity, and multinational fiscal governance.',
+    achievements: ['Managed $200M+ in capital allocation rounds', 'Ex-Goldman Sachs & Morgan Stanley', 'Global Corporate Finance Award 2024'],
+    education: [{ degree: 'MS — Finance & Economics', institution: 'London School of Economics', year: '2008' }],
+    messageFromFounder: 'Sustainable enterprise value is built upon transparency, disciplined capital allocation, and bold execution.',
     socialLinks: { linkedin: '#', twitter: '#', instagram: '#', facebook: '', website: '' },
   },
 ];
@@ -69,8 +83,21 @@ function Initials({ name, accent }: { name: string; accent: string }) {
   );
 }
 
+/* ─── helper to resolve email for founder ────────────────────────────────── */
+function getFounderEmail(f: FounderData, index: number): string {
+  if (f.email && f.email.trim()) return f.email.trim();
+  const lowerTitle = (f.title || '').toLowerCase();
+  if (lowerTitle.includes('ceo') || lowerTitle.includes('executive') || index === 0) {
+    return 'executive@chargease.in';
+  }
+  if (lowerTitle.includes('cfo') || lowerTitle.includes('finan') || index === 2) {
+    return 'finance@chargease.in';
+  }
+  return 'operations@chargease.in';
+}
+
 /* ─── expanded detail drawer ─────────────────────────────────────────────── */
-function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: string }) {
+function DetailDrawer({ founder: f, accent, email }: { founder: FounderData; accent: string; email: string }) {
   return (
     <motion.div
       initial={{ opacity: 0, height: 0, y: 10 }}
@@ -88,6 +115,40 @@ function DetailDrawer({ founder: f, accent }: { founder: FounderData; accent: st
       }}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+
+        {/* Direct Email in detail drawer */}
+        {email && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.75rem',
+            padding: '0.65rem 0.95rem',
+            background: 'var(--black)',
+            borderRadius: 10,
+            border: '1px solid var(--gray-800)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Mail size={13} style={{ color: accent, flexShrink: 0 }} />
+              <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--gray-400)', textTransform: 'uppercase' }}>Direct Email</span>
+            </div>
+            <a
+              href={`mailto:${email}`}
+              style={{
+                fontSize: '0.82rem',
+                color: accent,
+                textDecoration: 'none',
+                fontFamily: 'var(--font-mono, monospace)',
+                fontWeight: 600,
+                wordBreak: 'break-all',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(e) => (e.currentTarget.style.textDecoration = 'none')}
+            >
+              {email}
+            </a>
+          </div>
+        )}
 
         {/* Biography */}
         {f.biography && (
@@ -198,6 +259,7 @@ function FounderCard({ founder: f, index, expanded, onToggle }: {
   onToggle: () => void;
 }) {
   const theme = CARD_THEMES[index % CARD_THEMES.length];
+  const email = getFounderEmail(f, index);
 
   return (
     <motion.div
@@ -245,7 +307,7 @@ function FounderCard({ founder: f, index, expanded, onToggle }: {
       </motion.div>
 
       {/* 2. Name — Title / Role and Parenthetical Description */}
-      <div style={{ marginTop: '1.25rem', width: '100%', padding: '0 0.5rem' }}>
+      <div style={{ marginTop: '1.25rem', width: '100%', padding: '0 0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         {/* Name — Role */}
         <h3
           style={{
@@ -267,7 +329,48 @@ function FounderCard({ founder: f, index, expanded, onToggle }: {
           <span style={{ color: theme.accent, fontWeight: 600 }}>{f.title}</span>
         </h3>
 
-
+        {/* Email button/pill under the person */}
+        <div style={{ marginTop: '0.35rem', marginBottom: '0.65rem' }}>
+          <a
+            href={`mailto:${email}`}
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Send email to ${email}`}
+            title={`Click to open email box for ${email}`}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.45rem',
+              padding: '0.35rem 0.85rem',
+              borderRadius: '9999px',
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: `1px solid ${theme.border}`,
+              color: 'var(--gray-300)',
+              fontSize: '0.82rem',
+              fontFamily: 'var(--font-mono, monospace)',
+              textDecoration: 'none',
+              letterSpacing: '0.01em',
+              transition: 'all 0.25s ease',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = theme.accent;
+              e.currentTarget.style.color = theme.accent;
+              e.currentTarget.style.background = `${theme.accent}18`;
+              e.currentTarget.style.boxShadow = `0 4px 18px ${theme.glow}`;
+              e.currentTarget.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = theme.border;
+              e.currentTarget.style.color = 'var(--gray-300)';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+              e.currentTarget.style.boxShadow = 'none';
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <Mail size={13} style={{ flexShrink: 0, color: theme.accent }} />
+            <span>{email}</span>
+          </a>
+        </div>
 
         {/* Toggle profile detail */}
         <button
@@ -297,7 +400,7 @@ function FounderCard({ founder: f, index, expanded, onToggle }: {
 
       {/* 3. Detail Drawer on expand */}
       <AnimatePresence>
-        {expanded && <DetailDrawer founder={f} accent={theme.accent} />}
+        {expanded && <DetailDrawer founder={f} accent={theme.accent} email={email} />}
       </AnimatePresence>
     </motion.div>
   );

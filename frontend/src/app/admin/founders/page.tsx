@@ -7,7 +7,7 @@ import { AdminModal, ConfirmDialog, AdminLoading } from '@/app/admin/components'
 import { adminInput, adminTextarea, adminLabel, adminBtn } from '@/app/admin/components/adminStyles';
 import {
   Plus, Edit2, Trash2, Users, Upload, ImageIcon,
-  Linkedin, Instagram, Globe, Loader2,
+  Linkedin, Instagram, Globe, Loader2, Mail,
 } from 'lucide-react';
 
 /* X (formerly Twitter) SVG icon */
@@ -21,7 +21,7 @@ function XIcon({ size = 14 }: { size?: number }) {
 
 const EMPTY_FORM = {
   type: 'founder' as 'founder' | 'cofounder',
-  name: '', title: '', biography: '', experience: '',
+  name: '', title: '', email: '', biography: '', experience: '',
   messageFromFounder: '',
   achievements: [''] as string[],
   education: [{ degree: '', institution: '', year: '' }],
@@ -64,7 +64,7 @@ export default function FoundersManagerPage() {
     setEditingId(f._id);
     setFormData({
       type: f.type || 'founder',
-      name: f.name || '', title: f.title || '', biography: f.biography || '',
+      name: f.name || '', title: f.title || '', email: f.email || '', biography: f.biography || '',
       experience: f.experience || '', messageFromFounder: f.messageFromFounder || '',
       achievements: f.achievements?.length ? [...f.achievements] : [''],
       education: f.education?.length
@@ -104,6 +104,7 @@ export default function FoundersManagerPage() {
       fd.append('type', formData.type);
       fd.append('name', formData.name);
       fd.append('title', formData.title);
+      fd.append('email', formData.email);
       fd.append('biography', formData.biography);
       fd.append('experience', formData.experience);
       fd.append('messageFromFounder', formData.messageFromFounder);
@@ -207,10 +208,14 @@ export default function FoundersManagerPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '0.85rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr 0.8fr', gap: '0.85rem' }}>
             <div>
               <label style={adminLabel}>Title <span style={{ color: '#f87171' }}>*</span></label>
               <input type="text" required placeholder="e.g. Chief Executive Officer" value={formData.title} onChange={e => setFormData({ ...formData, title: e.target.value })} style={adminInput} />
+            </div>
+            <div>
+              <label style={adminLabel}>Email Address</label>
+              <input type="email" placeholder="e.g. operations@chargease.in" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={adminInput} />
             </div>
             <div>
               <label style={adminLabel}>Experience</label>
@@ -336,7 +341,12 @@ function FounderCard({ founder: f, onEdit, onDelete }: { founder: FounderData; o
             {isFounder ? 'Founder' : 'Co-Founder'}
           </span>
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fafafa', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.name}</h3>
-          <p style={{ fontSize: '0.7rem', color: '#52525b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.title}</p>
+          <p style={{ fontSize: '0.7rem', color: '#52525b', margin: '0 0 0.15rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.title}</p>
+          {f.email && (
+            <a href={`mailto:${f.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.68rem', color: '#38bdf8', textDecoration: 'none' }}>
+              <Mail size={11} /> {f.email}
+            </a>
+          )}
         </div>
       </div>
 

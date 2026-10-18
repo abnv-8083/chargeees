@@ -45,6 +45,7 @@ export type FounderData = {
   type: 'founder' | 'cofounder';
   name: string;
   title: string;
+  email?: string;
   profileImage?: string;
   biography: string;
   experience: string;
