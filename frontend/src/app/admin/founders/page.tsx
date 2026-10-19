@@ -343,7 +343,13 @@ function FounderCard({ founder: f, onEdit, onDelete }: { founder: FounderData; o
           <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fafafa', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.name}</h3>
           <p style={{ fontSize: '0.7rem', color: '#52525b', margin: '0 0 0.15rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.title}</p>
           {f.email && (
-            <a href={`mailto:${f.email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.68rem', color: '#38bdf8', textDecoration: 'none' }}>
+            <a
+              href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(f.email)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Compose email to ${f.email} in Gmail`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.68rem', color: '#38bdf8', textDecoration: 'none' }}
+            >
               <Mail size={11} /> {f.email}
             </a>
           )}

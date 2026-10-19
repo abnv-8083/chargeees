@@ -96,6 +96,10 @@ function getFounderEmail(f: FounderData, index: number): string {
   return 'operations@chargease.in';
 }
 
+function getGmailComposeUrl(email: string): string {
+  return `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(email)}`;
+}
+
 /* ─── expanded detail drawer ─────────────────────────────────────────────── */
 function DetailDrawer({ founder: f, accent, email }: { founder: FounderData; accent: string; email: string }) {
   return (
@@ -133,7 +137,10 @@ function DetailDrawer({ founder: f, accent, email }: { founder: FounderData; acc
               <span style={{ fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.08em', color: 'var(--gray-400)', textTransform: 'uppercase' }}>Direct Email</span>
             </div>
             <a
-              href={`mailto:${email}`}
+              href={getGmailComposeUrl(email)}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={`Compose email to ${email} directly in Gmail`}
               style={{
                 fontSize: '0.82rem',
                 color: accent,
@@ -332,10 +339,12 @@ function FounderCard({ founder: f, index, expanded, onToggle }: {
         {/* Email button/pill under the person */}
         <div style={{ marginTop: '0.35rem', marginBottom: '0.65rem' }}>
           <a
-            href={`mailto:${email}`}
+            href={getGmailComposeUrl(email)}
+            target="_blank"
+            rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            aria-label={`Send email to ${email}`}
-            title={`Click to open email box for ${email}`}
+            aria-label={`Compose email to ${email} in Gmail`}
+            title={`Click to open Gmail directly and send email to ${email}`}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
