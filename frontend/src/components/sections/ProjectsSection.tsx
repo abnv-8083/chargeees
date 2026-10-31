@@ -1,16 +1,126 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import type { ProjectData } from '@/lib/types';
-import { X, ExternalLink, Search, Calendar, Tag, Send, CheckCircle2, AlertCircle, MessageSquare, Info } from 'lucide-react';
+import {
+  X, ExternalLink, Search, Calendar, Tag, Send, CheckCircle2,
+  AlertCircle, MessageSquare, Info, Zap, Trophy, Clock, ArrowRight
+} from 'lucide-react';
 import { submitInquiry } from '@/lib/api';
 
 const FALLBACK_PROJECTS: ProjectData[] = [
-  { _id: '1', title: 'Nexus Platform', slug: 'nexus', description: 'B2B SaaS platform connecting 500+ enterprises with workflow automation and real-time analytics.', category: 'Technology', status: 'completed', completionDate: '2024-03-01', coverImage: '', gallery: [], tags: ['SaaS', 'Enterprise'], featured: true, client: 'Enterprise Client' },
-  { _id: '2', title: 'Meridian Initiative', slug: 'meridian', description: 'Digital transformation for a Fortune 500 financial institution, reducing costs by 40%.', category: 'Consulting', status: 'completed', completionDate: '2023-11-01', coverImage: '', gallery: [], tags: ['Finance', 'Digital'], featured: true, client: 'Fortune 500' },
-  { _id: '3', title: 'Aurora Analytics', slug: 'aurora', description: 'Next-gen BI suite providing predictive insights across supply chain and operations.', category: 'Data & Analytics', status: 'ongoing', coverImage: '', gallery: [], tags: ['Analytics', 'AI'], featured: false, client: '' },
-  { _id: '4', title: 'Helix Infrastructure', slug: 'helix', description: 'Cloud-native infrastructure modernization for a global healthcare network.', category: 'Technology', status: 'completed', completionDate: '2024-06-01', coverImage: '', gallery: [], tags: ['Cloud', 'Healthcare'], featured: false, client: 'Global Healthcare' },
+  // ── 1. Ongoing Projects (Shown 1st by default!) ──
+  {
+    _id: 'proj-on-1',
+    title: 'Aurora Analytics Engine',
+    slug: 'aurora-analytics',
+    description: 'Next-generation AI-powered business intelligence suite providing predictive insights, real-time demand forecasting, and automated anomaly detection across operations.',
+    category: 'Data & Analytics',
+    status: 'ongoing',
+    coverImage: '',
+    gallery: [],
+    tags: ['AI Engine', 'Predictive Analytics', 'Supply Chain', 'Real-Time'],
+    featured: true,
+    client: 'Global Logistics Consortium',
+  },
+  {
+    _id: 'proj-on-2',
+    title: 'PulseGrid Smart EV Infrastructure',
+    slug: 'pulsegrid-ev',
+    description: 'Decentralized smart EV charging network with dynamic load balancing, IoT telemetry, solar micro-grid integration, and automated green power distribution.',
+    category: 'CleanTech',
+    status: 'ongoing',
+    coverImage: '',
+    gallery: [],
+    tags: ['CleanTech', 'EV Infrastructure', 'IoT', 'Smart Grid'],
+    featured: true,
+    client: 'Clean Energy Alliance',
+  },
+  {
+    _id: 'proj-on-3',
+    title: 'Zenith Global Enterprise Scaling',
+    slug: 'zenith-expansion',
+    description: 'Comprehensive cross-border market entry and enterprise expansion framework, optimizing operational efficiency and cross-regional compliance.',
+    category: 'Strategy',
+    status: 'ongoing',
+    coverImage: '',
+    gallery: [],
+    tags: ['Enterprise Scale', 'Cross-Border', 'Governance', 'Strategy'],
+    featured: false,
+    client: 'European Tech Group',
+  },
+  {
+    _id: 'proj-on-4',
+    title: 'Hyperion Zero-Trust Cloud Mesh',
+    slug: 'hyperion-mesh',
+    description: 'Resilient multi-cloud zero-trust networking mesh designed to orchestrate mission-critical containerized microservices with ultra-low latency.',
+    category: 'Technology',
+    status: 'ongoing',
+    coverImage: '',
+    gallery: [],
+    tags: ['Zero-Trust', 'Edge Computing', 'Cloud Native', 'Security'],
+    featured: false,
+    client: 'FinTech Infrastructure Corp',
+  },
+
+  // ── 2. Completed Projects ──
+  {
+    _id: 'proj-comp-1',
+    title: 'Nexus Platform Ecosystem',
+    slug: 'nexus-platform',
+    description: 'Enterprise B2B SaaS platform connecting 500+ global enterprises with end-to-end workflow automation, automated reporting, and unified analytics.',
+    category: 'Technology',
+    status: 'completed',
+    completionDate: '2024-03-01',
+    coverImage: '',
+    gallery: [],
+    tags: ['SaaS', 'Workflow Automation', 'Enterprise'],
+    featured: true,
+    client: 'Fortune 100 Enterprise',
+  },
+  {
+    _id: 'proj-comp-2',
+    title: 'Meridian Digital Transformation',
+    slug: 'meridian-initiative',
+    description: 'End-to-end digital banking transformation for a premier financial institution, modernizing legacy mainframes and reducing operational overhead by 40%.',
+    category: 'Consulting',
+    status: 'completed',
+    completionDate: '2023-11-01',
+    coverImage: '',
+    gallery: [],
+    tags: ['FinTech', 'Core Banking', 'Cost Optimization'],
+    featured: true,
+    client: 'Meridian Capital Group',
+  },
+  {
+    _id: 'proj-comp-3',
+    title: 'Helix Healthcare Infrastructure',
+    slug: 'helix-infrastructure',
+    description: 'HIPAA-compliant, high-availability cloud infrastructure modernization for a global hospital network serving 2M+ patients across 8 countries.',
+    category: 'Technology',
+    status: 'completed',
+    completionDate: '2024-06-01',
+    coverImage: '',
+    gallery: [],
+    tags: ['Healthcare', 'Cloud Native', 'High Availability'],
+    featured: false,
+    client: 'Global Health Network',
+  },
+  {
+    _id: 'proj-comp-4',
+    title: 'OmniVanguard Threat Intelligence',
+    slug: 'omnivanguard-security',
+    description: 'Next-gen cybersecurity threat intelligence mesh using machine learning models to identify and neutralize zero-day attack surfaces across hybrid cloud networks.',
+    category: 'Data & Analytics',
+    status: 'completed',
+    completionDate: '2023-08-15',
+    coverImage: '',
+    gallery: [],
+    tags: ['Cybersecurity', 'Machine Learning', 'Zero-Day'],
+    featured: false,
+    client: 'Aerospace & Defense Partner',
+  },
 ];
 
 const BG_COLORS = [
@@ -346,42 +456,162 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
 
 export default function ProjectsSection({ data }: { data?: ProjectData[]; categories?: string[] }) {
   const [projects, setProjects] = useState<ProjectData[]>(data || FALLBACK_PROJECTS);
-  const [filtered, setFiltered] = useState<ProjectData[]>(data || FALLBACK_PROJECTS);
+  // User requirement: 2 sessions (ongoing & completed), with ongoing shown 1st
+  const [activeTab, setActiveTab] = useState<'ongoing' | 'completed'>('ongoing');
   const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<ProjectData | null>(null);
-  const categories = ['All', ...Array.from(new Set(projects.map(p => p.category)))];
 
   useEffect(() => {
-    let result = projects;
-    if (activeFilter !== 'All') result = result.filter(p => p.category === activeFilter);
-    if (search) result = result.filter(p => p.title.toLowerCase().includes(search.toLowerCase()) || p.description.toLowerCase().includes(search.toLowerCase()));
-    setFiltered(result);
-  }, [activeFilter, search, projects]);
+    if (data && data.length > 0) {
+      setProjects(data);
+    }
+  }, [data]);
+
+  // Separate ongoing and completed projects
+  const ongoingProjects = useMemo(() => {
+    return projects.filter(p => p.status === 'ongoing' || p.status === 'upcoming' || p.status === 'on-hold');
+  }, [projects]);
+
+  const completedProjects = useMemo(() => {
+    return projects.filter(p => p.status === 'completed');
+  }, [projects]);
+
+  // Current session's projects
+  const currentTabProjects = activeTab === 'ongoing' ? ongoingProjects : completedProjects;
+
+  // Categories specific to current session
+  const categories = useMemo(() => {
+    const list = Array.from(new Set(currentTabProjects.map(p => p.category).filter(Boolean)));
+    return ['All', ...list];
+  }, [currentTabProjects]);
+
+  // Handle switching between Ongoing and Completed sessions
+  const handleTabChange = (tab: 'ongoing' | 'completed') => {
+    setActiveTab(tab);
+    setActiveFilter('All');
+  };
+
+  // Filtered by category and search
+  const filtered = useMemo(() => {
+    let result = currentTabProjects;
+    if (activeFilter !== 'All') {
+      result = result.filter(p => p.category === activeFilter);
+    }
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        p =>
+          p.title.toLowerCase().includes(q) ||
+          p.description.toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q) ||
+          (p.tags && p.tags.some(t => t.toLowerCase().includes(q)))
+      );
+    }
+    return result;
+  }, [currentTabProjects, activeFilter, search]);
 
   return (
     <section id="projects" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }} data-cursor-color="#818cf8">
       <div className="section-container">
         {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }} style={{ marginBottom: '3rem' }}>
-          <p className="label-sm" style={{ marginBottom: '1rem' }}>Our Portfolio</p>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem' }}>
-            <h2 className="heading-xl">Featured Projects</h2>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          style={{ marginBottom: '2.5rem' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.75rem' }}>
+            <p className="label-sm" style={{ margin: 0 }}>Our Portfolio</p>
+            <span style={{ fontSize: '0.78rem', color: 'var(--gray-500)', fontFamily: 'var(--font-grotesk)' }}>
+              Showing {filtered.length} of {currentTabProjects.length} {activeTab === 'ongoing' ? 'Ongoing' : 'Completed'} Projects
+            </span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '1.5rem' }}>
+            <div style={{ maxWidth: '680px' }}>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={activeTab}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <h2 className="heading-xl" style={{ margin: 0 }}>
+                    {activeTab === 'ongoing' ? 'Ongoing Projects' : 'Completed Projects'}
+                  </h2>
+                  <p className="body-md" style={{ color: 'var(--gray-400)', marginTop: '0.5rem' }}>
+                    {activeTab === 'ongoing'
+                      ? 'Discover the cutting-edge solutions, technology architectures, and enterprise initiatives currently in active development across our engineering teams.'
+                      : 'Explore our track record of battle-tested enterprise platforms, digital transformations, and strategic client milestones successfully delivered.'}
+                  </p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
             <div className="search-wrapper">
               <Search size={15} className="search-icon" />
               <input
                 type="search"
-                placeholder="Search projects..."
+                placeholder={`Search ${activeTab} projects...`}
                 className="search-input"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                aria-label="Search projects"
+                aria-label={`Search ${activeTab} projects`}
               />
+            </div>
+          </div>
+
+          {/* ── 2 Primary Session Tabs (Ongoing & Completed, Ongoing 1st) ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
+            <div className="project-tabs-container" role="tablist" aria-label="Project status sessions">
+              <button
+                role="tab"
+                id="tab-ongoing"
+                aria-selected={activeTab === 'ongoing'}
+                aria-controls="panel-ongoing"
+                className={`project-tab-btn ${activeTab === 'ongoing' ? 'active' : ''}`}
+                onClick={() => handleTabChange('ongoing')}
+              >
+                {activeTab === 'ongoing' && (
+                  <motion.div
+                    layoutId="activeProjectTabIndicator"
+                    className="project-tab-indicator"
+                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                  />
+                )}
+                <span className="live-pulse-dot" />
+                <Zap size={16} />
+                <span>Ongoing Projects</span>
+                <span className="project-tab-count">{ongoingProjects.length}</span>
+              </button>
+
+              <button
+                role="tab"
+                id="tab-completed"
+                aria-selected={activeTab === 'completed'}
+                aria-controls="panel-completed"
+                className={`project-tab-btn ${activeTab === 'completed' ? 'active' : ''}`}
+                onClick={() => handleTabChange('completed')}
+              >
+                {activeTab === 'completed' && (
+                  <motion.div
+                    layoutId="activeProjectTabIndicator"
+                    className="project-tab-indicator"
+                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                  />
+                )}
+                <CheckCircle2 size={16} />
+                <span>Completed Projects</span>
+                <span className="project-tab-count">{completedProjects.length}</span>
+              </button>
             </div>
           </div>
         </motion.div>
 
-        {/* Filters */}
+        {/* Category Filters */}
         <div className="projects-filters" role="group" aria-label="Project category filters">
           {categories.map(cat => (
             <button
@@ -398,10 +628,12 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
         {/* Projects Grid */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeFilter + search}
+            key={activeTab + activeFilter + search}
             className="projects-grid"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
           >
             {filtered.map((project, i) => (
               <motion.div
@@ -409,7 +641,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
                 className="project-card"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.06, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                transition={{ delay: i * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                 onClick={() => setSelected(project)}
                 role="button"
                 aria-label={`View project: ${project.title}`}
@@ -428,18 +660,45 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
                   />
                 ) : (
                   <div className="project-card-placeholder" style={{ background: BG_COLORS[i % BG_COLORS.length] }}>
-                    <div style={{ marginBottom: 'auto', paddingTop: '1.5rem' }}>
+                    <div style={{ marginBottom: 'auto', paddingTop: '1.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
                       <span className="tag">{project.category}</span>
+                      {project.tags?.[0] && <span className="tag" style={{ opacity: 0.75 }}>{project.tags[0]}</span>}
                     </div>
                   </div>
                 )}
                 <div className="project-card-overlay">
                   <div className="project-card-overlay-inner">
-                    <span className={`status-badge status-${project.status}`} style={{ marginBottom: '0.6rem' }}>{project.status}</span>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 700, color: 'var(--white)', lineHeight: 1.2, marginBottom: '0.35rem' }}>{project.title}</h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', lineHeight: 1.5, margin: 0 }}>{project.category}</p>
-                    <div className="project-card-overlay-cta" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.85rem', color: 'var(--white)', fontSize: '0.8rem', fontWeight: 600 }}>
-                      <ExternalLink size={13} /> View Details
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.55rem', flexWrap: 'wrap' }}>
+                      {project.status === 'ongoing' ? (
+                        <span className="status-badge status-ongoing">
+                          <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> Ongoing Development
+                        </span>
+                      ) : (
+                        <span className="status-badge status-completed">
+                          <CheckCircle2 size={12} /> Completed
+                        </span>
+                      )}
+                      {project.completionDate && project.status === 'completed' && (
+                        <span style={{ fontSize: '0.72rem', color: 'var(--gray-400)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Calendar size={12} /> {new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) !== 'Invalid Date' ? new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : project.completionDate}
+                        </span>
+                      )}
+                    </div>
+                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 700, color: 'var(--white)', lineHeight: 1.25, marginBottom: '0.35rem' }}>
+                      {project.title}
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', lineHeight: 1.5, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {project.description}
+                    </p>
+                    <div className="project-card-overlay-cta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.85rem' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--white)', fontSize: '0.8rem', fontWeight: 600 }}>
+                        <ExternalLink size={13} /> View Details
+                      </span>
+                      {project.status === 'ongoing' && (
+                        <span style={{ fontSize: '0.75rem', color: '#60a5fa', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                          <MessageSquare size={12} /> Inquire
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -449,9 +708,21 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
         </AnimatePresence>
 
         {filtered.length === 0 && (
-          <div style={{ textAlign: 'center', padding: '5rem 0', color: 'var(--gray-600)' }}>
-            <p className="heading-md">No projects found</p>
-            <p className="body-md" style={{ marginTop: '0.5rem' }}>Try adjusting your search or filter</p>
+          <div style={{ textAlign: 'center', padding: '4.5rem 1.5rem', color: 'var(--gray-500)', border: '1px dashed rgba(139,92,246,0.25)', borderRadius: 18, marginTop: '1.5rem', background: 'rgba(255,255,255,0.015)' }}>
+            <p className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.5rem' }}>
+              No {activeTab === 'ongoing' ? 'ongoing' : 'completed'} projects found
+            </p>
+            <p className="body-md" style={{ color: 'var(--gray-400)', maxWidth: '440px', margin: '0 auto 1.5rem' }}>
+              We couldn&apos;t find any {activeTab} projects matching your current search or category filter.
+            </p>
+            {(activeFilter !== 'All' || search) && (
+              <button
+                onClick={() => { setActiveFilter('All'); setSearch(''); }}
+                style={{ background: 'var(--grad-primary)', border: 'none', color: 'var(--white)', padding: '0.6rem 1.4rem', borderRadius: 100, fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 18px rgba(139,92,246,0.4)' }}
+              >
+                Reset Filters
+              </button>
+            )}
           </div>
         )}
       </div>
