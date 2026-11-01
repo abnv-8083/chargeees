@@ -6,7 +6,7 @@ import type { ProjectData } from '@/lib/types';
 import {
   X, ExternalLink, Search, Calendar, Tag, Send, CheckCircle2,
   AlertCircle, MessageSquare, Info, Zap, Trophy, Clock, ArrowRight,
-  ChevronLeft, ChevronRight, Play, Pause
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { submitInquiry } from '@/lib/api';
 import CardSwap, { Card, CardSwapRef } from '@/components/ui/CardSwap';
@@ -464,7 +464,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   const [selected, setSelected] = useState<ProjectData | null>(null);
   const swapRef = useRef<CardSwapRef>(null);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isAutoplay, setIsAutoplay] = useState(true);
+
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -628,7 +628,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
                 depth={85}
                 skewAmount={5}
                 delay={4200}
-                autoplay={isAutoplay}
+                autoplay={true}
                 pauseOnHover={true}
                 draggable={true}
                 visibleCards={Math.min(4, filtered.length)}
@@ -888,27 +888,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
                 <ChevronRight size={16} />
               </button>
 
-              <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.15)' }} />
 
-              <button
-                type="button"
-                onClick={() => setIsAutoplay(prev => !prev)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: isAutoplay ? '#34d399' : 'var(--gray-400)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.35rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 500,
-                }}
-                title={isAutoplay ? 'Pause autoplay' : 'Resume autoplay'}
-              >
-                {isAutoplay ? <Pause size={13} /> : <Play size={13} />}
-                <span>{isAutoplay ? 'Auto' : 'Paused'}</span>
-              </button>
             </div>
             <p style={{ fontSize: '0.72rem', color: 'var(--gray-500)', marginTop: '0.6rem', textAlign: 'center' }}>
               Drag or fling the card to swap • Click to view full details
