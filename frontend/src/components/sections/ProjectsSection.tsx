@@ -1,13 +1,15 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import type { ProjectData } from '@/lib/types';
 import {
   X, ExternalLink, Search, Calendar, Tag, Send, CheckCircle2,
-  AlertCircle, MessageSquare, Info, Zap, Trophy, Clock, ArrowRight
+  AlertCircle, MessageSquare, Info, Zap, Trophy, Clock, ArrowRight,
+  ChevronLeft, ChevronRight, Play, Pause
 } from 'lucide-react';
 import { submitInquiry } from '@/lib/api';
+import CardSwap, { Card, CardSwapRef } from '@/components/ui/CardSwap';
 
 const FALLBACK_PROJECTS: ProjectData[] = [
   // ── 1. Ongoing Projects (Shown 1st by default!) ──
@@ -460,6 +462,9 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   const [activeTab, setActiveTab] = useState<'ongoing' | 'completed'>('ongoing');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<ProjectData | null>(null);
+  const swapRef = useRef<CardSwapRef>(null);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [isAutoplay, setIsAutoplay] = useState(true);
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -482,6 +487,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   // Handle switching between Ongoing and Completed sessions
   const handleTabChange = (tab: 'ongoing' | 'completed') => {
     setActiveTab(tab);
+    setCurrentCardIndex(0);
   };
 
   // Filtered by search query
@@ -599,89 +605,316 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
           </div>
         </motion.div>
 
-        {/* Projects Grid */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeTab + search}
-            className="projects-grid"
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-          >
-            {filtered.map((project, i) => (
-              <motion.div
-                key={project._id}
-                className="project-card"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                onClick={() => setSelected(project)}
-                role="button"
-                aria-label={`View project: ${project.title}`}
-                tabIndex={0}
-                onKeyDown={e => e.key === 'Enter' && setSelected(project)}
-                data-cursor-hover
+        {/* Swapping Cards Showcase */}
+        {filtered.length > 0 ? (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: 560,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <CardSwap
+                ref={swapRef}
+                key={activeTab + (search ? '-search-' + search : '')}
+                width={500}
+                height={350}
+                cardDistance={55}
+                verticalDistance={65}
+                depth={85}
+                skewAmount={5}
+                delay={4200}
+                autoplay={isAutoplay}
+                pauseOnHover={true}
+                draggable={true}
+                visibleCards={Math.min(4, filtered.length)}
+                onChange={(idx) => setCurrentCardIndex(idx)}
+                onCardClick={(idx) => {
+                  if (filtered[idx]) setSelected(filtered[idx]);
+                }}
               >
-                {project.coverImage ? (
-                  <Image
-                    src={project.coverImage}
-                    alt={project.title}
-                    fill
-                    className="project-card-image"
-                    style={{ objectFit: 'cover' }}
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="project-card-placeholder" style={{ background: BG_COLORS[i % BG_COLORS.length] }}>
-                    <div style={{ marginBottom: 'auto', paddingTop: '1.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      {project.tags?.[0] && <span className="tag">{project.tags[0]}</span>}
-                      {project.tags?.[1] && <span className="tag" style={{ opacity: 0.75 }}>{project.tags[1]}</span>}
-                    </div>
-                  </div>
-                )}
-                <div className="project-card-overlay">
-                  <div className="project-card-overlay-inner">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.55rem', flexWrap: 'wrap' }}>
-                      {project.status === 'ongoing' ? (
-                        <span className="status-badge status-ongoing">
-                          <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> Ongoing Development
+                {filtered.map((project, i) => (
+                  <Card
+                    key={project._id}
+                    onClick={() => setSelected(project)}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      height: '100%',
+                      position: 'relative',
+                      overflow: 'hidden',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {/* Background image or gradient */}
+                    {project.coverImage ? (
+                      <Image
+                        src={project.coverImage}
+                        alt={project.title}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        draggable={false}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          position: 'absolute',
+                          inset: 0,
+                          background: BG_COLORS[i % BG_COLORS.length],
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span
+                          style={{
+                            opacity: 0.08,
+                            fontSize: '9rem',
+                            fontWeight: 900,
+                            fontFamily: 'var(--font-display)',
+                            color: '#ffffff',
+                            userSelect: 'none',
+                          }}
+                        >
+                          {project.title[0]}
                         </span>
-                      ) : (
-                        <span className="status-badge status-completed">
-                          <CheckCircle2 size={12} /> Completed
-                        </span>
-                      )}
-                      {project.completionDate && project.status === 'completed' && (
-                        <span style={{ fontSize: '0.72rem', color: 'var(--gray-400)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
-                          <Calendar size={12} /> {new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) !== 'Invalid Date' ? new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : project.completionDate}
-                        </span>
-                      )}
-                    </div>
-                    <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.35rem', fontWeight: 700, color: 'var(--white)', lineHeight: 1.25, marginBottom: '0.35rem' }}>
-                      {project.title}
-                    </h3>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', lineHeight: 1.5, margin: 0, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                      {project.description}
-                    </p>
-                    <div className="project-card-overlay-cta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '0.85rem' }}>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: 'var(--white)', fontSize: '0.8rem', fontWeight: 600 }}>
-                        <ExternalLink size={13} /> View Details
-                      </span>
-                      {project.status === 'ongoing' && (
-                        <span style={{ fontSize: '0.75rem', color: '#60a5fa', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                          <MessageSquare size={12} /> Inquire
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+                      </div>
+                    )}
 
-        {filtered.length === 0 && (
+                    {/* Gradient Overlay for high readability */}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background:
+                          'linear-gradient(180deg, rgba(8,8,16,0.78) 0%, rgba(8,8,16,0.25) 30%, rgba(8,8,16,0.92) 75%, rgba(8,8,16,0.98) 100%)',
+                        pointerEvents: 'none',
+                      }}
+                    />
+
+                    {/* Card Content */}
+                    <div
+                      style={{
+                        position: 'relative',
+                        zIndex: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: '100%',
+                        padding: '1.4rem',
+                        boxSizing: 'border-box',
+                      }}
+                    >
+                      {/* Top Bar */}
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: 'auto' }}>
+                        {project.status === 'ongoing' ? (
+                          <span className="status-badge status-ongoing" style={{ backdropFilter: 'blur(8px)', background: 'rgba(59,130,246,0.2)' }}>
+                            <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> Ongoing Development
+                          </span>
+                        ) : (
+                          <span className="status-badge status-completed" style={{ backdropFilter: 'blur(8px)', background: 'rgba(139,92,246,0.2)' }}>
+                            <CheckCircle2 size={12} /> Completed
+                          </span>
+                        )}
+
+                        {project.completionDate && project.status === 'completed' ? (
+                          <span style={{ fontSize: '0.72rem', color: 'var(--gray-300)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(0,0,0,0.4)', padding: '0.2rem 0.6rem', borderRadius: 100, border: '1px solid rgba(255,255,255,0.1)' }}>
+                            <Calendar size={11} /> {new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) !== 'Invalid Date' ? new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : project.completionDate}
+                          </span>
+                        ) : project.tags?.[0] ? (
+                          <span className="tag" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--gray-300)' }}>
+                            {project.tags[0]}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      {/* Bottom Info & Actions */}
+                      <div style={{ marginTop: 'auto' }}>
+                        <h3
+                          style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: '1.35rem',
+                            fontWeight: 700,
+                            color: 'var(--white)',
+                            lineHeight: 1.25,
+                            marginBottom: '0.4rem',
+                          }}
+                        >
+                          {project.title}
+                        </h3>
+                        <p
+                          style={{
+                            fontSize: '0.8rem',
+                            color: 'var(--gray-300)',
+                            lineHeight: 1.45,
+                            marginBottom: '0.9rem',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}
+                        >
+                          {project.description}
+                        </p>
+
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '0.5rem',
+                            paddingTop: '0.6rem',
+                            borderTop: '1px solid rgba(255,255,255,0.1)',
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelected(project);
+                            }}
+                            style={{
+                              background: 'rgba(255,255,255,0.1)',
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              borderRadius: 8,
+                              padding: '0.45rem 0.85rem',
+                              color: 'var(--white)',
+                              fontSize: '0.78rem',
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.35rem',
+                              transition: 'all 0.2s',
+                            }}
+                          >
+                            <ExternalLink size={13} /> View Details
+                          </button>
+
+                          {project.status === 'ongoing' && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelected(project);
+                              }}
+                              style={{
+                                background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                                border: 'none',
+                                borderRadius: 8,
+                                padding: '0.45rem 0.85rem',
+                                color: 'var(--white)',
+                                fontSize: '0.78rem',
+                                fontWeight: 600,
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.35rem',
+                                boxShadow: '0 2px 10px rgba(59,130,246,0.35)',
+                              }}
+                            >
+                              <MessageSquare size={13} /> Inquire
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </CardSwap>
+            </div>
+
+            {/* Swapping Controls Bar */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '1rem',
+                marginTop: '1.25rem',
+                padding: '0.45rem 1rem',
+                background: 'rgba(255, 255, 255, 0.04)',
+                border: '1px solid rgba(139, 92, 246, 0.2)',
+                borderRadius: 100,
+                backdropFilter: 'blur(10px)',
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => swapRef.current?.prev()}
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '50%',
+                  width: 34,
+                  height: 34,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--white)',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s',
+                }}
+                aria-label="Previous card"
+              >
+                <ChevronLeft size={16} />
+              </button>
+
+              <span style={{ fontSize: '0.8rem', color: 'var(--gray-300)', fontFamily: 'var(--font-grotesk)', minWidth: 60, textAlign: 'center' }}>
+                {filtered.length > 0 ? (currentCardIndex % filtered.length) + 1 : 0} / {filtered.length}
+              </span>
+
+              <button
+                type="button"
+                onClick={() => swapRef.current?.next()}
+                style={{
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: '50%',
+                  width: 34,
+                  height: 34,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--white)',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s',
+                }}
+                aria-label="Next card"
+              >
+                <ChevronRight size={16} />
+              </button>
+
+              <div style={{ width: 1, height: 16, background: 'rgba(255,255,255,0.15)' }} />
+
+              <button
+                type="button"
+                onClick={() => setIsAutoplay(prev => !prev)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: isAutoplay ? '#34d399' : 'var(--gray-400)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.35rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                }}
+                title={isAutoplay ? 'Pause autoplay' : 'Resume autoplay'}
+              >
+                {isAutoplay ? <Pause size={13} /> : <Play size={13} />}
+                <span>{isAutoplay ? 'Auto' : 'Paused'}</span>
+              </button>
+            </div>
+            <p style={{ fontSize: '0.72rem', color: 'var(--gray-500)', marginTop: '0.6rem', textAlign: 'center' }}>
+              Drag or fling the card to swap • Click to view full details
+            </p>
+          </div>
+        ) : (
           <div style={{ textAlign: 'center', padding: '4.5rem 1.5rem', color: 'var(--gray-500)', border: '1px dashed rgba(139,92,246,0.25)', borderRadius: 18, marginTop: '1.5rem', background: 'rgba(255,255,255,0.015)' }}>
             <p className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.5rem' }}>
               No {activeTab === 'ongoing' ? 'ongoing' : 'completed'} projects found
