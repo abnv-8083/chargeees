@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { submitInquiry } from '@/lib/api';
-import CardSwap, { Card, CardSwapRef } from '@/components/ui/CardSwap';
+import CircularGallery from '@/components/ui/CircularGallery';
 
 const FALLBACK_PROJECTS: ProjectData[] = [
   // ── 1. Ongoing Projects (Shown 1st by default!) ──
@@ -20,7 +20,7 @@ const FALLBACK_PROJECTS: ProjectData[] = [
     description: 'Next-generation AI-powered business intelligence suite providing predictive insights, real-time demand forecasting, and automated anomaly detection across operations.',
     category: 'Data & Analytics',
     status: 'ongoing',
-    coverImage: '',
+    coverImage: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
     tags: ['AI Engine', 'Predictive Analytics', 'Supply Chain', 'Real-Time'],
     featured: true,
@@ -33,7 +33,7 @@ const FALLBACK_PROJECTS: ProjectData[] = [
     description: 'Decentralized smart EV charging network with dynamic load balancing, IoT telemetry, solar micro-grid integration, and automated green power distribution.',
     category: 'CleanTech',
     status: 'ongoing',
-    coverImage: '',
+    coverImage: 'https://images.unsplash.com/photo-1593941707882-a5bba14938c7?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
     tags: ['CleanTech', 'EV Infrastructure', 'IoT', 'Smart Grid'],
     featured: true,
@@ -46,7 +46,7 @@ const FALLBACK_PROJECTS: ProjectData[] = [
     description: 'Comprehensive cross-border market entry and enterprise expansion framework, optimizing operational efficiency and cross-regional compliance.',
     category: 'Strategy',
     status: 'ongoing',
-    coverImage: '',
+    coverImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
     tags: ['Enterprise Scale', 'Cross-Border', 'Governance', 'Strategy'],
     featured: false,
@@ -59,7 +59,7 @@ const FALLBACK_PROJECTS: ProjectData[] = [
     description: 'Resilient multi-cloud zero-trust networking mesh designed to orchestrate mission-critical containerized microservices with ultra-low latency.',
     category: 'Technology',
     status: 'ongoing',
-    coverImage: '',
+    coverImage: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
     tags: ['Zero-Trust', 'Edge Computing', 'Cloud Native', 'Security'],
     featured: false,
@@ -75,7 +75,7 @@ const FALLBACK_PROJECTS: ProjectData[] = [
     category: 'Technology',
     status: 'completed',
     completionDate: '2024-03-01',
-    coverImage: '',
+    coverImage: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
     tags: ['SaaS', 'Workflow Automation', 'Enterprise'],
     featured: true,
@@ -89,7 +89,7 @@ const FALLBACK_PROJECTS: ProjectData[] = [
     category: 'Consulting',
     status: 'completed',
     completionDate: '2023-11-01',
-    coverImage: '',
+    coverImage: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
     tags: ['FinTech', 'Core Banking', 'Cost Optimization'],
     featured: true,
@@ -103,7 +103,7 @@ const FALLBACK_PROJECTS: ProjectData[] = [
     category: 'Technology',
     status: 'completed',
     completionDate: '2024-06-01',
-    coverImage: '',
+    coverImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
     tags: ['Healthcare', 'Cloud Native', 'High Availability'],
     featured: false,
@@ -117,7 +117,7 @@ const FALLBACK_PROJECTS: ProjectData[] = [
     category: 'Data & Analytics',
     status: 'completed',
     completionDate: '2023-08-15',
-    coverImage: '',
+    coverImage: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
     tags: ['Cybersecurity', 'Machine Learning', 'Zero-Day'],
     featured: false,
@@ -462,9 +462,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   const [activeTab, setActiveTab] = useState<'ongoing' | 'completed'>('ongoing');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<ProjectData | null>(null);
-  const swapRef = useRef<CardSwapRef>(null);
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
-
+  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -487,7 +485,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   // Handle switching between Ongoing and Completed sessions
   const handleTabChange = (tab: 'ongoing' | 'completed') => {
     setActiveTab(tab);
-    setCurrentCardIndex(0);
+    setActiveProjectIndex(0);
   };
 
   // Filtered by search query
@@ -504,6 +502,17 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
     }
     return result;
   }, [currentTabProjects, search]);
+
+  const galleryItems = useMemo(() => {
+    return filtered.map((project, idx) => ({
+      image: project.coverImage || `https://picsum.photos/seed/${project._id || idx}/1000/700`,
+      text: project.title,
+      description: project.description,
+      alt: project.title,
+    }));
+  }, [filtered]);
+
+  const activeProject = filtered[activeProjectIndex % (filtered.length || 1)] || filtered[0];
 
   return (
     <section id="projects" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }} data-cursor-color="#818cf8">
@@ -605,293 +614,132 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
           </div>
         </motion.div>
 
-        {/* Swapping Cards Showcase */}
+        {/* Circular 3D Gallery Showcase */}
         {filtered.length > 0 ? (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
             <div
               style={{
                 position: 'relative',
                 width: '100%',
-                height: 560,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
+                height: 600,
+                borderRadius: '24px',
+                overflow: 'hidden',
+                background: 'radial-gradient(ellipse at center, rgba(30, 27, 75, 0.4) 0%, rgba(10, 10, 18, 0.95) 100%)',
+                border: '1px solid rgba(139, 92, 246, 0.2)',
+                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
               }}
             >
-              <CardSwap
-                ref={swapRef}
-                key={activeTab + (search ? '-search-' + search : '')}
-                width={500}
-                height={350}
-                cardDistance={55}
-                verticalDistance={65}
-                depth={85}
-                skewAmount={5}
-                delay={4200}
-                autoplay={true}
-                pauseOnHover={true}
-                draggable={true}
-                visibleCards={Math.min(4, filtered.length)}
-                onChange={(idx) => setCurrentCardIndex(idx)}
-                onCardClick={(idx) => {
-                  if (filtered[idx]) setSelected(filtered[idx]);
+              <CircularGallery
+                items={galleryItems}
+                bend={3}
+                textColor="#ffffff"
+                borderRadius={0.06}
+                scrollEase={0.05}
+                scrollSpeed={1}
+                itemSize={0.65}
+                itemAspect={1.35}
+                snap={true}
+                showTitles={true}
+                openOnClick={true}
+                onItemClick={(item, index) => {
+                  const p = filtered[index];
+                  if (p) setSelected(p);
+                }}
+                onActiveChange={(index) => {
+                  setActiveProjectIndex(index);
+                }}
+              />
+            </div>
+
+            {/* Active Project Highlight Bar */}
+            {activeProject && (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '1rem',
+                  marginTop: '1.25rem',
+                  padding: '0.85rem 1.5rem',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(139, 92, 246, 0.25)',
+                  borderRadius: 16,
+                  backdropFilter: 'blur(16px)',
+                  width: '100%',
+                  maxWidth: 780,
                 }}
               >
-                {filtered.map((project, i) => (
-                  <Card
-                    key={project._id}
-                    onClick={() => setSelected(project)}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                  {activeProject.status === 'ongoing' ? (
+                    <span className="status-badge status-ongoing">
+                      <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> Ongoing
+                    </span>
+                  ) : (
+                    <span className="status-badge status-completed">
+                      <CheckCircle2 size={12} /> Completed
+                    </span>
+                  )}
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 700, color: 'var(--white)', fontFamily: 'var(--font-display)' }}>
+                      {activeProject.title}
+                    </h4>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--gray-400)' }}>
+                      {activeProject.category} {activeProject.tags?.[0] ? `• ${activeProject.tags[0]}` : ''}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <button
+                    type="button"
+                    onClick={() => setSelected(activeProject)}
                     style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      height: '100%',
-                      position: 'relative',
-                      overflow: 'hidden',
+                      background: 'var(--grad-primary)',
+                      border: 'none',
+                      borderRadius: 8,
+                      padding: '0.5rem 1rem',
+                      color: 'var(--white)',
+                      fontSize: '0.8rem',
+                      fontWeight: 600,
                       cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      boxShadow: '0 2px 12px rgba(139, 92, 246, 0.35)',
+                      transition: 'all 0.2s',
                     }}
                   >
-                    {/* Background image or gradient */}
-                    {project.coverImage ? (
-                      <Image
-                        src={project.coverImage}
-                        alt={project.title}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        draggable={false}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          position: 'absolute',
-                          inset: 0,
-                          background: BG_COLORS[i % BG_COLORS.length],
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <span
-                          style={{
-                            opacity: 0.08,
-                            fontSize: '9rem',
-                            fontWeight: 900,
-                            fontFamily: 'var(--font-display)',
-                            color: '#ffffff',
-                            userSelect: 'none',
-                          }}
-                        >
-                          {project.title[0]}
-                        </span>
-                      </div>
-                    )}
+                    <ExternalLink size={14} /> View Details
+                  </button>
 
-                    {/* Gradient Overlay for high readability */}
-                    <div
+                  {activeProject.status === 'ongoing' && (
+                    <button
+                      type="button"
+                      onClick={() => setSelected(activeProject)}
                       style={{
-                        position: 'absolute',
-                        inset: 0,
-                        background:
-                          'linear-gradient(180deg, rgba(8,8,16,0.78) 0%, rgba(8,8,16,0.25) 30%, rgba(8,8,16,0.92) 75%, rgba(8,8,16,0.98) 100%)',
-                        pointerEvents: 'none',
-                      }}
-                    />
-
-                    {/* Card Content */}
-                    <div
-                      style={{
-                        position: 'relative',
-                        zIndex: 2,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        height: '100%',
-                        padding: '1.4rem',
-                        boxSizing: 'border-box',
+                        background: 'rgba(255,255,255,0.08)',
+                        border: '1px solid rgba(255,255,255,0.18)',
+                        borderRadius: 8,
+                        padding: '0.5rem 1rem',
+                        color: 'var(--white)',
+                        fontSize: '0.8rem',
+                        fontWeight: 600,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.4rem',
                       }}
                     >
-                      {/* Top Bar */}
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem', marginBottom: 'auto' }}>
-                        {project.status === 'ongoing' ? (
-                          <span className="status-badge status-ongoing" style={{ backdropFilter: 'blur(8px)', background: 'rgba(59,130,246,0.2)' }}>
-                            <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> Ongoing Development
-                          </span>
-                        ) : (
-                          <span className="status-badge status-completed" style={{ backdropFilter: 'blur(8px)', background: 'rgba(139,92,246,0.2)' }}>
-                            <CheckCircle2 size={12} /> Completed
-                          </span>
-                        )}
+                      <MessageSquare size={14} /> Inquire
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
 
-                        {project.completionDate && project.status === 'completed' ? (
-                          <span style={{ fontSize: '0.72rem', color: 'var(--gray-300)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', background: 'rgba(0,0,0,0.4)', padding: '0.2rem 0.6rem', borderRadius: 100, border: '1px solid rgba(255,255,255,0.1)' }}>
-                            <Calendar size={11} /> {new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) !== 'Invalid Date' ? new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) : project.completionDate}
-                          </span>
-                        ) : project.tags?.[0] ? (
-                          <span className="tag" style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', color: 'var(--gray-300)' }}>
-                            {project.tags[0]}
-                          </span>
-                        ) : null}
-                      </div>
-
-                      {/* Bottom Info & Actions */}
-                      <div style={{ marginTop: 'auto' }}>
-                        <h3
-                          style={{
-                            fontFamily: 'var(--font-display)',
-                            fontSize: '1.35rem',
-                            fontWeight: 700,
-                            color: 'var(--white)',
-                            lineHeight: 1.25,
-                            marginBottom: '0.4rem',
-                          }}
-                        >
-                          {project.title}
-                        </h3>
-                        <p
-                          style={{
-                            fontSize: '0.8rem',
-                            color: 'var(--gray-300)',
-                            lineHeight: 1.45,
-                            marginBottom: '0.9rem',
-                            display: '-webkit-box',
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: 'vertical',
-                            overflow: 'hidden',
-                          }}
-                        >
-                          {project.description}
-                        </p>
-
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: '0.5rem',
-                            paddingTop: '0.6rem',
-                            borderTop: '1px solid rgba(255,255,255,0.1)',
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setSelected(project);
-                            }}
-                            style={{
-                              background: 'rgba(255,255,255,0.1)',
-                              border: '1px solid rgba(255,255,255,0.2)',
-                              borderRadius: 8,
-                              padding: '0.45rem 0.85rem',
-                              color: 'var(--white)',
-                              fontSize: '0.78rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.35rem',
-                              transition: 'all 0.2s',
-                            }}
-                          >
-                            <ExternalLink size={13} /> View Details
-                          </button>
-
-                          {project.status === 'ongoing' && (
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setSelected(project);
-                              }}
-                              style={{
-                                background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                                border: 'none',
-                                borderRadius: 8,
-                                padding: '0.45rem 0.85rem',
-                                color: 'var(--white)',
-                                fontSize: '0.78rem',
-                                fontWeight: 600,
-                                cursor: 'pointer',
-                                display: 'inline-flex',
-                                alignItems: 'center',
-                                gap: '0.35rem',
-                                boxShadow: '0 2px 10px rgba(59,130,246,0.35)',
-                              }}
-                            >
-                              <MessageSquare size={13} /> Inquire
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </CardSwap>
-            </div>
-
-            {/* Swapping Controls Bar */}
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '1rem',
-                marginTop: '1.25rem',
-                padding: '0.45rem 1rem',
-                background: 'rgba(255, 255, 255, 0.04)',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
-                borderRadius: 100,
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              <button
-                type="button"
-                onClick={() => swapRef.current?.prev()}
-                style={{
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '50%',
-                  width: 34,
-                  height: 34,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--white)',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s',
-                }}
-                aria-label="Previous card"
-              >
-                <ChevronLeft size={16} />
-              </button>
-
-              <span style={{ fontSize: '0.8rem', color: 'var(--gray-300)', fontFamily: 'var(--font-grotesk)', minWidth: 60, textAlign: 'center' }}>
-                {filtered.length > 0 ? (currentCardIndex % filtered.length) + 1 : 0} / {filtered.length}
-              </span>
-
-              <button
-                type="button"
-                onClick={() => swapRef.current?.next()}
-                style={{
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.15)',
-                  borderRadius: '50%',
-                  width: 34,
-                  height: 34,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--white)',
-                  cursor: 'pointer',
-                  transition: 'background 0.2s',
-                }}
-                aria-label="Next card"
-              >
-                <ChevronRight size={16} />
-              </button>
-
-
-            </div>
-            <p style={{ fontSize: '0.72rem', color: 'var(--gray-500)', marginTop: '0.6rem', textAlign: 'center' }}>
-              Drag or fling the card to swap • Click to view full details
+            <p style={{ fontSize: '0.75rem', color: 'var(--gray-400)', marginTop: '0.75rem', textAlign: 'center' }}>
+              ✦ Drag or scroll horizontally to rotate the 3D gallery • Click any project to inspect full details ✦
             </p>
           </div>
         ) : (
