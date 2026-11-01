@@ -458,7 +458,6 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   const [projects, setProjects] = useState<ProjectData[]>(data || FALLBACK_PROJECTS);
   // User requirement: 2 sessions (ongoing & completed), with ongoing shown 1st
   const [activeTab, setActiveTab] = useState<'ongoing' | 'completed'>('ongoing');
-  const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<ProjectData | null>(null);
 
@@ -480,36 +479,25 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   // Current session's projects
   const currentTabProjects = activeTab === 'ongoing' ? ongoingProjects : completedProjects;
 
-  // Categories specific to current session
-  const categories = useMemo(() => {
-    const list = Array.from(new Set(currentTabProjects.map(p => p.category).filter(Boolean)));
-    return ['All', ...list];
-  }, [currentTabProjects]);
-
   // Handle switching between Ongoing and Completed sessions
   const handleTabChange = (tab: 'ongoing' | 'completed') => {
     setActiveTab(tab);
-    setActiveFilter('All');
   };
 
-  // Filtered by category and search
+  // Filtered by search query
   const filtered = useMemo(() => {
     let result = currentTabProjects;
-    if (activeFilter !== 'All') {
-      result = result.filter(p => p.category === activeFilter);
-    }
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
         p =>
           p.title.toLowerCase().includes(q) ||
           p.description.toLowerCase().includes(q) ||
-          p.category.toLowerCase().includes(q) ||
           (p.tags && p.tags.some(t => t.toLowerCase().includes(q)))
       );
     }
     return result;
-  }, [currentTabProjects, activeFilter, search]);
+  }, [currentTabProjects, search]);
 
   return (
     <section id="projects" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }} data-cursor-color="#818cf8">
@@ -566,7 +554,7 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
 
           {/* ── 2 Primary Session Tabs (Ongoing & Completed, Ongoing 1st) ── */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-            <div className="project-tabs-container" role="tablist" aria-label="Project status sessions">
+            <div className="project-tabs-container" style={{ marginBottom: 0 }} role="tablist" aria-label="Project status sessions">
               <button
                 role="tab"
                 id="tab-ongoing"
@@ -611,24 +599,10 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
           </div>
         </motion.div>
 
-        {/* Category Filters */}
-        <div className="projects-filters" role="group" aria-label="Project category filters">
-          {categories.map(cat => (
-            <button
-              key={cat}
-              className={`filter-btn ${activeFilter === cat ? 'active' : ''}`}
-              onClick={() => setActiveFilter(cat)}
-              aria-pressed={activeFilter === cat}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
         {/* Projects Grid */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeTab + activeFilter + search}
+            key={activeTab + search}
             className="projects-grid"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
@@ -661,8 +635,8 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
                 ) : (
                   <div className="project-card-placeholder" style={{ background: BG_COLORS[i % BG_COLORS.length] }}>
                     <div style={{ marginBottom: 'auto', paddingTop: '1.5rem', display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      <span className="tag">{project.category}</span>
-                      {project.tags?.[0] && <span className="tag" style={{ opacity: 0.75 }}>{project.tags[0]}</span>}
+                      {project.tags?.[0] && <span className="tag">{project.tags[0]}</span>}
+                      {project.tags?.[1] && <span className="tag" style={{ opacity: 0.75 }}>{project.tags[1]}</span>}
                     </div>
                   </div>
                 )}
@@ -713,14 +687,14 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
               No {activeTab === 'ongoing' ? 'ongoing' : 'completed'} projects found
             </p>
             <p className="body-md" style={{ color: 'var(--gray-400)', maxWidth: '440px', margin: '0 auto 1.5rem' }}>
-              We couldn&apos;t find any {activeTab} projects matching your current search or category filter.
+              We couldn&apos;t find any {activeTab} projects matching your current search.
             </p>
-            {(activeFilter !== 'All' || search) && (
+            {search && (
               <button
-                onClick={() => { setActiveFilter('All'); setSearch(''); }}
+                onClick={() => setSearch('')}
                 style={{ background: 'var(--grad-primary)', border: 'none', color: 'var(--white)', padding: '0.6rem 1.4rem', borderRadius: 100, fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 18px rgba(139,92,246,0.4)' }}
               >
-                Reset Filters
+                Clear Search
               </button>
             )}
           </div>
