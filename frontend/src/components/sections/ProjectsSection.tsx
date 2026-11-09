@@ -1,15 +1,24 @@
 'use client';
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 import type { ProjectData } from '@/lib/types';
 import {
-  X, ExternalLink, Search, Calendar, Tag, Send, CheckCircle2,
-  AlertCircle, MessageSquare, Info, Zap, Trophy, Clock, ArrowRight,
-  ChevronLeft, ChevronRight
+  X,
+  ExternalLink,
+  Search,
+  Calendar,
+  Tag,
+  Send,
+  CheckCircle2,
+  AlertCircle,
+  MessageSquare,
+  Info,
+  ArrowUpRight,
+  Building2,
+  Sparkles,
 } from 'lucide-react';
 import { submitInquiry } from '@/lib/api';
-import CircularGallery from '@/components/ui/CircularGallery';
 
 const FALLBACK_PROJECTS: ProjectData[] = [
   // ── 1. Ongoing Projects (Shown 1st by default!) ──
@@ -112,26 +121,26 @@ const FALLBACK_PROJECTS: ProjectData[] = [
   {
     _id: 'proj-comp-4',
     title: 'OmniVanguard Threat Intelligence',
-    slug: 'omnivanguard-security',
-    description: 'Next-gen cybersecurity threat intelligence mesh using machine learning models to identify and neutralize zero-day attack surfaces across hybrid cloud networks.',
-    category: 'Data & Analytics',
+    slug: 'omnivanguard-threat',
+    description: 'Autonomous cyber defense system integrating behavioral anomaly heuristics and automated incident remediation for financial networks.',
+    category: 'Security',
     status: 'completed',
-    completionDate: '2023-08-15',
+    completionDate: '2024-01-15',
     coverImage: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=1000&q=80',
     gallery: [],
-    tags: ['Cybersecurity', 'Machine Learning', 'Zero-Day'],
+    tags: ['Cybersecurity', 'Autonomous Defense', 'SOC Automation'],
     featured: false,
-    client: 'Aerospace & Defense Partner',
+    client: 'Sovereign Wealth Fund',
   },
 ];
 
 const BG_COLORS = [
-  'linear-gradient(135deg, #111 0%, #1a1a1a 100%)',
-  'linear-gradient(135deg, #0d0d0d 0%, #161616 100%)',
-  'linear-gradient(135deg, #141414 0%, #1c1c1c 100%)',
-  'linear-gradient(135deg, #0a0a0a 0%, #171717 100%)',
-  'linear-gradient(135deg, #111 0%, #0d0d0d 100%)',
-  'linear-gradient(135deg, #161616 0%, #111 100%)',
+  'linear-gradient(135deg, #18182e 0%, #0d0d1a 100%)',
+  'linear-gradient(135deg, #1a162b 0%, #0c0a18 100%)',
+  'linear-gradient(135deg, #111e2e 0%, #080f1a 100%)',
+  'linear-gradient(135deg, #24142a 0%, #0f0815 100%)',
+  'linear-gradient(135deg, #181828 0%, #090914 100%)',
+  'linear-gradient(135deg, #1a202c 0%, #0a0d14 100%)',
 ];
 
 type InquiryFormState = {
@@ -142,8 +151,16 @@ type InquiryFormState = {
   message: string;
 };
 
-function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () => void }) {
-  const [activeTab, setActiveTab] = useState<'details' | 'inquiry'>('details');
+function ProjectModal({
+  project,
+  initialTab = 'details',
+  onClose,
+}: {
+  project: ProjectData;
+  initialTab?: 'details' | 'inquiry';
+  onClose: () => void;
+}) {
+  const [activeTab, setActiveTab] = useState<'details' | 'inquiry'>(initialTab);
   const [form, setForm] = useState<InquiryFormState>({ name: '', email: '', phone: '', companyName: '', message: '' });
   const [submitting, setSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -195,12 +212,16 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
     <AnimatePresence>
       <motion.div
         className="modal-overlay"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         onClick={onClose}
       >
         <motion.div
           className="modal-content"
-          initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
           transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           onClick={e => e.stopPropagation()}
         >
@@ -258,7 +279,7 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2.5rem' }}>
                   <div>
                     <p className="body-lg" style={{ marginBottom: '1.5rem', textAlign: 'justify' }}>{project.description}</p>
-                    {project.tags.length > 0 && (
+                    {project.tags && project.tags.length > 0 && (
                       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                         {project.tags.map((tag, i) => <span key={i} className="tag">{tag}</span>)}
                       </div>
@@ -278,7 +299,6 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
                         </div>
                       ))}
                     </div>
-                    {/* CTA to inquiry tab — only for ongoing projects */}
                     {project.status === 'ongoing' && (
                       <button
                         onClick={() => setActiveTab('inquiry')}
@@ -291,7 +311,7 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
                 </div>
 
                 {/* Gallery */}
-                {project.gallery.length > 0 && (
+                {project.gallery && project.gallery.length > 0 && (
                   <div style={{ marginTop: '2rem' }}>
                     <p className="label-sm" style={{ marginBottom: '1rem' }}>Project Gallery</p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
@@ -401,7 +421,6 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
                       </div>
                     </div>
 
-                    {/* Read-only project reference */}
                     <div>
                       <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--gray-400)', marginBottom: '0.4rem', fontWeight: 500 }}>
                         Project Reference
@@ -456,314 +475,486 @@ function ProjectModal({ project, onClose }: { project: ProjectData; onClose: () 
   );
 }
 
+function ProjectStackCard({
+  project,
+  index,
+  total,
+  onSelect,
+}: {
+  project: ProjectData;
+  index: number;
+  total: number;
+  onSelect: (p: ProjectData, tab?: 'details' | 'inquiry') => void;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Track the scroll of this card relative to viewport
+  const { scrollYProgress: enterProgress } = useScroll({
+    target: cardRef,
+    offset: ['start end', 'start start'],
+  });
+
+  // Track the exit/stack progression as user scrolls past this card
+  const { scrollYProgress: exitProgress } = useScroll({
+    target: cardRef,
+    offset: ['start start', 'end start'],
+  });
+
+  const isLast = index === total - 1;
+  const targetScale = total <= 1 || isLast ? 1 : Math.max(0.92, 1 - (total - index - 1) * 0.025);
+
+  const scale = useTransform(exitProgress, [0, 1], [1, targetScale]);
+  const opacity = useTransform(exitProgress, [0, 0.7, 1], [1, 0.96, isLast ? 1 : 0.75]);
+  const brightness = useTransform(exitProgress, [0, 1], [1, isLast ? 1 : 0.68]);
+  const filter = useTransform(brightness, b => `brightness(${b})`);
+
+  // Parallax on image inside card
+  const imageY = useTransform(enterProgress, [0, 1], [-20, 20]);
+
+  // Stepped sticky offset so cards create stacked tab edges
+  const topOffset = Math.min(index * 16, 48);
+
+  const formattedDate = project.completionDate
+    ? new Date(project.completionDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    : null;
+
+  return (
+    <motion.div
+      ref={cardRef}
+      className="project-stack-card-wrapper"
+      style={{
+        top: `calc(88px + ${topOffset}px)`,
+        zIndex: index + 1,
+        marginBottom: isLast ? '1rem' : '4.5rem',
+        scale,
+        opacity,
+        filter,
+      }}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-50px' }}
+      transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+    >
+      <div className="project-stack-card" data-cursor-hover>
+        <div className="project-card-glow" />
+
+        {/* Card Top Metadata Strip */}
+        <div className="project-card-topbar">
+          <div className="project-card-topbar-left">
+            <span className="project-index-pill">0{index + 1}</span>
+            <span className={`status-badge status-${project.status}`}>
+              {project.status === 'ongoing' ? (
+                <>
+                  <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> Ongoing
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={12} /> Completed
+                </>
+              )}
+            </span>
+            <span className="tag">{project.category}</span>
+          </div>
+
+          <div className="project-card-topbar-right">
+            {project.client && (
+              <span className="project-meta-item">
+                <Building2 size={13} style={{ color: 'var(--purple-400)' }} />
+                <span>{project.client}</span>
+              </span>
+            )}
+            {formattedDate && (
+              <span className="project-meta-item">
+                <Calendar size={13} style={{ color: 'var(--purple-400)' }} />
+                <span>{formattedDate}</span>
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Card Body */}
+        <div className="project-card-body">
+          {/* Info Column */}
+          <div className="project-info-col">
+            <h3 className="project-title">{project.title}</h3>
+            <p className="project-description">{project.description}</p>
+
+            {project.tags && project.tags.length > 0 && (
+              <div className="project-tags-list">
+                {project.tags.map((tag, tIdx) => (
+                  <span key={tIdx} className="project-tag-pill">
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="project-actions-row">
+              <button
+                type="button"
+                onClick={() => onSelect(project, 'details')}
+                className="project-btn-primary"
+                aria-label={`View details for ${project.title}`}
+              >
+                <span>Explore Project</span>
+                <ArrowUpRight size={16} />
+              </button>
+
+              {project.status === 'ongoing' && (
+                <button
+                  type="button"
+                  onClick={() => onSelect(project, 'inquiry')}
+                  className="project-btn-secondary"
+                  aria-label={`Inquire about ${project.title}`}
+                >
+                  <MessageSquare size={14} />
+                  <span>Inquire Now</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Media Column */}
+          <div
+            className="project-media-col"
+            onClick={() => onSelect(project, 'details')}
+            role="button"
+            tabIndex={0}
+            aria-label={`View details for ${project.title}`}
+            onKeyDown={e => e.key === 'Enter' && onSelect(project, 'details')}
+          >
+            {project.coverImage ? (
+              <motion.div style={{ y: imageY, width: '100%', height: '115%', position: 'relative' }}>
+                <Image
+                  src={project.coverImage}
+                  alt={project.title}
+                  fill
+                  className="project-media-image"
+                  sizes="(max-width: 960px) 100vw, 50vw"
+                />
+              </motion.div>
+            ) : (
+              <div
+                className="project-media-art"
+                style={{
+                  background: BG_COLORS[index % BG_COLORS.length],
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', zIndex: 1 }}>
+                  <span
+                    className="tag"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      borderColor: 'rgba(255, 255, 255, 0.2)',
+                      color: 'var(--white)',
+                    }}
+                  >
+                    {project.category}
+                  </span>
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: 'rgba(255,255,255,0.06)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                    }}
+                  >
+                    <Sparkles size={16} style={{ color: 'var(--purple-400)' }} />
+                  </div>
+                </div>
+
+                {/* Decorative Initial Watermark */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: '1.5rem',
+                    bottom: '-1rem',
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                    opacity: 0.08,
+                    fontFamily: 'var(--font-display)',
+                    fontSize: '9rem',
+                    fontWeight: 900,
+                    color: 'var(--white)',
+                    lineHeight: 1,
+                  }}
+                >
+                  {project.title.charAt(0)}
+                </div>
+
+                <div style={{ zIndex: 1 }}>
+                  <p
+                    style={{
+                      fontSize: '0.75rem',
+                      color: 'rgba(255,255,255,0.6)',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.08em',
+                      marginBottom: '0.25rem',
+                    }}
+                  >
+                    Featured Initiative
+                  </p>
+                  <p
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: '1.25rem',
+                      fontWeight: 700,
+                      color: 'var(--white)',
+                      margin: 0,
+                    }}
+                  >
+                    {project.title}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <div className="project-media-badge">
+              <ExternalLink size={13} />
+              <span>Explore Case Study</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function ProjectsSection({ data }: { data?: ProjectData[]; categories?: string[] }) {
-  const [projects, setProjects] = useState<ProjectData[]>(data || FALLBACK_PROJECTS);
-  // User requirement: 2 sessions (ongoing & completed), with ongoing shown 1st
-  const [activeTab, setActiveTab] = useState<'ongoing' | 'completed'>('ongoing');
+  const [projects, setProjects] = useState<ProjectData[]>(data && data.length > 0 ? data : FALLBACK_PROJECTS);
+  const [statusTab, setStatusTab] = useState<'all' | 'ongoing' | 'completed'>('all');
+  const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<ProjectData | null>(null);
-  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
+  const [modalTab, setModalTab] = useState<'details' | 'inquiry'>('details');
 
+  // Keep synced if data prop updates
   useEffect(() => {
     if (data && data.length > 0) {
       setProjects(data);
     }
   }, [data]);
 
-  // Separate ongoing and completed projects
-  const ongoingProjects = useMemo(() => {
-    return projects.filter(p => p.status === 'ongoing' || p.status === 'upcoming' || p.status === 'on-hold');
+  const ongoingCount = useMemo(() => projects.filter(p => p.status === 'ongoing').length, [projects]);
+  const completedCount = useMemo(() => projects.filter(p => p.status === 'completed').length, [projects]);
+
+  const categories = useMemo(() => {
+    return ['All', ...Array.from(new Set(projects.map(p => p.category)))];
   }, [projects]);
 
-  const completedProjects = useMemo(() => {
-    return projects.filter(p => p.status === 'completed');
-  }, [projects]);
-
-  // Current session's projects
-  const currentTabProjects = activeTab === 'ongoing' ? ongoingProjects : completedProjects;
-
-  // Handle switching between Ongoing and Completed sessions
-  const handleTabChange = (tab: 'ongoing' | 'completed') => {
-    setActiveTab(tab);
-    setActiveProjectIndex(0);
-  };
-
-  // Filtered by search query
   const filtered = useMemo(() => {
-    let result = currentTabProjects;
+    let result = projects;
+    if (statusTab !== 'all') {
+      result = result.filter(p => p.status === statusTab);
+    }
+    if (activeFilter !== 'All') {
+      result = result.filter(p => p.category === activeFilter);
+    }
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(
         p =>
           p.title.toLowerCase().includes(q) ||
           p.description.toLowerCase().includes(q) ||
-          (p.tags && p.tags.some(t => t.toLowerCase().includes(q)))
+          (p.tags && p.tags.some(t => t.toLowerCase().includes(q))) ||
+          (p.client && p.client.toLowerCase().includes(q))
       );
     }
     return result;
-  }, [currentTabProjects, search]);
+  }, [projects, statusTab, activeFilter, search]);
 
-  const galleryItems = useMemo(() => {
-    return filtered.map((project, idx) => ({
-      image: project.coverImage || `https://picsum.photos/seed/${project._id || idx}/1000/700`,
-      text: project.title,
-      description: project.description,
-      alt: project.title,
-    }));
-  }, [filtered]);
-
-  const activeProject = filtered[activeProjectIndex % (filtered.length || 1)] || filtered[0];
+  const handleSelect = (project: ProjectData, tab: 'details' | 'inquiry' = 'details') => {
+    setSelected(project);
+    setModalTab(tab);
+  };
 
   return (
-    <section id="projects" className="section-py" style={{ background: 'var(--gray-900)', position: 'relative' }} data-cursor-color="#818cf8">
+    <section id="projects" className="section-py" data-cursor-color="#818cf8">
       <div className="section-container">
-        {/* Header */}
+        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-          style={{ marginBottom: '2.5rem' }}
+          className="projects-header"
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '0.75rem' }}>
-            <p className="label-sm" style={{ margin: 0 }}>Our Portfolio</p>
-            <span style={{ fontSize: '0.78rem', color: 'var(--gray-500)', fontFamily: 'var(--font-grotesk)' }}>
-              Showing {filtered.length} of {currentTabProjects.length} {activeTab === 'ongoing' ? 'Ongoing' : 'Completed'} Projects
-            </span>
-          </div>
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '1.5rem', marginBottom: '1.5rem' }}>
-            <div style={{ maxWidth: '680px' }}>
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  <h2 className="heading-xl" style={{ margin: 0 }}>
-                    {activeTab === 'ongoing' ? 'Ongoing Projects' : 'Completed Projects'}
-                  </h2>
-                  <p className="body-md" style={{ color: 'var(--gray-400)', marginTop: '0.5rem' }}>
-                    {activeTab === 'ongoing'
-                      ? 'Discover the cutting-edge solutions, technology architectures, and enterprise initiatives currently in active development across our engineering teams.'
-                      : 'Explore our track record of battle-tested enterprise platforms, digital transformations, and strategic client milestones successfully delivered.'}
-                  </p>
-                </motion.div>
-              </AnimatePresence>
+          <div className="projects-header-top">
+            <div>
+              <p className="label-sm" style={{ marginBottom: '0.75rem' }}>
+                Our Portfolio
+              </p>
+              <h2 className="heading-xl">Featured Projects</h2>
             </div>
 
             <div className="search-wrapper">
               <Search size={15} className="search-icon" />
               <input
                 type="search"
-                placeholder={`Search ${activeTab} projects...`}
+                placeholder="Search projects by title, tag, client..."
                 className="search-input"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
-                aria-label={`Search ${activeTab} projects`}
+                aria-label="Search projects"
               />
             </div>
           </div>
 
-          {/* ── 2 Primary Session Tabs (Ongoing & Completed, Ongoing 1st) ── */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-            <div className="project-tabs-container" style={{ marginBottom: 0 }} role="tablist" aria-label="Project status sessions">
+          {/* Session Tabs: All / Ongoing / Completed */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.75rem' }}>
+            <div className="project-tabs-container" role="tablist" aria-label="Project status filter">
               <button
+                type="button"
                 role="tab"
-                id="tab-ongoing"
-                aria-selected={activeTab === 'ongoing'}
-                aria-controls="panel-ongoing"
-                className={`project-tab-btn ${activeTab === 'ongoing' ? 'active' : ''}`}
-                onClick={() => handleTabChange('ongoing')}
+                aria-selected={statusTab === 'all'}
+                className={`project-tab-btn ${statusTab === 'all' ? 'active' : ''}`}
+                onClick={() => setStatusTab('all')}
               >
-                {activeTab === 'ongoing' && (
+                {statusTab === 'all' && (
                   <motion.div
-                    layoutId="activeProjectTabIndicator"
+                    layoutId="activeProjectSessionTab"
                     className="project-tab-indicator"
-                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.55 }}
                   />
                 )}
-                <span className="live-pulse-dot" />
-                <Zap size={16} />
-                <span>Ongoing Projects</span>
-                <span className="project-tab-count">{ongoingProjects.length}</span>
+                <span>All Projects</span>
+                <span className="project-tab-count">{projects.length}</span>
               </button>
 
               <button
+                type="button"
                 role="tab"
-                id="tab-completed"
-                aria-selected={activeTab === 'completed'}
-                aria-controls="panel-completed"
-                className={`project-tab-btn ${activeTab === 'completed' ? 'active' : ''}`}
-                onClick={() => handleTabChange('completed')}
+                aria-selected={statusTab === 'ongoing'}
+                className={`project-tab-btn ${statusTab === 'ongoing' ? 'active' : ''}`}
+                onClick={() => setStatusTab('ongoing')}
               >
-                {activeTab === 'completed' && (
+                {statusTab === 'ongoing' && (
                   <motion.div
-                    layoutId="activeProjectTabIndicator"
+                    layoutId="activeProjectSessionTab"
                     className="project-tab-indicator"
-                    transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.55 }}
                   />
                 )}
-                <CheckCircle2 size={16} />
-                <span>Completed Projects</span>
-                <span className="project-tab-count">{completedProjects.length}</span>
+                <span className="live-pulse-dot" />
+                <span>Ongoing</span>
+                <span className="project-tab-count">{ongoingCount}</span>
               </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={statusTab === 'completed'}
+                className={`project-tab-btn ${statusTab === 'completed' ? 'active' : ''}`}
+                onClick={() => setStatusTab('completed')}
+              >
+                {statusTab === 'completed' && (
+                  <motion.div
+                    layoutId="activeProjectSessionTab"
+                    className="project-tab-indicator"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.55 }}
+                  />
+                )}
+                <CheckCircle2 size={14} style={{ color: statusTab === 'completed' ? '#fff' : 'var(--purple-400)' }} />
+                <span>Completed</span>
+                <span className="project-tab-count">{completedCount}</span>
+              </button>
+            </div>
+
+            <div className="projects-count-indicator">
+              <span className="projects-pulse-dot" />
+              <span>
+                Showing {filtered.length} of {projects.length} Projects • Scroll to explore
+              </span>
+            </div>
+          </div>
+
+          {/* Category Filter Pills */}
+          <div className="projects-meta-bar">
+            <div className="projects-filters" role="group" aria-label="Project category filters">
+              {categories.map(cat => {
+                const count =
+                  cat === 'All'
+                    ? (statusTab === 'all' ? projects.length : projects.filter(p => p.status === statusTab).length)
+                    : projects.filter(p => (statusTab === 'all' || p.status === statusTab) && p.category === cat).length;
+                return (
+                  <button
+                    key={cat}
+                    className={`filter-btn ${activeFilter === cat ? 'active' : ''}`}
+                    onClick={() => setActiveFilter(cat)}
+                    aria-pressed={activeFilter === cat}
+                  >
+                    {cat} <span style={{ opacity: 0.7, fontSize: '0.75rem', marginLeft: '0.35rem' }}>({count})</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </motion.div>
 
-        {/* Circular 3D Gallery Showcase */}
-        {filtered.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '0.5rem' }}>
+        {/* Projects Scroll Trigger Stack */}
+        <div className="projects-stack">
+          {filtered.map((project, i) => (
+            <ProjectStackCard
+              key={project._id || i}
+              project={project}
+              index={i}
+              total={filtered.length}
+              onSelect={handleSelect}
+            />
+          ))}
+        </div>
+
+        {/* Empty state */}
+        {filtered.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            style={{ textAlign: 'center', padding: '6rem 2rem', color: 'var(--gray-500)' }}
+          >
             <div
               style={{
-                position: 'relative',
-                width: '100%',
-                height: 600,
-                borderRadius: '24px',
-                overflow: 'hidden',
-                background: 'radial-gradient(ellipse at center, rgba(30, 27, 75, 0.4) 0%, rgba(10, 10, 18, 0.95) 100%)',
-                border: '1px solid rgba(139, 92, 246, 0.2)',
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+                display: 'inline-flex',
+                padding: '1rem',
+                borderRadius: '50%',
+                background: 'rgba(139, 92, 246, 0.1)',
+                marginBottom: '1rem',
               }}
             >
-              <CircularGallery
-                items={galleryItems}
-                bend={3}
-                textColor="#ffffff"
-                borderRadius={0.06}
-                scrollEase={0.05}
-                scrollSpeed={1}
-                itemSize={0.65}
-                itemAspect={1.35}
-                snap={true}
-                showTitles={true}
-                openOnClick={true}
-                onItemClick={(item, index) => {
-                  const p = filtered[index];
-                  if (p) setSelected(p);
-                }}
-                onActiveChange={(index) => {
-                  setActiveProjectIndex(index);
-                }}
-              />
+              <Search size={28} style={{ color: 'var(--purple-400)' }} />
             </div>
-
-            {/* Active Project Highlight Bar */}
-            {activeProject && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  flexWrap: 'wrap',
-                  gap: '1rem',
-                  marginTop: '1.25rem',
-                  padding: '0.85rem 1.5rem',
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(139, 92, 246, 0.25)',
-                  borderRadius: 16,
-                  backdropFilter: 'blur(16px)',
-                  width: '100%',
-                  maxWidth: 780,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                  {activeProject.status === 'ongoing' ? (
-                    <span className="status-badge status-ongoing">
-                      <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> Ongoing
-                    </span>
-                  ) : (
-                    <span className="status-badge status-completed">
-                      <CheckCircle2 size={12} /> Completed
-                    </span>
-                  )}
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '0.98rem', fontWeight: 700, color: 'var(--white)', fontFamily: 'var(--font-display)' }}>
-                      {activeProject.title}
-                    </h4>
-                    <span style={{ fontSize: '0.75rem', color: 'var(--gray-400)' }}>
-                      {activeProject.category} {activeProject.tags?.[0] ? `• ${activeProject.tags[0]}` : ''}
-                    </span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <button
-                    type="button"
-                    onClick={() => setSelected(activeProject)}
-                    style={{
-                      background: 'var(--grad-primary)',
-                      border: 'none',
-                      borderRadius: 8,
-                      padding: '0.5rem 1rem',
-                      color: 'var(--white)',
-                      fontSize: '0.8rem',
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.4rem',
-                      boxShadow: '0 2px 12px rgba(139, 92, 246, 0.35)',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <ExternalLink size={14} /> View Details
-                  </button>
-
-                  {activeProject.status === 'ongoing' && (
-                    <button
-                      type="button"
-                      onClick={() => setSelected(activeProject)}
-                      style={{
-                        background: 'rgba(255,255,255,0.08)',
-                        border: '1px solid rgba(255,255,255,0.18)',
-                        borderRadius: 8,
-                        padding: '0.5rem 1rem',
-                        color: 'var(--white)',
-                        fontSize: '0.8rem',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.4rem',
-                      }}
-                    >
-                      <MessageSquare size={14} /> Inquire
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
-
-            <p style={{ fontSize: '0.75rem', color: 'var(--gray-400)', marginTop: '0.75rem', textAlign: 'center' }}>
-              ✦ Drag or scroll horizontally to rotate the 3D gallery • Click any project to inspect full details ✦
+            <h3 className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.5rem' }}>
+              No projects found
+            </h3>
+            <p className="body-md" style={{ marginBottom: '1.5rem' }}>
+              No projects match &ldquo;{search || activeFilter}&rdquo;. Try another search term or reset filters.
             </p>
-          </div>
-        ) : (
-          <div style={{ textAlign: 'center', padding: '4.5rem 1.5rem', color: 'var(--gray-500)', border: '1px dashed rgba(139,92,246,0.25)', borderRadius: 18, marginTop: '1.5rem', background: 'rgba(255,255,255,0.015)' }}>
-            <p className="heading-md" style={{ color: 'var(--white)', marginBottom: '0.5rem' }}>
-              No {activeTab === 'ongoing' ? 'ongoing' : 'completed'} projects found
-            </p>
-            <p className="body-md" style={{ color: 'var(--gray-400)', maxWidth: '440px', margin: '0 auto 1.5rem' }}>
-              We couldn&apos;t find any {activeTab} projects matching your current search.
-            </p>
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                style={{ background: 'var(--grad-primary)', border: 'none', color: 'var(--white)', padding: '0.6rem 1.4rem', borderRadius: 100, fontSize: '0.85rem', fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 18px rgba(139,92,246,0.4)' }}
-              >
-                Clear Search
-              </button>
-            )}
-          </div>
+            <button
+              onClick={() => {
+                setSearch('');
+                setActiveFilter('All');
+                setStatusTab('all');
+              }}
+              className="project-btn-secondary"
+              style={{ margin: '0 auto' }}
+            >
+              Reset Filters
+            </button>
+          </motion.div>
         )}
       </div>
 
       {/* Project Modal */}
-      {selected && <ProjectModal project={selected} onClose={() => setSelected(null)} />}
+      {selected && (
+        <ProjectModal
+          project={selected}
+          initialTab={modalTab}
+          onClose={() => setSelected(null)}
+        />
+      )}
     </section>
   );
 }
