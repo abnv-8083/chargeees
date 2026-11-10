@@ -6,7 +6,7 @@ const FALLBACK_NAV = [
   { label: 'Home',         href: '#hero',        id: 'hero',        order: 1 },
   { label: 'About',        href: '#about',       id: 'about',       order: 2 },
   { label: 'Projects',     href: '#projects',    id: 'projects',    order: 3 },
-  { label: 'Services',     href: '#services',    id: 'services',    order: 4 },
+  { label: 'Workflow',     href: '#services',    id: 'services',    order: 4 },
   { label: 'Gallery',      href: '#gallery',     id: 'gallery',     order: 5 },
   { label: 'Credentials', href: '/certificates', id: 'certificates', order: 6 },
   { label: 'Contact',      href: '#contact',     id: 'contact',     order: 7 },
