@@ -17,8 +17,11 @@ import {
   ArrowUpRight,
   Building2,
   Sparkles,
+  Layers,
+  Orbit,
 } from 'lucide-react';
 import { submitInquiry } from '@/lib/api';
+import CircularGallery from '@/components/ui/CircularGallery';
 
 const FALLBACK_PROJECTS: ProjectData[] = [
   // ── 1. Ongoing Projects (Shown 1st by default!) ──
@@ -729,6 +732,8 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
   const [statusTab, setStatusTab] = useState<'all' | 'ongoing' | 'completed'>('all');
   const [activeFilter, setActiveFilter] = useState('All');
   const [search, setSearch] = useState('');
+  const [viewMode, setViewMode] = useState<'gallery' | 'stack'>('gallery');
+  const [activeProjectIndex, setActiveProjectIndex] = useState(0);
   const [selected, setSelected] = useState<ProjectData | null>(null);
   const [modalTab, setModalTab] = useState<'details' | 'inquiry'>('details');
 
@@ -766,6 +771,23 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
     }
     return result;
   }, [projects, statusTab, activeFilter, search]);
+
+  useEffect(() => {
+    setActiveProjectIndex(0);
+  }, [statusTab, activeFilter, search]);
+
+  const galleryItems = useMemo(() => {
+    return filtered.map((project, idx) => ({
+      image: project.coverImage || `https://picsum.photos/seed/${project._id || idx}/1000/750`,
+      text: project.title,
+      description: project.description,
+      alt: project.title,
+    }));
+  }, [filtered]);
+
+  const activeProject = filtered.length > 0
+    ? filtered[activeProjectIndex % filtered.length] || filtered[0]
+    : undefined;
 
   const handleSelect = (project: ProjectData, tab: 'details' | 'inquiry' = 'details') => {
     setSelected(project);
@@ -864,11 +886,54 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
               </button>
             </div>
 
-            <div className="projects-count-indicator">
-              <span className="projects-pulse-dot" />
-              <span>
-                Showing {filtered.length} of {projects.length} Projects • Scroll to explore
-              </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              {/* View Switcher: 3D Gallery vs Scroll Stack */}
+              <div
+                className="project-tabs-container"
+                style={{ marginBottom: 0, padding: '0.25rem' }}
+                role="group"
+                aria-label="Project showcase view mode"
+              >
+                <button
+                  type="button"
+                  onClick={() => setViewMode('gallery')}
+                  className={`project-tab-btn ${viewMode === 'gallery' ? 'active' : ''}`}
+                  style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', gap: '0.4rem' }}
+                >
+                  {viewMode === 'gallery' && (
+                    <motion.div
+                      layoutId="activeProjectViewMode"
+                      className="project-tab-indicator"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
+                    />
+                  )}
+                  <Orbit size={14} />
+                  <span>3D Gallery</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode('stack')}
+                  className={`project-tab-btn ${viewMode === 'stack' ? 'active' : ''}`}
+                  style={{ padding: '0.45rem 1rem', fontSize: '0.8rem', gap: '0.4rem' }}
+                >
+                  {viewMode === 'stack' && (
+                    <motion.div
+                      layoutId="activeProjectViewMode"
+                      className="project-tab-indicator"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
+                    />
+                  )}
+                  <Layers size={14} />
+                  <span>Scroll Stack</span>
+                </button>
+              </div>
+
+              <div className="projects-count-indicator">
+                <span className="projects-pulse-dot" />
+                <span>
+                  Showing {filtered.length} of {projects.length} Projects
+                </span>
+              </div>
             </div>
           </div>
 
@@ -895,18 +960,124 @@ export default function ProjectsSection({ data }: { data?: ProjectData[]; catego
           </div>
         </motion.div>
 
-        {/* Projects Scroll Trigger Stack */}
-        <div className="projects-stack">
-          {filtered.map((project, i) => (
-            <ProjectStackCard
-              key={project._id || i}
-              project={project}
-              index={i}
-              total={filtered.length}
-              onSelect={handleSelect}
-            />
-          ))}
-        </div>
+        {/* Projects Display: CircularGallery (default) or Scroll Trigger Stack */}
+        {filtered.length > 0 && viewMode === 'gallery' && (
+          <div style={{ width: '100%' }}>
+            <div style={{ height: '600px', position: 'relative', width: '100%' }}>
+              <CircularGallery
+                items={galleryItems}
+                bend={3}
+                textColor="#ffffff"
+                borderRadius={0.05}
+                scrollEase={0.05}
+                itemSize={0.78}
+                itemAspect={1.25}
+                fadeEdges={0.14}
+                openOnClick={false}
+                onItemClick={(_item, index) => {
+                  const p = filtered[index];
+                  if (p) handleSelect(p, 'details');
+                }}
+                onActiveChange={(index) => {
+                  setActiveProjectIndex(index);
+                }}
+              />
+            </div>
+
+            {/* Active Centered Project Bar */}
+            {activeProject && (
+              <motion.div
+                key={activeProject._id}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  gap: '1.25rem',
+                  margin: '1.25rem auto 0',
+                  padding: '1.25rem 1.75rem',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(139, 92, 246, 0.25)',
+                  borderRadius: 18,
+                  backdropFilter: 'blur(16px)',
+                  maxWidth: 920,
+                }}
+              >
+                <div style={{ flex: '1 1 320px', minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                    <span className={`status-badge status-${activeProject.status}`}>
+                      {activeProject.status === 'ongoing' ? (
+                        <>
+                          <span className="live-pulse-dot" style={{ width: 6, height: 6 }} /> Ongoing
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 size={12} /> Completed
+                        </>
+                      )}
+                    </span>
+                    <span className="tag">{activeProject.category}</span>
+                    {activeProject.client && (
+                      <span style={{ fontSize: '0.78rem', color: 'var(--gray-400)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem' }}>
+                        <Building2 size={12} style={{ color: 'var(--purple-400)' }} />
+                        {activeProject.client}
+                      </span>
+                    )}
+                  </div>
+                  <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.2rem', fontWeight: 700, color: 'var(--white)', fontFamily: 'var(--font-display)' }}>
+                    {activeProject.title}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '0.85rem', color: 'var(--gray-400)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {activeProject.description}
+                  </p>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <button
+                    type="button"
+                    onClick={() => handleSelect(activeProject, 'details')}
+                    className="project-btn-primary"
+                  >
+                    <span>Explore Project</span>
+                    <ArrowUpRight size={16} />
+                  </button>
+
+                  {activeProject.status === 'ongoing' && (
+                    <button
+                      type="button"
+                      onClick={() => handleSelect(activeProject, 'inquiry')}
+                      className="project-btn-secondary"
+                    >
+                      <MessageSquare size={14} />
+                      <span>Inquire Now</span>
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            <p style={{ fontSize: '0.78rem', color: 'var(--gray-500)', marginTop: '1rem', textAlign: 'center', fontFamily: 'var(--font-grotesk)' }}>
+              Drag or scroll horizontally to explore projects • Click any card to inspect full details
+            </p>
+          </div>
+        )}
+
+        {filtered.length > 0 && viewMode === 'stack' && (
+          <div className="projects-stack">
+            {filtered.map((project, i) => (
+              <ProjectStackCard
+                key={project._id || i}
+                project={project}
+                index={i}
+                total={filtered.length}
+                onSelect={handleSelect}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Empty state */}
         {filtered.length === 0 && (
